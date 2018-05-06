@@ -1,0 +1,118 @@
+
+http://www.cnblogs.com/yupeng/p/3362068.html
+
+什么是python的装饰器？
+
+　　网络上的定义：
+
+　　　　装饰器就是一函数，用来包装函数的函数，用来修饰原函数，将其重新赋值给原来的标识符，并永久的丧失原函数的引用。
+
+　　在google上搜索下python 装饰器 可以搜索到很多关于很多的关于装饰器的文章，一个很简单，最能说明装饰器的例子如下：
+
+复制代码
+#-*- coding: UTF-8 -*-
+import time
+ 
+def foo():
+    print 'in foo()'
+ 
+# 定义一个计时器，传入一个，并返回另一个附加了计时功能的方法
+def timeit(func):
+     
+    # 定义一个内嵌的包装函数，给传入的函数加上计时功能的包装
+    def wrapper():
+        start = time.clock()
+        func()
+        end =time.clock()
+        print 'used:', end - start
+     
+    # 将包装后的函数返回
+    return wrapper
+ 
+foo = timeit(foo)
+foo()
+复制代码
+python中提供了一个@符号的语法糖，用来简化上面的代码，他们的作用一样
+
+复制代码
+import time
+ 
+def timeit(func):
+    def wrapper():
+        start = time.clock()
+        func()
+        end =time.clock()
+        print 'used:', end - start
+    return wrapper
+ 
+@timeit
+def foo():
+    print 'in foo()'
+ 
+foo()
+复制代码
+这2段的代码是一样的，等价的。
+
+内置的3个装饰器，他们分别是staticmethod,classmethod,property,他们的作用是分别把类中定义的方法变成静态方法，类方法和属性，如下：
+
+复制代码
+class Rabbit(object):
+     
+    def __init__(self, name):
+        self._name = name
+     
+    @staticmethod
+    def newRabbit(name):
+        return Rabbit(name)
+     
+    @classmethod
+    def newRabbit2(cls):
+        return Rabbit('')
+     
+    @property
+    def name(self):
+        return self._name
+复制代码
+装饰器的嵌套：
+
+就一个规律：嵌套的顺序和代码的顺序是相反的。
+
+也是来看一个例子：
+
+复制代码
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+def makebold(fn):
+    def wrapped():
+        return "<b>" + fn() + "</b>"
+    return wrapped
+
+def makeitalic(fn):
+    def wrapped():
+        return "<i>" + fn() + "</i>"
+    return wrapped
+
+@makebold
+@makeitalic
+def hello():
+    return "hello world"
+
+print hello()
+复制代码
+返回的结果是：
+
+<b><i>hello world</i></b>
+
+为什么是这个结果呢？
+
+1.首先hello函数经过makeitalic 函数的装饰，变成了这个结果<i>hello world</i>
+
+2.然后再经过makebold函数的装饰，变成了<b><i>hello world</i></b>，这个理解起来很简单。
+
+ ---end---　　
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,78 @@
+LINUX与UNIX SHELL编程指南
+高级Bash脚本编程指南
+鸟哥的Linux私房菜 基础学习篇（第3版）
+
+http://www.cnblogs.com/end/archive/2012/05/25/2518400.html
+http://kb.cnblogs.com/page/509402/
+http://kb.cnblogs.com/page/509527/
+http://kb.cnblogs.com/page/509630/
+php语言相关：
+http://news.cnblogs.com/n/510027/
+
+　Google 目前 Alexa 排名第1。它诞生于 1997 年，当时是一个研究性项目，每个月 build 一次索引，build 出来的索引通过 sharding（shard by doc）的方式分散到多台服务器（Index Server）上，具体的网页数据同样通过 sharding 的方式分散到多台服务器（Doc Server）上，当用户提交请求时，通过前端的一台服务器将请求提交给 Index Server 获得打了分的倒排索引，然后从 Doc Server 提取具体的网页信息（例如网页标题、搜索关键词匹配的片段信息等），最终展现给用户。
+
+　　随着索引的网页增加，这个结构可通过增加 Index Server 以及 Doc Server 来存储索引以及网页的数据，但仍然会面临其他很多方面的问题，于是在这之后的十多年的时间里，Google 做了很多事情来改进上面的结构。
+
+　　1999年，Google 增加了一个 Cache Cluster，用来 Cache 查询的索引结果和文档片段信息，同时将 Index Server 和 Doc Server 通过 Replicate 的方式变成了 Cluster。这两个改造带来的好处是网站的响应速度、可支撑的访问量以及可用性（Availability）得到了提升。这个变化造成了成本的增 加，Google 在硬件方面的风格始终是不用昂贵的高端硬件，而是在软件层面来保证系统的可靠性及高性能，于是同年，Google 开始采用自行设计的服务器来降低成本。2000年，Google 开始自行设计 DataCenter，采用了各种方法（例如采用其他的制冷方法来替代空调）来优化 PUE（能源利用率），同时对自行设计的服务器也做了很多化。2001年，Google 对 Index 的格式进行了修改，将所有的 Index 放入内存， 这次改造带来的好处是网站的响应速度以及可支撑的访问量得到了极大的提升。2003年，Google 发表了文章 Google Cluster Architecture，其 Cluster 结构组成为硬件 LB+Index Cluster+Doc Cluster+ 大量廉价服务器（例如 IDE 硬盘、性价比高的 CPU 等），通过并行处理 +sharding 来保证在降低对硬件要求的同时，响应速度仍然很快。同年 Google 发表了关于 Google 文件系统的论文（GFS 在 2000 年就已经上线），这篇论文很大程度也体现了 Google 不用昂贵硬件的风格，通过 GFS+ 大量廉价的服务器即可存储大量的数据。2004年，Google 再次对 Index 的格式进行了修改，使得网站的响应速度继续提升。同年 Google 发表关于 MapReduce 的论文，通过 MapReduce+ 大量廉价的服务器即可快速完成以前要使用昂贵小型机、中型机甚至是大型机才能完成的计算任务，而这显然对于 Google 快速地构建索引提供了很大的帮助。2006年，Google 发表了关于 BigTable 的论文（2003年开始上线），使得海量数据的分析能够达到在线系统的要求了，这对于 Google 提升网站的响应速度起到了很大的帮助。
+
+　　以上 3 篇论文彻底改变了业界对于海量数据的存储、分析和检索的方法（小道消息：Google 内部已完成了 GFS、MapReduce、BigTable 的替换），也奠定了 Google 在业界的技术领导地位。
+
+　　在一些场景中，Google 也采用 MySQL 来存储数据。同样，Google 对 MySQL 也做了很多修改，它使用的 MySQL 信息可以从 https://code.google.com/p/google-mysql/了解。
+
+　　2007年，Google 将 build 索引的时间缩短到分钟级，当新网页出现后，几分钟后即可在 Google 搜索到，同时将 Index Cluster 通过 Protocol Buffers 对外提供 Service，以供 Google 各种搜索（例如网页、图片、新闻、书籍等）使用，除了 Index Cluster 提供的 Service 外，还有很多其他的 Service，例如广告、词法检查等。Google 的一次搜索大概需要调用内部 50 个以上的 Service，Service 主要用 C++ 或 Java 来编写。2009年，Google 的一篇《How Google uses Linux》文章，揭示了 Google 在提升机器利用率方面也做了很多的努力，例如将不同资源消耗类型的应用部署在同一台机器上。
+
+　　在之后，Google 又研发了 Colossus（下一代类 GFS 文件系统）、Spanner（下一代类 BigTable 海量存储和计算架构）、实时搜索（基于 Colossus 实现），主要都是为了提升搜索的实时性以及存储更多数据。除了在海量数据相关技术上的革新外，Google 也不断对业界的传统技术进行创新，例如提高 TCP 的初始拥塞窗口值、改进 HTTP 的 SPDY 协议、新的图片格式 WebP 等。
+
+　　在 Google 的发展过程中，其技术的改造主要围绕在可伸缩性、性能、成本和可用性 4 个方面，Google 不采用昂贵硬件的风格以及领先其他网站的数据量决定了其技术改造基本都是对传统的软硬件技术的革新。
+
+
+
+　　Facebook 目前 Alexa 排名第2。它采用 LAMP 构建，随着业务的发展，它也在技术上做了很多改造。
+
+　　作为改造的第一步，Facebook 首先在 LAMP 结构中增加了 Memcached，用来缓存各种数据，从而大幅度提升系统的响应时间以及可支撑的访问量，之后又增加了 Services 层，将 News Feed、Search 等较通用的功能作为 Service 提供给前端的 PHP 系统使用，前端的系统通过 Thrift 访问这些 Service。Facebook 采用了多种语言来编写各种不同的 Service，主要是针对不同的场景选择合适的语言，例如C++、Java、Erlang。
+
+　　大量使用 Memcached 以及访问量的不断上涨，导致访问 Memcached 的网络流量太大，交换机无法支撑，Facebook 通过改造采用 UDP 的方式来访问 Memcached，以降低单连接上的网络流量。除此之外，还有其他一些改造，具体信息可以查看 http://on.fb.me/8R0C。
+
+　　PHP 作为脚本语言，优势是开发简单、易上手，劣势是需要消耗较多的 CPU 和内存。当 Facebook 的访问量增长到了一定规模后，这个劣势就比较突出了，于是从 2007 年起，Facebook 就尝试多种方法来解决这个问题，最后诞生于 Facebook Hackathon 的 HipHop 产品成功地脱颖而出。HipHop 可以自动将 PHP 转化为 C++ 代码，Facebook 在使用 HipHop 后，同等配置的机器，可支撑的请求量是之前的 6 倍，CPU 的使用率平均下降了 50%，从而为 Facebook 节省了大量主机。将来 Facebook 还会对 HipHop 进行再次改进，通过 HipHop 将 PHP 编译为 bytecode，放入 HipHop VM 中执行，再由 HipHop VM 来编译为机器代码，方式与 JIT 类似。
+
+　　2009年，Facebook 研发了 BigPipe，借助此系统，Facebook 成功让网站的速度提升了两倍。随着 Facebook 访问量的上涨，收集众多服务器上的执行日志也开始面临挑战，于是 Facebook 研发了 Scribe 来解决此问题。对于存储在 MySQL 中的数据，Facebook 采用垂直拆分库和水平拆分表的方式来支撑不断增长的数据量。作为 Facebook 技术体系中重要的一环，Facebook 也对 MySQL 进行了很多优化和改进，例如 Online Schema Change 等，更多信息可见 http://www.facebook.com/MySQLAtFacebook。
+
+　　发展之初的 Facebook 采用了高端的存储设备（例如 NetApp、Akamai）来存图片，随着图片不断增加，成本也大幅提高，于是 2009 年 Facebook 开发了 Haystack 来存储图片。Haystack 可采用廉价的 PC Server 进行存储，大幅度降低了成本。
+
+　　Facebook 除了使用 MySQL 存储数据外，近几年也开始摸索采用新的方式。在 2008 年 Facebook 开发了 Cassandra，在 Message Inbox Search 中作为新的存储方式。不过在 2010 年，Facebook 又放弃了 Cassandra，转为采用 HBase 作为其 Messages 的存储，并在 2011 年将 HBase 应用在了 Facebook 更多的项目上（例如 Puma、ODS）。据说，现在 Facebook 更是在尝试将其用户以及关系数据从 MySQL 迁移到 HBase。
+
+　　从 2009 年开始，Facebook 尝试自行设计 DataCenter 以及服务器，以降低其运行成本，并对外开放了其构建的 PUE 仅1.07的 DataCenter 的相关技术。Facebook 在技术方面的基本原则是：“在能用开源产品的情况下就用开源，根据情况对其进行优化并反馈给社区”。从 Facebook 的技术发展历程上可以看到这个原则贯彻始终，Facebook 的技术改造也主要是围绕在可伸缩、性能、成本和可用性 4 个方面。
+
+　　Twitter 目前 Alexa 排名第8。在 2006 年诞生之时是采用 Ruby On Rails+ MySQL 构建的，2007年增加了 Memcached 作为 Cache 层，以提升响应速度。基于 Ruby on Rails 让 Twitter 享受到了快速的开发能力，但随着访问量的增长，其对 CPU 和内存的消耗也让 Twitter 痛苦不堪，于是 Twitter 做了不少改造和努力，例如编写了一个优化版的 Ruby GC。
+
+　　2008年 Twitter 决定逐步往 Java 迁移，选择了 Scala 作为主力的开发语言（理由是“难以向一屋子的 Ruby 程序员推销 Java”），采用 Thrift 作为其主要的通信框架，开发了 Finagle 作为 Service Framework，可将后端各种功能暴露为 Service 提供给前端系统使用，使得前端系统无需关心各种不同的通信协议（例如对于使用者可以用同样的调用服务的方式去访问 Memcache、Redis、Thrift 服务端），开发了 Kestrel 作为其消息中间件（替代之前用 Ruby 写的 Starling）。
+
+　　Twitter 的数据存储一直采用 MySQL，发展过程中出现的小插曲是，当 Facebook 开源了 Cassandra 时，Twitter 本计划使用，但最终还是放弃，仍然保持了使用 MySQL，Twitter 的 MySQL 版本已开源（https://github.com/twitter/mysql）。Twitter 也是采用分库分表的方式来支撑大数据量，使用 Memcached 来 Cache tweet，timeline 的信息则迁移为用 Redis 来 Cache。
+
+　　2010年，Twitter 在盐湖城拥有了第一个自建的 DataCenter，主要是为了增加可控性。从 Twitter 的发展过程看，6年来它的技术改造主要围绕可伸缩以及可用性。
+
+
+
+　　作为一家电子商务网站的员工，请允许我在此介绍这个 Alexa 排名 21 的著名电子商务网站的技术演变。
+
+　　1995年，eBay 诞生，当时采用 CGI 编写，数据库采用的是 GDBM，最多只能支撑 5 万件在线商品。1997年，eBay 将操作系统从 FreeBSD 迁移到 Windows NT，另外将数据库从 GDBM 迁移为 Oracle。1999年，eBay 将前端系统改造为 Cluster（之前只有一台主机），采用 Resonate 作为负载均衡，后端的 Oracle 机器升级为 Sun E1000小型机，同年给数据库增加了一台机器作为备库，提升可用性。前端机器随着访问量不断增加还可以应付，但数据库机器在 1999 年 11 月时已经达到了瓶颈（已经不能再加 CPU 和内存了），于是在 11 月开始将数据库按业务拆分为多个库。2001-2002年，eBay 将数据表进行了水平拆分，例如按类目存储商品，同时部署 Oracle 的小型机换为 Sun A3500。2002年，将整个网站迁移为用 Java 构建，在这个阶段，做了 DAL 框架来屏蔽数据库分库分表带来的影响，同时还设计了一个开发框架以供开发人员更好地上手进行功能开发。从 eBay 的整个发展过程来看，技术改造主要围绕在可伸缩性和可用性两点。
+
+
+
+　　腾讯目前 Alexa 排名第9。最初 QQ IM 采用的是单台接入服务器来处理用户的登录和状态保持，但在发展到一百万用户同时在线时，这台服务器已经无法支撑。于是 QQ IM 将所有单台服务器改造为了集群，并增加了状态同步服务器，由其完成集群内状态的同步，用户的信息存储在 MySQL 中，做了分库分表，好友关系存储在自行实现的文件存储中。为了提升进程间通信的效率，腾讯自行实现了用户态 IPC。之后腾讯将状态同步服务器也改造为同步集群，以支撑越来越多的在线用户。在经历了前面几次改造后，已基本能支撑千万级别的用户同时在线，但可用性 比较差，于是腾讯对 QQ IM 再次进行改造，实现了同城跨 IDC 的容灾，加强了监控和运维系统的建设。此后腾讯决定对 QQ IM 架构完全重写（大概是 2009 年持续到现在），主要是为了增强灵活性、支持跨城市的 IDC、支撑千万级的好友。在这次大的技术改造过程中，腾讯的数据都不再存储于 MySQL 中，而是全部存储在了自己设计的系统里。
+
+　　从 QQ  IM 的技术演变来看，其技术改造主要是围绕在可伸缩性和可用性上。
+
+
+
+　　2003年，淘宝诞生，直接购买了一个商业的 phpAuction 的软件，在此基础上改造产生了淘宝。2004年，将系统由 PHP 迁移到 Java，MySQL 迁移为 Oracle（小型机、高端存储设备），应用服务器采用了 WebLogic。2005-2007年的发展过程中，用 JBoss 替代了 WebLogic，对数据库进行了分库，基于 BDB 做了分布式缓存，自行开发了分布式文件系统 TFS 以支持小文件的存储，并建设了自己的 CDN。2007-2009年对应用系统进行垂直拆分，拆分后的系统都以 Service 的方式对外提供功能，对数据采用了垂直和水平拆分。
+
+　　在进行了数据的垂直和水平拆分后，Oracle 产生的成本越来越高，于是在之后的几年，淘宝又开始将数据逐渐从 Oracle 迁移到 MySQL，同时开始尝试新型的数据存储方案，例如采用 HBase 来支撑历史交易订单的存储和检索等。近几年淘宝开始进行 Linux 内核、JVM、Nginx 等软件的修改定制工作，同时也自行设计了低能耗服务器，同时在软硬件上进行优化，以更好地降低成本。
+
+　　从淘宝的整个发展过程来看，技术改造主要围绕在可伸缩性和可用性两点，现在也开始逐渐将精力投入在了性能和成本上。目前淘宝的 Alexa 排名为第 14。
+
+　　总结
+
+　　从上面这些 Alexa 排名靠前网站的技术发展过程来看，每家网站由于其所承担的业务不同、团队人员组成不同、做事风格相异，在技术的不同发展阶段中会采用不同的方法来支撑业务 的发展，但基本都会围绕在可伸缩性、可用性、性能以及成本这 4 点上，在发展到比较大规模后，各网站在技术结构上有了很多的相似点，并且这些结构还将继续进行演变。
+
+　　作者林昊，目前就职于淘宝，2007-2010年负责设计和实现淘宝的服务框架，此服务框架在淘宝大面积使用，每天承担了 150 亿+的请求；2011年开始负责 HBase 在淘宝的落地，目前淘宝已有 20 个以上的在线项目在使用 HBase。

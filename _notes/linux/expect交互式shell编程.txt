@@ -1,0 +1,157 @@
+expect交互式shell脚本编程：即要手动键盘输入完成命令的执行
+在crontab里执行expect脚本，那么最后一句应该是expect eof
+
+http://blog.chinaunix.net/uid-22521242-id-3432704.html
+http://blog.sina.com.cn/s/blog_7dc317590101c29p.html
+http://www.jb51.net/article/34005.htm
+
+
+
+
+#!/usr/bin/expect -f
+#设置参数	
+set ipaddress [lindex $argv 0]   //设置ipaddress变量，采用参数0
+set password [lindex $argv 1]    //设置ipaddress变量，采用参数1
+set email [lindex $argv 2]    //设置email变量，采用参数2
+
+set 变量名 变量值
+
+判断参数为空
+set device [lindex $argv 0];  
+if {$device != ""} { 
+    set CTS_CMD "$CTS_CMD --serial $device" 
+} 
+
+set timeout 4    		#设置expect ""等待的全局超时时间,单位s。可不断修改
+spawn linuxCmd   		#执行linuxCmd命令，进入expect命令提示符
+sleep 2
+puts ">>string<<"		#输出语句
+send "linuxCmd\r" 		#手动输入linuxCmd并\r敲回车。 一定记得\r！
+执行一个命令后，设置一下超时时间set timeout 4或者sleep 3秒
+set timeout 4
+expect "期望的字符串" 	#支持regex
+sleep 3
+interact 				#停留在远程终端shell提示符下，这个时候就可以手工操作了。 如果你只是登录过去执行一段命令就退出，可改为expect eof
+exit
+
+expect单步调试：
+expect -d fileName.exp
+expect -c "expectCmd"
+
+expect /root/login.exp $i $j   #shell脚本中执行expect脚本login.exp，并带上参数i，j
+set timeout 4
+sleep 3
+interact	#user will stay at remote server
+#expect eof
+
+expect {
+    "yes/no" {send "yes\r"}      //捕捉yes/no的字符串，并发送send命令
+    "*assword:" {send "$password\r"}  //捕捉*assword的字符串，并发送send命令
+}
+expect "]*"                       //捕捉shell提示符($、#)
+send "date\r"
+send "sleep 5\r"
+send "su - root\r"
+
+脚本远程登录并执行远程主机上的脚本 ssh 1.1.1.1 “/bin/bash /home/a.sh”
+登录到其他机器上后expect脚本不支持$HOME变量，但支持~号， 而ssh则两者都支持。
+-----------------------------------------------------------------------------------------
+send "$CTS_CMD -c android.media.cts.CameraProfileTest\r"	#执行命令
+#set timeout 15 min for package CameraTest Items			#设置超时时间	
+set timeout 900												#期望字符串	
+expect "Time:"
+sleep 1
+send "\r"
+
+ >>>>>>>>>test each case singlely <<<<<<<<<<<<<<< 
+ set Semicolon ":"  
+ set Comment "#"  
+ set Class "Class" 
+ set Case "case" 
+ set fd [open ctsTestConfig r] 
+  
+ while {[set lineLen [gets $fd line]] >= 0} { 
+ #skip blank line 
+ if {$lineLen == 0} continue 
+  
+ #remove the spaces both ends 
+ set line [string trim $line] 
+ #skip whitespace line 
+ if {[string length $line] == 0} continue 
+  
+ #skip comment line , start with '#.....' 
+ if {[string index $line 0] == $Comment } continue 
+  
+ set semipos [string first $Semicolon $line] 
+ if {[string range $line 0 [expr $semipos -1]] == $Class } {  
+    set classname [string range $line [expr $semipos + 1] [string length $line]] 
+    puts ">>>>>>>>test $classname Class <<<<<<<<" 
+    continue 
+ } 
+ if {[string range $line 0 [expr $semipos -1]] == $Case} { 
+    set casename [string range $line [expr $semipos + 1] [string length $line]] 
+    puts $casename 
+    set runitems "$CTS_CMD -c $classname -m $casename \r" 
+    send  $runitems 
+ # here can be set by handle. should be lagrer than the max time of one single case test 
+    set timeout 300  
+    expect "Time:" 
+    sleep 1 
+    send "\r" 
+    continue 
+ } 
+ } 
+ close $fd 
+------------------------------------------------------------------------------------------------------------
+http://blog.chinaunix.net/uid-16865301-id-97324.html
+
+1.SSH到linux主机上查看linux内核版本号
+#!/usr/expect/bin/expect
+ 
+set HOSTIP [lindex $argv 0]
+set LOGIN [lindex $argv 1]
+set PASS [lindex $argv 2]
+ 
+set timeout 1
+set cmd {uname -a}
+ 
+if {$argc<3} {
+        puts stderr "Usage:$argv0 hostip login password.\n"
+        exit 1
+}
+ 
+send_user "argv0:  $argv0\n"
+send_user "argv:  $argv\n "
+ 
+spawn ssh $LOGIN@$HOSTIP
+expect_after eof { exit 0 }
+ 
+expect "yes/no" { send "yes\r" }
+expect "password:" { send "$PASS\r" }
+expect "#"
+send "$cmd\r"
+expect "*\r"
+send "exit\r"
+-----------------------------------------------------------------------------------------------------
+
+参数运用方面还有很多技巧
+
+比如$argc 存储了参数个数，args被结构化成一个列表存在argv。$argv0 被初始化为脚本名字。
+
+除此之外，如果你在第一行(#!那行)使用-d (debug参数)，可以在运行的时候输出一些很有用的信息
+
+比如你会看见
+
+ 
+
+argv[0] = /usr/bin/expect argv[1] = -d argv[2] = ./launch.exp argv[3] = 1 argv[4] = 2 argv[5] = 3
+
+使用这些也可以完成参数传递
+
+8.
+
+expect的命令行参数参考了c语言的，与bash shell有点不一样。其中，$argc为命令行参数的个数，$argv0为脚本名字本身，$argv为命令行参数。[lrange $argv 0 0]表示第1个参数，[lrange $argv 0 4]为第一个到第五个参数。与c语言不一样的地方在于，$argv不包含脚本名字本身。
+
+
+
+

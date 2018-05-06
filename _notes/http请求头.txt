@@ -1,0 +1,7 @@
+Content-type: Application/json 
+Content-length: 
+Range: 多线程下载
+Refer: 反盗链 
+Expire： -1 图片.cookie.缓存
+programa：
+Cache-Control：no

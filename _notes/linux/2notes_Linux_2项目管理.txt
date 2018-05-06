@@ -1,0 +1,22 @@
+Linux下c++编程、shell脚本、python的IDE无代码自动提示功能，需纯手写代码
+
+原理.操作.代码积累.排错.日志记录
+技术选型java、Linux：跨平台、远程管理
+需求管理Trello.JIRA
+代码管理github.svn、hg
+bug管理redmine
+文档管理wiki
+项目管理.类库管理Maven(pom.xml)、Ant(build.xml)、
+foxMail邮件客户端：gmail邮箱	IM：QQ、易信、手机号
+Makefile(linux命令)
+http://www.douban.com/group/topic/31389566/
+http://www.cnblogs.com/jiqingwu/archive/2012/06/13/java_makefile.html
+
+张兴业：
+http://blog.csdn.net/xyz_lmn/article/category/922246  
+罗升阳：
+http://blog.csdn.net/luoshengyang 
+
+
+
+

@@ -1,0 +1,109 @@
+web分布式服务+git历史管理(分布式服务，集中式管理)：github、wiki、email
+git库读.写权限管理
+--------------------------------------------------------------------------
+多线程同步.线程间通信：多个线程访问同一资源时，如读写操作，需进行同步处理。	
+synchronized(lock){
+	lock.notify(); //避免死锁，唤醒其他线程由阻塞状态改为就绪状态
+	while(flag判断){...lock.wait()...};
+	业务逻辑、修改flag判断;
+	lock.notifyAll();
+	}
+	
+获取对象锁：进入synchronized代码块
+释放对象锁：lock.wait()、synchronized代码块执行结束
+	
+调用wait()方法前的判断最好用while，可以实现被wakeup后thread再次作条件判断；而if则只能判断一次；
+synchronzied(同一对象)的synchronized方法/synchronized代码块不可以被同时调用
+static sychronized方法封锁的是类本身
+synchronzied{}代码块相当于一个房间，而lock对象相当于一把钥匙。
+synchronzied包含尽量少的代码块
+值传递、引用传递
+各线程拥有自己独立的数据
+线程何时中断不受程序控制。
+线程中断：时间片用完、Thread.sleep()、wait()等
+在a线程中运行b.join(),则切换执行b线程，并将a线程添加至b线程末尾
+-----------------------------------------
+java线程池工作机制：
+
+当一个新任务提交时：
+（1）正常工作的线程数poolSize<corePoolSize，提交的runnable任务，会直接做为new一个Thread的参数，立马执行 
+（2）poolSize>corePoolSize，会将当前的runable提交到一个blockQueue中
+ (3)poolSize>corePoolSize ,如果blockQueue是个有界队列，并且队列已填满时，会尝试new一个Thread的进行救急处理，立马执行对应的runnable任务
+即使用顺序为:1.期望的最大线程数corePoolSize 2.放入阻塞队列blockQueue 3.最大工作线程maximumPoolSize 4.拒绝任务的处理策略handler
+
+6个参数的含义：
+corePoolSize即期望的最大线程数、maximumPoolSize：线程池维护线程的最大数量
+keepAliveTime空闲时间、unit时间的单位  (临时线程空闲状态的超时时间)
+blockQueue：线程池所的阻塞队列、handler：线程池对拒绝任务的处理策略
+
+注意：
+(1)corePoolSize =即期望的最大线程数
+(2)maximumPoolSize的意义：当工作threads存在满负荷，并且有界的blockQueue队列也满了，这时代表接近崩溃边缘。这时允许临时起一批threads用来处理runnable(但线程总数<maximumPoolSize)，处理完后,(超时时间一过)立马退出。
+(3)block size >= corePoolSize ，不然线程池就没任何意义
+(4)RejectExecutionHandler = CallsRun ,  blockqueue size = 2 * poolSize (为啥是2倍poolSize，主要一个考虑就是瞬间高峰处理，允许一个thread等待一个runnable任务)
+(但正常工作线程满负荷，即=corePoolSize，并且有界blockQueue队列也满了，正常工作线程数+临时线程数=maximumPoolSize时，则出现拒绝对任务的处理)
+(5)当大量的请求是，有超时时间设置的Socket请求时，最好使用有界的blockQueue。避免无界blockQueue中都是超时的无效请求，而造成I/O异常。
+-----------------------------------------------
+定时器
+开启新线程执行耗时操作及高并发操作
+
+----------------------------------------------
+反射
+获取类字节码：类名.class、对象.getClass()、Class.forName("包名+类名") (类文件路径查找)
+Class的加载分了三个阶段，loading（装载），linking（连接）和initializing（实例化），其中链接又可以分成校验、准备和解析三步
+ClassLoader
+根加载器：该装载器没有父装载器，它只能够装载基本的Java 类，如 rt.jar 中的 class 
+扩展加载器：继承的父装载器为根装载器，不像根装载器可能与运行时的操作系统有关，它从 java.ext.dirs(扩展目录)中装载代码
+系统加载器：继承的父装载器为扩展装载器，我们都知道在安装 JDK 的时候要设置环境变量 (CLASSPATH ) ，这个类装载器就是从 java.class.path(CLASSPATH 环境变量 ) 中装载代码的
+在创建一个加载器时 , 如果没有显式地给出父加载器 , 那么 JVM 将默认系统加载器为其父加载器。
+当JVM要求类加载器 CL(ClassLoader) 加载一个类时 ,CL 首先将这个类装载请求转发给他的父装载器。只有当父装载器没有装载并无法装载这个类时 ,CL 才获得装载这个类的机会。
+JVM
+接口.注解.动态代理InvocationHandler.CGlib
+泛型、可变参数：类型... args
+java.util.concurrent.*
+----------------------------------------------------------------------------
+IO模型.通知机制(同步阻塞、轮询、回调函数)
+瞬时操作：直接执行代码
+耗时操作：采用多线程或回调函数
+client-server模式：请求-响应机制
+epoll,kqueue及各种I/O模型：
+1.阻塞
+2.轮询.非阻塞
+3.timeout：1.sleep交互式 2.计时器+轮询检查.自身
+4.回调：epoll,kqueue用callback取代轮询.订阅分发模式.观察者模式
+
+回调函数：接口声明方调用回调函数，并传递参数  请求.响应机制
+声明、实现、调用
+底层调用回调函数，并传递参数、观察者模式、分发.订阅、
+回调函数要分清接口声明方(调用方)、实现方。系统调用回调函数
+事实上回调函数无处不再，控制台中的main、WIN32中的WinMain、WINDRV中的DriverEntry都是回调函数，对于驱动程序框架则完全是回调机制
+
+高并发：线程池来解决：线程管理类ThreadPoolManager、任务队列List<Task>、信号量的通知机制：wait -notify：WorkThread抓取任务，并执行任务、任务类：Task
+线程池如何实现线程复用：http://www.iteye.com/topic/1130281  http://www.iteye.com/problems/11278
+线程安全：多线程同步，防止对同一份数据修改的时候，进行读取操作。如银行取款
+回调函数实现线程返回值.如何知道线程已结束
+线程死锁
+
+知道线程的各个状态
+windows线程间通信一般采用四种方式：全局变量方式、消息传递方式、参数传递方式和线程同步法。
+对于线程：不同的操作系统有不同的调度机制
+Java中有两类线程：User Thread(用户线程)、Daemon Thread(守护线程)。
+守护线程和用户线程的唯一区别就是守护线程会随着用户线程的（被守护的）结束而结束。
+
+tcp： 消息推送.断线重连
+
+数据库连接池dbcp.c3p0、数据库事务、数据库隔离级别
+web、数据库、文件、邮件服务器
+
+设计架构根据业务流程、业务规则和功能模块来制定
+通用设计架构
+
+多线程 高并发 线程池 
+大数据、服务器集群.分布式.数据同步.ssh免密码登陆、
+操作隶属于哪个进程、哪个线程、哪个对象
+nginx反向代理：负载均衡、预防攻击。
+Ecache缓存 
+数据库连接池、读.写库分离，读库依赖于写库
+文件系统、CDN、内存.硬盘.cpu等硬件
+
+

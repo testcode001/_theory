@@ -1,0 +1,18 @@
+android root原理：
+cp /data/tmp/su /system/bin/ #copy su 到/system/分区
+chown root:root su #su的所有者置成root
+chmod 4775 /system/bin/su #把su置成-rwsr-xr-x
+一个办法就是找一个本身已经有root权限的进程来启动我上面的两行代码，那我这两行代码一启动就是root权限，就可以顺利执行了
+这个时候就需要你找漏洞了，比如用来破解Android2.3 root权限的zergRush漏洞就是利用一个拥有root权限的进程栈溢出漏洞。
+难点在于找到漏洞
+busybox
+
+ext4 utils 
+mkyaffs2image
+http://bbs.xiaomi.cn/thread-2943923-1-1.html
+http://xingqu.baidu.com/p/3547291595 
+btrfs
+
+android_uboot:
+http://blog.chinaunix.net/uid-25652313-id-212632.html
+http://blog.chinaunix.net/uid-24129645-id-3538147.html

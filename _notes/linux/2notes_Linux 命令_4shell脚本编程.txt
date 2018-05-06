@@ -1,0 +1,968 @@
+shell开启子进程的方式：1.bash 开启新进程执行shell脚本 2.管道 | 3.$(linuxCommand)操作符	4.&提交后台作业 	
+shell子进程最后一句用exit 0/exit 1手动返回上一条命令的执行状态
+. source exec 在当前shell执行脚本。 通常用于设置当前shell的环境变量
+source 命令会强制执行脚本中的全部命令,而忽略文件的权限。
+source 命令可以影响执行脚本的父shell的环境，而 export 则只能影响其子shell的环境。
+环境变量在当前shell及子shell中有效，父shell中无效。 export设置.查看环境变量
+普通变量只在当前shell中有效，父shell.子shell中无效
+子进程继承父进程的环境变量， 但父进程没有子进程的环境变量
+shell进程间通信：
+输入输出重定向到文件的方式，把子进程中的变量导出到父进程
+mkfifo -m 777 npipe
+命令 执行文件 传递参数(k=v)  	默认值 
+系统环境变量.ide.工具：默认命令搜索路径、默认文件搜索路径
+
+
+
+
+shell脚本在执行前，会先扩展变量和regex
+参数形式： 
+空白    扩展变量和通配符
+双引号  仅扩展变量，不扩展通配符   字符$、转义符\、反引号``保留特殊功能，其他字符原样输出。
+单引号  纯字符串，不扩展
+反引号``、() 执行linux命令。 `` 和() 可独自嵌套使用 反引号内不能再引用反引号，而$()中可以引用反引号
+shell从上到下，从左到右依次运行命令
+shell靠反引号`` 来改变一行中命令执行的先后顺序,没有运算符优先级之说
+shell脚本特殊符号：
+''	""	``()						字符串.命令
+$ ${}								取变量值。中划线"_"可用在shell脚本的目录及文件名中， 但不可用在变量命名中。用"_"定义变量, "-" 分割变量
+shell脚本用 ${} 中划线"-"来分割变量
+|									命令管线
+${}  #用作字符串替换时，"/"代表字符串的替换、:代表字符串的提取、#和%公别代表左截和右截
+cmd1;cmd2;cmd3 
+[] (()) [[]] 
+&& ||  -a(and) -o(or) 	选择语句
+http://www.kaishigo.com/archives/76.html
+-exec参数可用命令xargs来替代		如find . -name .svn | xargs rm -rf
+-exec command {} \;     			#将查到的文件执行command操作,查找到的文件会作为参数放在{...} 里边。注意{}和\;之间的空格
+正确输出 > 或 >>   #/dev/stdout -> /proc/self/fd/1 即1代表：/dev/stdout
+错误输出 2> 或 2>>  #/dev/stderr -> /proc/self/fd/2 即2代表：/dev/stderr
+标准输入 < 或 <<   #/dev/stdin ->  /proc/self/fd/0 即0代表：/dev/stdin 
+&[n]代表是已经存在的文件描述符，&1 代表输出 &2代表错误输出 &-代表关闭与它绑定的描述符
+
+eval command-line
+其中command－line是在终端上键入的一条普通命令行。然而当在它前面放上eval时，其结果是shell在执行命令行之前扫描它两次。如：
+pipe="|"
+eval ls $pipe wc -l
+shell第1次扫描命令行时，它替换出pipe的 值｜，接着eval使它再次扫描命令行，这时shell把｜ 作为管道符号了。
+如果变量中包含任何需要shell直接在命令行中看到的字符（不是替换的结果），就可以使用eval。命令行结束符（； ｜ &），I／o重 定向符（< >）和引号就属于对shell具有特殊意义的符号，必须直接出现在命令行中。
+java运行shell脚本：Non-interactive mode: Running initial command then exiting非交互模式
+
+配置文件：
+shell脚本+export key=value形式的配置文件 (key是全局唯一标识符)
+shell读取ini形式的配置文件: 需知道section 和key的值。 不便于修改和维护
+
+shell代码复用：
+. shell脚本的shell函数或全局变量、export K=V形式的配置文件：实现shell代码复用
+export 环境变量
+默认是全局变量
+local局部变量
+环境变量作用域：当前文件及子进程
+全局变量作用域：当前文件
+局部变量作用域：当前花括号内 
+shell函数初始化后，也可直接当命令来调用
+shell函数用echo来实现函数的返回值
+shell数组: ()
+
+shell脚本注意：
+shell表达式一定要用'' "" ``等引起来
+shell脚本中的命令.文件或目录一定要写参数形式的绝对路径
+cd 进入目录，执行命令
+"="赋值语句两边不能有空格
+shell变量使用expr命令进行加减乘除运算，运算符两侧要留有空格
+if [ -f $i ]; then 	if判断中每一项两边要注意留空格
+:即do nothing的空命令，''纯字符串解决注释中反引号命令报错问题
+shell脚本的阅读：shell脚本中变量、函数定义在最前边
+运行shell脚本：	
+bash XX.sh   # 直接使用bash执行脚本
+直接使用相对路径或绝对路径执行shell脚本
+sh 脚本的运行条件：1.对脚本有r权限   2.对脚本所在的目录有rx权限
+编程语言执行shell脚本
+NDK：交叉编译链，编译c/c++程序使其运行在android系统上。
+
+脚本调试：
+echo "XX" 打印输出语句
+bash -x XX.sh
+bash -n XX.sh
+http://www.ibm.com/developerworks/cn/linux/l-cn-shell-debug/
+线程的维护是高级语言如C的责任，进一步说，这例子更体现了线程受制于程序(进程)本身。我们不能用脚本来实现多线程，因为脚本只是"粘合剂"。
+在Linux下实际上就没有线程的概念！真正实现线程的是WinNT/2000或者Solaris这些！它们本身就是以线程为基础进行任务调度的，性能较好比较正常，可以综合利用多处理器的优点和在进程内部切换线程的优点。
+在bash中，使用后台任务来实现任务的“多进程化”。我从来没有说过UNIX没有多线程，我只是说它还远远不完善。
+
+时间戳日志查询系统：日志文件名为业务相关的全局唯一标示符+时间戳
+2>&1 | tee file.log (> /dev/null) #将内容同时输出到标准输出设备和文件中，只用查看最外层日志即可
+ls -l 1>test.log 2>&1  
+echo "end time-----`date +%Y%m%d"_"%H%M%S`" >> $logFile
+dirname `readlink -f 脚本名` #获取文件的绝对路径
+current_path=`dirname $0`   #获取脚本文件所在的目录
+pwd  #获取当前执行命令所在的目录
+$0     #获取脚本名
+彩色文本:重置=0，黑色=30，红色=31，绿色=32，黄色=33，蓝色=34，洋红=35，青色=36，白色=37  
+彩色背景: 重置=0，黑色=40，红色=41，绿色=42，黄色=43，蓝色=44，洋红=45，青色=46，白色=47
+终端彩色输出：echo -e '\e[1;31m this is red text\e[0m' #-e 让echo支持转义字符 
+\e[1;31m将颜色设为红色， \e[0m将颜色重新置回。
+(time cmd) >1 2>&1
+输入输出重定向，用于日志查看和调试程序
+输入输出重定向具有拦截功能：即内脚本的输出重定向语句不会打印到外脚本的输出重定向文件中
+/dev/null  #特殊的无底洞文件，所有输出都不会显示
+去掉文本中的颜色代码：
+vim中  :%s/^[\[[0-9];[0-9]m//g   #^红色部分按ctrl+v+[获得， v和[一块按
+sed -i 's/^[\[0;32m//g' fileName
+
+shell开启子进程的方式：1.bash 开启新进程执行shell脚本 2.管道 | 3.$(linuxCommand)操作符	4.&提交后台作业
+shell 开启子进程后，必须对子进程的执行状态进行判断		shell脚本必须用exit 0/exit 1显示指定退出，以返回上一条命令的执行状态
+shell用后台进程&实现多线程
+父进程退出时会向子进程发送信号：
+trap -l		
+trap `exit 0` 15  xxx信号		
+kill -9 0——杀死脚本自己及衍生出来的子进程
+ps -xj看bbb.sh和sleep 600在同一个进程组TPGID
+
+邮件通知机制
+邮件触发执行系统
+
+输入输出重定向：
+追加>>  tee -a Example.txt
+覆盖> 2>  tee Example.txt
+2>&1 | tee file.log #将内容同时输出到标准输出设备和文件中，只用查看最外层日志即可
+2>&1 | tee -a file.log#将内容同时输出到标准输出设备和文件中，只用查看最外层日志即可
+> fileName.log 2>&1
+>> fileName.log 2>&1
+> /dev/null	2>&1
+2>&1 意思是把 标准错误输出 重定向到 标准输出.
+&>file 意思是把 标准输出 和 标准错误输出 都重定向到文件file中
+
+在 shell 中创建临时文件(随机文件名)的方法总结:
+$$ 保存所运行的当前进程的进程号
+echo $RANDOM 返回伪随机整数(范围为0 - 32767)
+mktemp -d mktemp_test.XXXX
+如果你使用“文件名.XXXX”的模版 ，其中的“X”数量必须大于等于3。且文件会创建在相对于当前目录的路径下。
+mktemp -d
+不使用模版，则会在默认的 /tmp 目录下创建临时文件（夹），文件名为 tmp.XXXXXXXXXX
+uuidgen
+md5sum
+sha1sum
+sha256sum
+base64
+
+shell脚本传递参数：
+1.export K=V形式的配置文件(K为业务相关的全局唯一标示符)
+2.shift N 消耗位置参数. 消耗参数的个数由其所带的参数指定,例如shift 9把$10移到$1，借助shift命令可以访问多于9个的参数。
+3.getopts格式为：getopts optstring varname  实现shell脚本传递-h -b -c等类型的参数
+optstring最好是":a:b:c:d:"这种格式
+重点：(a.)在optstring的参数名后面跟一个冒号":"，则该参数可以有参数值 (b.)getopts检测到参数key不是以连字符-开头时,getopts就会停止
+getopts读取参数中以连字符-开头的单字符参数，并将读取的单字符参数与optstring中的字符匹配，若匹配，则用varname来存放参数key，OPTARG用来存放参数value。
+若在optstring中未找到匹配的参数字符，将varname设置为"?"。 
+getopts用到的变量：
+optstring  option字符串，会逐个匹配
+varname    每次匹配成功的选项
+arg        参数列表，没写时它会取命令行参数列表
+$OPTIND    特殊变量option index，指向下一个参数的位置，初始值为1
+$OPTARG    特殊变量option argument，不同情况下有不同的值
+
+当optstring以”:“开头时，getopts会区分invalid option错误和miss option argument错误。
+invalid option时，varname会被设成"?"，miss option argument时，varname会被设成":"。
+
+当optstring不以”:“开头,invalid option错误和miss option argument错误都会使varname被设成?
+
+
+READ_TIMEOUT=60  
+read -t "$READ_TIMEOUT" input   #读取输入超时
+read -p 'Please select: ' var 	#从键盘输入，赋值到变量var
+echo "$var"
+http://blog.solrex.org/articles/logging-in-shell-script.html
+shell脚本参数
+shell函数参数
+shell是以空格来区分位置参数的$1 $2 $3，当参数中有空格时，参数要用""引起来
+$? 上一个命令的执行结果 0成功.正常退出，非0失败.非正常退出。exit 0退出程序。
+$#		参数个数
+$@		即参数数组
+$*		没双引号时是参数数组，有双引号时是字符串。
+$0     #获取脚本名
+$1..$9 位置参数
+$$ 		#表示当前进程的ID
+$PPID 		#$PPID表示当前进程的父进程的ID.
+$! 		后台运行的最后一个进程的PID
+shell的source就是C中的include
+PATH环境变量相当于当前目录
+export就相当于#define宏，避免重复导入问题
+~ $HOME 
+$USER
+内置变量即数字键上的特殊符号
+$0在用sh 或者 ./执行脚本时，指的是脚本名，用source或.执行时，永运是bash，这也反应了sh 或者 ./执行脚本的原理和source的方式是不同的.
+
+悄悄地、迅速地、前进
+长时间的潜移默化
+
+软件设计
+软件架构
+算法：
+
+shell脚本=linux命令+shell语法
+shell数组：
+定义数组：array=(element1 element2 element3 .... elementN)
+读取数组：
+echo ${array[0]}
+echo ${array[index]} 
+数组的遍历：
+for data in ${array[@]}  
+do  
+    echo ${data}  
+done
+${array[@]} 等同于$*，即数组中的元素一行输出
+数组长度：len=${#arr[@]}
+获取变量值的长度： length=${#var} 
+http://www.cnblogs.com/chengmo/archive/2010/09/30/1839632.html
+shell语法：
+http://blog.chinaunix.net/uid-25880122-id-2903209.html
+shell编程控制结构
+http://blog.csdn.net/fansongy/article/details/6724228
+shell变量名用下划线"_", 而不要用中划线"-" (字母 数字 下划线)
+shell文件、目录名、变量值用中划线"-"
+shell循环.选择语句没有大括号{}，所以要有结束标记。shell函数有大括号{}
+用${}和中划线-来分割shell变量
+
+shell条件判断：数字用字符串 字符串用等号= 
+shell脚本的for循环：
+http://hi.baidu.com/mchina_tang/item/67213e7fa87f30226dc37c36
+http://luochunfeng163.blog.163.com/blog/static/16700924920130186430354/
+http://blog.chinaunix.net/uid-20754793-id-177766.html
+http://www.blogjava.net/freeman1984/archive/2011/06/09/351992.html
+-----------------------
+for 变量名 in 名字表
+do 
+	执行语句
+done
+--------------------
+select 变量名 in 字符串
+do 
+	break
+done
+-----------------
+case 变量值 in
+		字符串1) 命令 ;;
+		字符串n) 命令;;
+		*)	命令 ;;			
+esac
+-----------------
+while [...];
+do
+	命令
+done
+until语句与while语句格式完全相同，只是until语句是条件为假的时候才继续执行
+--------------------
+函数定义:
+函数名()
+{
+	命令(函数中必须使用全局变量，不能使用局部变量)
+}
+
+函数调用： 即函数名 参数1 参数n...
+函数调用：不带()， 即函数名 参数1 参数n...
+---------------------
+
+shell脚本中的if [ ] 判断，数字用字母，字母用数字符号== != -z空 -n非空：
+字符串判断
+        str1 = str2              相等
+        str1 != str2             不相等
+		-z                       空字符串
+        -n                       非空字符串
+		
+整数判断
+        -eq                      相等
+        -ne                      不等于
+        -gt                      大于
+        -ge                      大于等于
+        -lt                      小于
+        -le                      小于等于
+
+文件判断
+         -e                      是否存在
+         -f                      普通文件
+        -d                       目录
+        -s                       空文件
+        -p                       管道文件
+        -b                       块设备文件
+        -c                       字符设备文件
+        -L                       软链接man test，看-L和-h 
+        -S                       Socket文件
+    
+文件权限判断
+        -r                       可读的权限
+        -w                       可写的权限
+        -x                       可执行权限
+        -u                       有suid位
+        -g                       有guid位
+        -k                       有t位，即粘贴位
+
+两个文件的比较判断
+        -nt                      file1比file2新
+        -ot                      file1比file2旧
+        -ef                      file1和file2是否为同一个文件， 一般用于判断硬链接				
+shell的if判断：判断文件、整数、字符串。 	
+多重条件判断：
+=和==在[]中等价，字符串相等。 ==在[[]]中的行为是可变的
+[[ ... && ... || ...  ]] 或者 [ ... -a ... -o ...] (-a即and，-o即or)
+(())常用于数字比较,[[]]常用于字符串的比较.
+
+shell字符串处理：
+echo "string" | grep -q 'search' #grep字符串
+grep -q 'search' fileName #grep文件内容
+
+字符串包含判断：
+echo "$var1" |grep -q "$var2"
+if [ $? -eq 0 ]
+then
+    echo "include"
+fi
+
+echo "string" | grep -q 'search' #grep字符串
+grep -q 'search' fileName #grep文件内容
+
+比较两个字符串是否相等：
+if [ "$test1"x == "$test2"x ]; then
+注意到"$test"x最后的x，这是特意安排的。因为当$test为空的时候，没有x的话左边就为空，表达式就会报错。
+
+shell默认就是一行一行地读取文件中的内容：
+cat fileName | while read line
+do
+    echo $line
+done
+或者
+while read line
+do
+    echo $line
+done < fileName
+
+shell文件读.写(输入输出重定向)
+字符串判断
+字符串截取
+awk字符串提取域
+字符串修改
+--------------------------------------------------------------------------------------------------------------------
+shell字符串截取格式：${string运算符}	%获取左边，#获取右边；*即删除字符，最后标记字符 
+#、##、%、%%、:n、:0-n都是运算符  (string若是变量的话，应直接使用变量名，而不是$变量名)
+#*字符		删除左边第一个"字符"及左边所有字符   
+##*字符		删除左边最后一个"字符"及左边所有字符
+%字符*		删除右边第一个"字符"及右边所有字符
+%%字符*		删除右边最后一个"字符"及右边所有字符
+:n:m		截取从左边第n个字符开始的m个字符 (:m表示字符个数，若省略则表示到最后)
+:0-n:m		截取从右边从第n个字符开始的m个字符
+http://blog.csdn.net/gumanren/article/details/5601544
+
+Linux 的字符串截取很有用。有八种方法。
+假设有变量 var=http://www.hao.com/123.htm 
+
+一 # 号截取，删除左边字符，保留右边字符。
+echo ${var#*//}
+其中 var 是变量名，# 号是运算符，*// 表示从左边开始删除第一个 // 号及左边的所有字符
+即删除 http://
+结果是 ：www.hao.com/123.htm
+ 
+二 ## 号截取，删除左边字符，保留右边字符。
+echo ${var##*/}
+##*/ 表示从左边开始删除最后（最右边）一个 / 号及左边的所有字符
+即删除 http://www.hao.com/          
+结果是 123.htm
+
+三 %号截取，删除右边字符，保留左边字符
+echo ${var%/*}
+%/* 表示从右边开始，删除第一个 / 号及右边的字符
+结果是：http://www.hao.com
+ 
+四 %% 号截取，删除右边字符，保留左边字符
+echo ${var%%/*}
+%%/* 表示从右边开始，删除最后（最左边）一个 / 号及右边的字符
+结果是：http:
+ 
+五 从左边第几个字符开始，及字符的个数
+echo ${var:0:5}
+其中的 0 表示左边第一个字符开始，5 表示字符的总个数。
+结果是：http:
+ 
+六 从左边第几个字符开始，一直到结束。
+echo ${var:7}
+其中的 7 表示左边第8个字符开始，一直到结束。
+结果是 ：www.hao.com/123.htm
+ 
+七 从右边第几个字符开始，及字符的个数
+echo ${var:0-7:3}
+其中的 0-7 表示右边算起第七个字符开始，3 表示字符的个数。
+结果是：123
+ 
+八 从右边第几个字符开始，一直到结束。
+echo ${var:0-7}
+表示从右边第七个字符开始，一直到结束。
+结果是：123.htm
+注：（左边的第一个字符是用 0 表示，右边的第一个字符用 0-1 表示）
+  
+http://www.cnblogs.com/lingiu/p/3446647.html
+http://www.cnblogs.com/me115/p/3428147.html
+http://blog.csdn.net/absurd/article/details/1595625
+shell关键字
+index=1
+let "index+=1" 
+exit 1
+continue  
+sleep
+wait是等待前面的后台任务&全部完成才往下执行
+| 
+| xargs
+
+---------------------------------------------------------------------------------------------------------------------
+echo ""  # 输出变量
+echo ''  # 纯字符串
+echo `` 或者 $(str) # 执行shell命令
+定义变量
+循环.选择 输入.输出语句
+函数.类
+shell脚本编程是线性的？还是多线程？若多线程，多线程同步?
+shell执行命令时是启用了一个新shell?
+sleep
+http://blog.csdn.net/mvpme82/article/details/7615454
+ls -l `which sh` # 查看sh使用哪个shell
+bash XX.sh 或者sh XX.sh 或者./XX.sh #执行shell脚本
+cat /etc/shells
+echo $SHELL
+chsh -s /bin/bash
+
+sudo ln -sf bash /bin/sh #更改sh链接
+Linux下使用Shell脚本改变当前工作路径
+
+反引号``和管道命令|的作用相同，但执行方向相反。
+`cmd1;cmd2;cmd3`
+对于bash的来说，命令的解释是从左到右的，反引号修改一行内执行命令的先后顺序
+将反引号或$()中的字符串做为命令来执行。 
+$var ${var}获取变量值,"_"下划线默认是变量名的一部分，若要把下划线当做字符串来连接变量值时，可用${var}。shell字符串截取：${string运算符}
+但反引号内不能再引用反引号，而$()中可以引用反引号
+并不是awk '{ }' urfile是awk的固定语法，而是为了让awk能够跳脱shell的偷取其命令和参数
+
+shell脚本注意：
+输入输出.命令
+命令 参数名=参数值即Key-Value的形式
+进入到某个目录下，执行命令
+shell脚本中的$var后的变量值，使用的命令、文件，可执行文件等一定要写绝对路径
+pwd显示一下当前路径、查看循环.选择语句中的$var变量值是否在当前目录下
+"="赋值语句两边不能有空格
+if [ -f $i ] 选择语句两边要注意留空格
+:即do nothing的空命令，''纯字符串解决注释中反引号命令报错问题
+
+shell脚本调试：
+echo "XX" 打印输出语句
+bash -x XX.sh #单步执行
+bash -n XX.sh #检查语法错误，不执行
+
+		
+shell的if判断：判断文件、整数、字符串。 	判断形式：[],[[]],(())还是test,let。
+if判断[]中，每一项两边都要有空格
+多重条件判断：
+[[ ... && ... || ...  ]] 或者 [ ... -a ... -o ...] (-a即and，-o即or)
+[[ ]]逻辑组合可以不使用[的-a,-o而使用&&,||
+
+
+
+
+http://blog.csdn.net/a491057947/article/details/26841157
+http://blog.csdn.net/yf210yf/article/details/9207147
+http://blog.csdn.net/ysdaniel/article/details/7905818
+http://www.blogjava.net/freeman1984/archive/2011/06/09/351992.html
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+shell脚本：
+1. Linux命令、循环.选择语句(输入.输出)
+2. linux服务器管理
+(shell脚本即Linux下批处理命令：其作用是实现自动化运行)
+(1)定义变量		
+(2)循环.选择语句 (输入.输出.返回)    	
+(3)函数.类	
+
+sed.awk.regex
+命令：输入(参数.参数值即K.V的形式)、输出
+Linux命令：文本处理.字符串处理：
+windows下开发: shell脚本、python脚本
+Make脚本、ant脚本用于在Linux服务器端编译、部署代码，比较方便。
+make更多应用于c/c++ ,ant(build.xml)更多应用于Java、maven(pom.xml)也用于java
+
+shell脚本调试：
+echo打印输出语句
+sh -n 文件名		shell脚本检查语法错误，不执行
+sh -x 文件名		shell脚本单步调试执行(x可执行)
+
+sh 文件名 或者./文件名		#运行shell脚本
+sh 脚本的运行条件：1.对脚本有r权限   2.对脚本所在的目录有rx权限
+
+
+
+
+输入输出语句：
+(1.)printf.echo 字符串 #		$变量名、${变量名} #取变量值
+""用来输出变量值，可省略不写
+'' 纯字符串
+``反引号用来提高linux命令执行的优先级
+bash是从上到下，从左到右依次执行linux命令
+``嵌套 ""嵌套 ``和""嵌套？
+
+单引号的内容全部当做普通字符原样输出''
+双引号内的字符$、转义符\、反引号``保留特殊功能，其他字符原样输出。(反引号用来执行linux命令)
+反引号``(1字旁边的那个符号)内的内容当做shell命令来执行
+(2.)read name    #获取键盘输入，赋值到变量name
+(变量赋值默认是字符串赋值，若要进行计算则使用expr命令：expr加减乘除命令：运算符两侧要留有空格)
+
+特殊变量：
+$? 上一个命令的执行结果 0成功.正常退出，非0失败.非正常退出。exit 0退出程序。
+$0-9:	$0是命令名，$1-9是执行命令时的位置参数		getopts options variable 获取执行命令时的选项
+$# 这个程序的参数个数
+$*和$@都是这个程序的所有参数
+$*为"1 2 3"		所有参数当做一个字符串
+$@为"1" "2" "3" 各个参数分别当做一个字符串，相当于数组
+$$ 这个程序的PID
+$! 执行上一个后台命令的PID
+
+test测试变量语句可用[]来代替。  	(-a逻辑与、-o逻辑或，用于[]内部) (&&、||用于[]外部)
+1.测试字符串：=、!=、-n是否不为空、-z是否为空
+2.测试整数：-eq= 、-ge>= 、-gt> 、-le<= 、-lt< 、-ne!= 
+3.测试文件：
+-dcbl file1是否是目录.字符设备文件.块设备文件.快捷方式
+-f file1是否是常规文件、
+-xrw file1是否可读可写可执行、
+-a file1文件是否存在、
+-s file1文件大小是否非0)  
+
+awk [-F分隔符] '{commands}' 文件名 
+实际动作或者commands放在{}内，如:打印动作{print $0}
+浏览一条记录时,浏览域标记为$1、$2...$n，成为域标示	($0即所有域)
+(分隔符为空格时，可不写-F参数)
+域分隔符：由-F参数指定，默认为空格
+记录分隔符：默认一行为一条记录
+commands的两个特殊字段：BEGIN{} 、END{}
+awk的正则表达式用//括起来
+awk循环.选择语句、awk内置变量
+
+shell脚本的for循环：
+http://hi.baidu.com/mchina_tang/item/67213e7fa87f30226dc37c36
+http://luochunfeng163.blog.163.com/blog/static/16700924920130186430354/
+http://blog.chinaunix.net/uid-20754793-id-177766.html
+
+编写脚本执行系统命令、脚本解释器
+编程语言执行shell脚本，shell脚本中调用的是系统命令
+sh 文件名 或者./文件名		运行shell脚本
+sh 脚本：1.对脚本有r权限   2.对脚本所在的目录有rx权限
+shell脚本中的命令最好写绝对路径，文件也最好写绝对路径 
+---------------------------------------------------------------------------------------------------------------------
+常见linux命令.regex：
+regex：
+
+
+通过linux命令来c.r.u.d linux配置文件
+环境变量：系统的、当前用户的、当前shell*的环境变量 环境变量采用就近原则
+export 设置.查看当前shell的环境变量
+. /source/exec 在当前shell执行脚本。 通常用于设置当前shell的环境变量
+环境变量不会递归查找命令或文件
+默认环境变量及其作用： ~或者$HOME $USER
+命令或文件的查找路径及先后顺序：软件配置文件、当前目录、系统环境变量
+类库查找路径及先后顺序
+定时器(crontab环境变量和shell的环境变量相互独立)
+crontab -e编辑cron文件时，注意PATH=的赋值后边只能写绝对路径，不能写如$PATH的取变量值的形式
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/nginx/sbin:/usr/local/mysql/bin:/root/bin
+MAILTO=root
+HOME=/
+
+0 */12 * * * sh /data/cron/backup.sh
+保存之后，就可以正常备份了。
+不要假定cron知道所需要的特殊环境，它其实并不知道。所以你要保证在shelll脚本中提供所有必要的路径和环境变量，除了一些自动设置的全局变量。所以
+a）脚本中涉及文件路径时写全局路径；
+b）脚本执行要用到java或其他环境变量时，通过source命令引入环境变量.
+
+1.crontab -e(编辑的是/var/spool/cron下对应用户的cron文件,也可以直接修改/etc/crontab文件), crontab -e在文件顶部修改crontab的环境变量 export PATH=/sbin:/bin:/usr/sbin:/usr/bin 
+时间设置支持regex
+#MIN      HOUR     DAY       MONTH  DAYOFWEEK       COMMAND
+后边的时间具体了，前面的时间也必须具体，不能模糊来写？
+*/1 * * * *   printenv > /home/sby_1104/cron_env.text #查看cron的环境变量
+#每天早上6点10分
+10    6     *     *     *     date
+#每两个小时
+0     */2   *     *     *     date
+#晚上11点到早上8点之间每两个小时，早上8点
+0     23-7/2，8      *     *     *     date
+#每个月的4号和每个礼拜一到礼拜三的早上11点
+0     11    4     *     1-3  date
+#1月1日早上4点
+0     4     1     1       *  date
+export VISUAL='vim' #更改crontab -e默认编辑器
+crontab -e编辑某个用户的任务 
+-l列出某个用户的任务计划
+-r删除某个用户的任务
+-u指定一个用户
+crontab filename //以filename作为crontab的任务列表文件并载入 
+定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
+周期性计划任务:
+crontab -e 分 时 天 月 星期 命令/文件名 (cron表达式)
+知道的具体时间加上，不知道的都写成*
+每隔2分钟：*/2		每隔5分钟：*/5
+一次性计划任务:
+at -f 文件名 hh:mm MM/DD/YY		启动计划任务 (计划任务放在/var/spool/at目录下)
+at -l							查看队列中的任务
+at -d 计划任务序号				删除计划任务
+/etc/at.allow和/etc/at.deny若两个文件都不存在则只有root用户可以使用at命令；若两个文件都存在且均为空，则所有用户都可以使用at命令
+
+输入(键盘)输出(显示器)重定向：用于执行命令后的日志记录 
+输入重定向：<
+输出重定向：>覆盖、>>追加
+错误输出重定向：2>
+0标准输入
+1标准输出
+2标准错误输出
+
+login shell：用户登录时读取的shell读取的配置文件 
+non-login shell: 即登录后新打开shell，读取的配置文件
+readonly env_name #设置只读变量 
+set env export.printenv  #查看当前所有环境变量
+unset 变量名 	#清除环境变量
+~/.bashrc
+ln -sf file link  #创建软连接文件快捷方式 (默认硬链接避免误删文件)
+alias 别名='linux_command' #~/.bashrc中创建命令别名 
+
+命令路径查找顺序为：当前目录、系统环境变量、程序环境变量、程序安装目录、报错
+类库路径查找顺序
+shell默认环境变量及其作用：
+PATH	可执行文件或命令的搜索路径,以冒号为分隔符.注意与DOS下 不同的是, 当前目录不在系统路径里
+HOME	用户home目录的路径名,是cd命令的默认参 数
+COLUMNS	定义了命令编辑模式下可使用命令行的长度
+EDITOR	默认的行编辑器
+VISUAL	默认的可视编辑器
+FCEDIT	命令fc使用的编辑器
+HISTFILE	命令历史文件
+HISTSIZE	命令历史文件中最多可包含的命令条数
+HISTFILESIZE	命令历史文件中包含的最大行数
+IFS	定义SHELL使用的分隔符
+LOGNAME	用户登录名
+MAIL	指向一个需要SHELL监视其修改时间的文件. 当该文件修改后, SHELL将发消息You hava mail给用户
+MAILCHECK	SHELL检查MAIL文件的周期,单位是秒
+MAILPATH	功能与MAIL类似.但可以用一组文件,以冒号分隔,每个文件后可跟一个问号和一条发向用户的消息
+SHELL	SHELL的路径名
+TERM	终端类型
+TMOUT	SHELL自动退出的时间,单位为秒,若设为0则禁止SHELL自动退出
+PROMPT_COMMAND	指定在主命令提示符前应执行的命令
+PS1	主 命令提示符。对于root用户是#，对于普通用户是$
+PS2	二级命令提示符,命令执行过程中要求输入数据时用
+PS3	select 的命令提示符
+PS4	调试命令提示符
+MANPATH	寻找手册页的路径,以冒号分隔
+LD_LIBRARY_PATH	寻找库的路径,以冒号分隔
+--------------------------------------------------------------------------------------------------------------------
+定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
+分     小时    日       月       星期     命令
+0-59   0-23   1-31   	1-12     0-6     linuxCommand/shell脚本路径     (取值范围,0表示周日,一般一行对应一个任务)
+* #代表取值范围内的数字。 对于不指定的字段，要用“*”来填补其位置
+/ #代表”每”,
+- #代表从某个数字到某个数字,用来连接多个连续的时段
+, 连接多个不连续的时段
+例如：
+30     6   */10      *     *     ls       每个月中，每隔10天6:30执行一次ls命令[即每月的1、11、21、31日是的6：30执行一次ls 命令。 ]
+*/15   *    *        *     *     ls       每15分钟执行一次ls命令 [即每个小时的第0 15 30 45 60分钟执行ls命令 ]
+*/2 * * * * /bin/sh /home/admin/jiaoben/buy/deleteFile.sh
+查看服务是否已经运行 ps -aux | grep cron
+/sbin/service crond start //启动服务  
+/sbin/service crond stop //关闭服务  
+/sbin/service crond restart //重启服务  
+/sbin/service crond reload //重新载入配置
+”run-parts”这个参数，后面跟的是文件夹命名，而不是脚本名
+cron服务每分钟不仅要读一次/var/spool/cron内的所有文件，还需要读一次/etc/crontab。
+查找命令：
+locate类似于find（/var/lib/locatedb每天自动更新）updatedb手动更新
+find . -name <filename> #find查找多个文件时，多文名要用单引号引起来。-exec command {} ; #将查到的文件执行command操作. 注意{} 和 ;之间有空格。-exec参数与| xargs功能一样 
+grep -1rn "str" * --color 	#字符串查找 grep忽略指定目录 export GREP_OPTIONS="--exclude-dir=\.svn --exclude-dir=\.git" 
+which 	用来查看当前要执行的命令所在的路径。
+whereis 用来查看一个命令或者文件所在所有路径
+type <linuxCmd>	#是用来区分某个命令到底是由shell自带的，还是由shell外部的独立二进制文件提供的。
+file <fileName> #查看文件类型
+-------------------------------------------------------------------------------------------------
+进程命令：
+进程PID.端口.服务
+进程ps -ef | grep 'java'
+用户.文件目录.权限
+
+服务器负载实时监控:
+top
+ps -ef | grep 'str'
+
+netstat -ltpn | grep '端口号/PID' #根据端口号查看进程号/根据进程号查看端口号 在Linux中1024以下的端口号都需要root用户才能使用
+kill -9 PID
+killall 'str' #杀掉所有名为str的进程
+echo $$ #$$表示当前进程的ID
+echo $PPID 		#$PPID表示当前进程的父进程的ID.
+renice -n -20 -p 3432 #更改进程优先级(-20最高，19最低，只有root权限才能更改为负数)
+pkill -kill -t 用户tty #踢出用户
+kill %n 杀掉后台运行的进程，n即jobnumber通过jobs查看的进程号(而非pid)
+
+jobs -l查看当前有多少在后台运行的命令
+fg %jobnumber(不是pid) 将后台的任务拿到前台来处理。
+ctrl+z 將前台任务丟到后台中暂停, bg %jobnumber 将一个在后台暂停的任务，变成继续执行。
+linux命令后台运行：
+1.command &   后台运行，若关掉终端会停止运行。 需重定向输出，否则前台终端会被占用。
+2.nohup command & 后台运行，即使关掉终端也会继续运行。 默认输出都被重定向到一个名为nohup.out的文件中，除非另外指定了输出文件：nohup command > myout.file 2>&1 
+wait
+exit
+
+Linux中的中的第一个字符：文件类型
+-  普通文件
+d  目录文件。
+l  符号链接(指向另一个文件,类似于瘟下的快捷方式)。
+p  命名管道文件。
+s  套接字文件。
+b  块设备文件,二进制文件。
+c  字符设备文件。
+n  网络文件
+Linux不是以文件后缀来区分文件，而是以文件内容来区分文件的。
+Linux设备挂在在哪个目录下
+
+tar -czvf 压缩后的文件名 目录名 	#压缩 
+tar -xzvf 文件名 -C dirName			#解压到指定目录 
+tar.gz使用-z参数，tar.bz/tar.bz2使用-j参数
+-c 压缩.打包
+-x 解压
+
+-z 调用gzip压缩或解压
+-j 调用bzip2压缩或解压
+-Z 调用compress压缩或解压
+-v 显示过程
+-f 文件名
+tar仅仅是一个打包程序，但可以通过参数调用gzip/bzip2/compress等压缩程序
+zip -r des.zip dir #压缩
+unzip -o test.zip -d tmp/  #解压到指定目录 -o覆盖已存在的文件
+zip和unzip也是用来压缩和解压的命令
+Linux中的很多压缩程序只能针对一个文件进行压缩，这样当你想要压缩一大堆文件时，你就得先借助另它的工具将这一大堆文件先打成一个包
+
+ls -la 文件名/目录名	# 查看文件属性
+ls -la | wc -l  #默认按文件名排序
+ls -lt #按照文件修改时间排序 (-r 反向排序)
+tree #递归查看文件
+ls -lS #按照文件大小排序 (大在前面）
+cd - #返回上一次的目录
+history -c
+xxd -l 100 binaryfile
+basename 
+dirname
+time linux_cmd  #测量一个命令的运行时间
+watch -d -n N linuxCmd  #重复执行某条命令，用于监控性能。-d 高亮显示差异	 -n指定时间间隔 
+md5sum
+uuidgen
+clip
+sleep
+CTRL + r 	就可以搜索已经执行过的命令，它可以在你写命令时自动补全
+
+ubuntu软件安装方式：
+apt-get install package_name #新德里软件中心 
+dpkg -i package-name #*.deb文件安装
+dpkg -l --列出当前系统中所有的包
+dpkg -L package-name|more #查看软件包的安装位置
+./configure、make、make install #源码安装三部曲
+./*.bin #*.bin文件安装
+
+ubuntu更新源：
+vim /etc/apt/source.list #apt-get更新源
+sudo apt-get clean
+sudo apt-get update更新源问题：
+sudo apt-get upgrade 只更新已安装的软件包
+sudo apt-get dist-upgrade 更新安装的软件包及其依赖包 
+
+sudo apt-get install 
+sudo apt-get remove package 删除包
+
+文件权限管理：
+umask nnn   #其中nnn为umask置000-777。 必须在$[HOME]/.bashrc下增加umask值才可以永久定义自己的umask值。umask设置的是权限“补码”,从权限中“拿走”相应的位
+umask+umask -S = 777,  系统不允许创建文件时赋予执行权限
+目录默认权限：777-umask
+文件默认权限：666-umask
+
+用户：u(user)		g(group)	o(other)	a(all)
+设置：+(加入)		-(除去)		=(設定)
+chmod 权限r4.w2.x1.s位
+chmod -R 744 dirName/* #递归更改权限
+如果一个文件被设置了SUID或SGID位，会分别表现在所有者或同组用户的权限的可执行位上
+SUID对应数字4，SGID对应数字2，粘滞位对应的数字1。同时设置SUID，SGID的话对应数字6
+suid显示在自身权限上，sgid显示在组权限上，粘滞位显示在other权限上
+chmod 0755 test1.sh
+chmod 1755 test1.sh
+chmod 2755 test1.sh
+chmod 4755 test1.sh
+suid 和 sgid 占据与 
+当一个程序设置了SUID位时，内核就知道了运行这个程序的时候，应该认为是文件的所有者在运行这个程序。(一个普通的用户如何能够通过运行passwd命令修改这个/etc/passwd文件呢？)ping命令也被设置了suid位。
+设置suid权限时，如果还设置了 x 权限，则suid用 s(小写）表示。如果没有设置 x 位，则suid用S（大写）表示 。
+通过以下的命令可以找到系统上所有的设置了suid的文件： find / -perm -04000 -type f -ls
+粘滞位在文件权限中用t表示，常用于目录。当目录被设置粘滞位后，这将有效防止用户在一个公共目录中不慎覆盖或者删除别人的文件，用户只能在这个目录下删除自己所拥有的文件.
+如果文件设置了粘滞位, 那么这个文件将会被保存到缓存中
+
+chown jim program.c #要更改文件 program.c 的所有者：
+chown -R john:build /tmp/src #要将目录 /tmp/src 中所有文件的所有者和组更改为用户 john 和组 build：
+只有 root 用户可以更改文件的所有者。只有root或文件owner才可以更改文件的组，只可以将组更改为您是其成员的组。
+
+iptables设置.对外
+文件及目录权限设置.对内
+账户及组管理
+查看系统开放的端口及启动的服务
+
+Linux 防火墙配置iptables：
+vim /etc/sysconfig/iptables
+service iptables restart
+etc/rc.d/init.d/iptables save
+万一服务器不在你身边，而你贸然设置导致无法SSH，那就等着被老板骂吧
+配置文件:/etc/sysconfig/iptables
+启动指令:service iptables start   
+重启指令:service iptables restart   
+关闭指令:service iptables stop 
+-t: 指定表名
+-A：指定链名   
+-p：指定协议类型   
+-d：指定目标地址   
+--dport：指定目标端口（destination port 目的端口）   
+--sport：指定源端口（source port 源端口）   
+-j：指定动作类型 
+
+设置时间.需要root权限：
+date -s "20080808 12:00:00"  #设置时间为2008年8月8号12:00 
+date -s 200800808   #设置日期为2008年08月08号 
+date -s 10:18:00    #设置时间10点18分0秒 
+hwclock -w 或者clock -w #修改完后时间后,把系统时间写入CMOS, 同步BIOS时钟。
+显示时间：date +%Y%m%d"_"%H%M%S
+
+linux时间格式：
+%Y 年（例如：1970，1996等） 
+%y 年的最后两个数字（ 1999则是99） 
+%m 月（01..12） 
+%d 一个月的第几天（01..31） 
+%H 小时（00..23） 
+%k 小时（0..23） 
+%M 分（00..59） 
+%S 秒（00..59） 
+%N 获取纳秒值
+%T 时间(24小时制)（hh:mm:ss） 
+%X 时间+时区（％H:％M:％S） 
+%r 时间（hh：mm：ss AM或PM），12小时 
+%W 一年的第几个星期（00..53，星期一为第一天） 
+%w 一个星期的第几天（0代表星期天）  %u
+
+date +%-H:%-M:%-S 会把时分秒中无意义的 0 给去掉，像是原本的 08:09:04 会变为 8:9:4
+%j 一年的第几天（001..366） 
+%I 小时（01..12） 
+%l 小时（1..12） 
+%p 显示出AM或PM 
+%s 从1970年1月1日00：00：00到目前经历的秒数 
+%Z 时区 
+%a 星期几的简称（ Sun..Sat） 
+%A 星期几的全称（ Sunday..Saturday） 
+%b 月的简称（Jan..Dec） 和%h选项相同 
+%B 月的全称（January..December） 
+%c 日期和时间（ Mon Nov 8 14：12：46 CST 1999） 
+%D 日期（mm／dd／yy） 
+%x 显示日期的格式（星期，mm英文/dd/yy） 
+----------------------------------------------------------------------------------------------------------------------- 
+groups 查看当前登录用户的组内成员
+groups user1 查看user1用户所在的组,以及组内成员
+whoami 查看当前登录用户名
+/etc/group文件包含所有组：
+group_name:_group_passwd:GID:user_list (最后一个字段表示组内成员，每个成员之间用,号分割，本字段可以为空)
+/etc/passwd存放系统存在的所有用户名：
+用户名:密码:用户ID:组ID:用户全名:主目录:登录shell
+UID：当UID为0时说明其账号是管理员身份，1-499是保留给系统使用的主要是一些系统服务,500-65535是给一般用户的。
+/etc/shadow：
+username:password:last_change:min_change:max_change:warm:failed_expire:expiration:reserved
+账号名称:密码:最近更改密码的日期(from 1974-1-1):密码不可更改的天数:密码需要重新更改的天数:密码更改期限前的警告日期:密码过期的宽限时间:账号失效时间:保留
+
+账户切换
+sudo su  <username>	#切换到root用户
+su <username>  
+exit		#返回原账户
+su -		#切换到
+
+用户管理：
+adduser <username>
+userdel -r <username>
+passwd <username>
+tty：
+用w命令找到要踢出的用户
+pkill -kill -t pts/2   #踢出上面的pts/2
+who am i
+
+useradd 选项 用户名
+usermod 选项 用户名
+userdel -r user1 #此命令删除用户sam在系统文件中（主要是/etc/passwd, /etc/shadow, /etc/group等）的记录，同时删除用户的主目录。
+-c comment 指定一段注释性描述。
+-d 目录 指定用户主目录，如果此目录不存在，则同时使用-m选项，可以创建主目录。
+-g 用户组 指定用户所属的用户组。
+-G 用户组，用户组 指定用户所属的附加组。
+-s Shell文件 指定用户的登录Shell。
+-u 用户号 指定用户的用户号，如果同时有-o选项，则可以重复使用其他用户的标识号。
+passwd 选项 用户名
+-l 禁用账号，锁定口令。
+-u 口令解锁。
+-d 删除用户密码。
+-f 强迫用户下次登录时修改口令。
+如果用户名为空，则修改当前用户的口令。
+useradd –d /usr/sam -m sam #其中-d和-m选项用来为登录名sam产生一个主目录/usr/sam
+useradd -s /bin/sh -g group –G adm,root gem  #此命令新建了一个用户gem，该用户的登录Shell是/bin/sh，它属于group用户组，同时又属于adm和root用户组，其中group用户组是其主组。
+让普通用户拥有root的权限：修改/etc/passwd即可，把用户名的ID和ID组修改成0。
+
+用户组管理：
+groupadd 选项 用户组
+groupmod 选项 用户组
+groupdel group1
+-g GID 指定新用户组的组标识号（GID）。
+-o 一般与-g选项同时使用，表示新用户组的GID可以与系统已有用户组的GID相同。
+-n新用户组 将用户组的名字改为新名字。(修改用户组时使用)
+newgrp groupName #如果一个用户属于多个组，该命令用来切换用户所在组
+--------------------------------------------------------------------------------------------------
+HardWare：
+cat /proc/cpuinfo | grep 'processor'
+free
+df -h
+Software：
+uname -a
+cat /etc/issue
+
+cat /proc/meminfo
+cat /proc/cpuinfo
+free -m  #查看系统内存
+cat /etc/issue  #查看linux的版本信息
+uname -a
+“Linux“: 机器的内核名
+“tecmint“: 机器的节点名
+“3.8.0-19-generic“: 内核发布版本
+“#30-Ubuntu SMP“: 内核版本
+“i686“: 处理器架构
+“GNU/Linux“: 操作系统名
+http://codingstandards.iteye.com/blog/786653
+df -aTh
+du -sh 目录  #查看目录大小
+mount -o remount,rw -t device dir
+umount
+一块根硬盘存放操作系统，其他设备挂载在跟硬盘的指定目录下。
+操作系统管理主板上的设备
+把设备挂在在某个目录下 (设备即/dev目录下的文件)
+lspci
+lsusb
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

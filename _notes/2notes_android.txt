@@ -1,0 +1,38 @@
+免费开源程序
+http://wenku.baidu.com/view/4825656e011ca300a6c39018.html
+http://zh.wikipedia.org/wiki/%E5%BC%80%E6%94%BE%E6%BA%90%E4%BB%A3%E7%A0%81%E8%BD%AF%E4%BB%B6%E5%88%97%E8%A1%A8#.E8.AE.BA.E5.9D.9B
+
+http://blog.csdn.net/atomic_age/article/details/1876872
+
+音频：
+编解码与文件格式
+码率=采样率*位数*声道数
+流媒体：
+android source托管(源码下载)：
+http://luhuajcdd.iteye.com/blog/1632722
+https://github.com/android/platform_manifest
+http://blog.163.com/zhou_411424/blog/static/1973621562012111782412775/
+
+内存管理：
+数据区(静态域.常量池等全局变量)、
+代码区、
+堆heap、
+栈stack 
+(内存的栈用来存放引用、局部变量、参数等， 而数据结构的栈：后进先出)
+对象放在堆内存、引用放在栈内存.引用.局部变量.基本数据类型在方法执行完以后自动释放.递归有可能导致栈溢出(栈大小固定2M/可能与编译器有关)
+方法调用层级几百层到及千层
+父类引用指向子类对象 (创建对象，创建引用)
+
+1.开源社区： 关键字搜索	tigris社区 	
+http://code.google.com/p/	https://github.com/search		http://sourceforge.net/		
+http://www.apache.org/   	http://grepcode.com				http://code.taobao.org
+程序员开发常用工具
+(基于插件的方式来实现功能的扩展，而不是去改它的源代码)
+
+
+
+
+
+
+
+

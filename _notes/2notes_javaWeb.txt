@@ -1,0 +1,36 @@
+1.)
+ssh框架：MVC模式 model、action.service.dao.util(model的CRUD操作)	
+servlet处理 超链接/form表单请求，对数据处理后，调用jsp页面来显示数据。(若只含有静态数据，则可直接通过超链接的方式来打开显示)
+jsp页面只是用来显示servlet传递过来的数据
+四大域对象用来在servlet和jsp之间传递数据：(page.jsp才有)、request、session、application不同范围内的map容器 (request是一次请求一个对象，session是多次请求使用同一个对象)
+一个浏览器独占一个session对象
+session实际上用的是Cookie技术
+Cookie的生命周期可修改，默认是浏览器进程。
+2.)
+jsp页面与javascript脚本	(ajax核心对象XMLHTTPRequest)
+jstl标签：循环c:forEach.选择c:if标签、输出标签c:out
+el表达式：1.从域中获取数据并显示。2.获取web开发中的11大隐式对象。
+jsp的9大内置对象：web服务器一启动时便驻留在内存中。
+el表达式的11大隐式对象
+
+浏览器只能访问webRoot根目录下的文件或web.xml文件中的映射路径，WEB-INF下的jsp页面只能通过servlet转发来访问。
+浏览器默认会缓存、静态资源缓存，动态资源不要缓存.如图片验证码Cache-Control=no-Cache、Expires=-1、Pragma=no-Cache
+具有src属性的标签会浏览器会自动发送请求。如<img>、<script>、<css>等
+
+jsp：
+Servlet的生命周期:在第一次请求时加载进内存，直到web服务器停止后，才从内存中移除。
+浏览器会话：
+Session生命周期为浏览器进程，Cookie生命周期默认为浏览器进程，可以修改。
+Session实际上是Cookie技术
+Session.Cookie即Map容器
+每个Session、Cookie对象都其唯一标识符id，一个session能够唯一标识一个浏览器进程
+清缓存、清Cookie、关浏览器
+
+读取配置文件的三种方式：ClassLoader(Properties)、ResourceBundle、ServletContext(仅限于web环境)
+HttpServletRequest request = ServletActionContext.getRequest();
+JdbcTemplate
+
+Spring控制反转Ioc.依赖注入：xml解析+反射
+面向切面编程aop：动态代理InvocationHandler.CGlib
+
+

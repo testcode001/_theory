@@ -1,0 +1,28 @@
+1.启动web服务器控制脚本
+      #!/bin/sh
+      # Should be placed in /etc/rc2.d/s99webserver
+      case "$1" in
+      'start')
+             echo "starting webserver... \c"
+             if [-f /usr/local/sbin/webserver ]; then
+                  /usr/local/sbin/webserver start
+             fi
+             echo ""
+             ;;
+       'stop')
+             echo "Stopping webserver...\c"
+             if [ -f /usr/local/sbin/webserver ]; then
+                   /usr/local/sbin/webserver stop
+             fi
+             echo ""
+             ;;
+         *)
+              echo "Usage: /etc/rc2.d/s99webserver {start|stop}"
+             ;;
+        esac
+
+
+2.删除60天前的日志文件
+find /var/log -name "log*.gz" -mtime +60 -exec rm -rf {} \ ;
+
+http://blog.chinaunix.net/uid-10900999-id-2920724.html

@@ -1,0 +1,305 @@
+数字化.编号、信息化、自动化
+
+多表查询
+子查询
+order by
+group by
+limit 0,20
+
+
+网络请求一定有超时设置
+网络请求一定有回调函数
+缓存
+数据的初始化、使用和清理
+数据范围的划分
+回调函数：1.调用顺序2.调用时机
+回调函数适用于1.耗时操作2.通知操作(观察者模式)3.网络操作
+至少有一次IO处理，底层调用上层
+底层定义接口,底层将数据返回给上层，上层实现接口，并将实例对象传递给底层
+
+调用即单向数据传递，回调即双向数据传递.至少有一次IO操作
+回调是建立在多线程的基础上的
+回调也可以采用多线程+调用的方式去实现？
+
+多线程同步：
+notifyAll()通知其他线程处于就绪状态 
+就绪，运行，阻塞
+a.获得锁1.进入代码块、b.释放锁1.运行完2.wait()	
+lock.notifyAll();lock.wait();lock.notifyAll()
+
+adapter的MVC模式
+数据传递.数据更新(通知机制)view的绘制.重绘
+
+哈希算法用于验证数据的完整性，防篡改.数字签名
+
+window目录下alt+左.右箭头
+根据文件名打开指定文件
+跳转到指定方法 或 跳转到指定行
+win+上.下箭头
+Ctrl+Home/End 回到顶部/底部
+
+位深
+长宽像素大小
+图片压缩格式、压缩百分比
+
+获取图片属性
+按比例缩放后(1.长或宽与特定数值的比 2.图片自身的长宽比，3.屏幕的长与图片的长.屏幕的宽与图片的宽比)，设置图片格式
+重新生成图片
+
+1.decode bitmap 的时候，尽量配置下Options，例如：inSameSize
+2.Bitmap使用完以后，调用 bitmap.recycle()来释放内存
+3.如果应用是基于图片的应用，尽量采用LazyLoad和DymanicRecycle
+4.decode bitmap 的时候，将decode代码 try catch 出来，catch oom error，避免程序crash，可以在catch里面做一些释放内存操作
+
+public static int calculateInSampleSize(BitmapFactory.Options options,  
+            int reqWidth, int reqHeight) {  
+          
+        final int height = options.outHeight;  
+        final int width = options.outWidth;  
+        int inSampleSize = 1;  
+  
+        if (height > reqHeight || width > reqWidth) {  
+  
+            final int heightRatio = Math.round((float) height  
+                    / (float) reqHeight);  
+            final int widthRatio = Math.round((float) width / (float) reqWidth);  
+  
+            inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;  
+        }  
+  
+        return inSampleSize;  
+    } 
+	
+
+   private static int calculateInSampleSize(BitmapFactory.Options options,
+            int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+	
+
+
+
+吃透业务及需求文档
+
+通用功能模块及通用功能需求
+通用数据处理
+版本更新及各版本之间的兼容性：
+1.app启动及用户登录时传递版本号，类似qq和微软的强制更新       
+git记录各版本之间的详细差异
+字段更改，版本更新，
+跨平台： 跨环境，跨设备，跨机器，跨账户
+model定义
+网络访问相关
+数据持久化处理，缓存设计
+环境切换相关
+日志处理及网络安全相关
+代码复用.抽取：抽取到方法中、抽取到父类中
+是引用而不是副本
+四种不同环境下的flag：环境切换、功能调试，log打印等
+
+跨工程的通用功能模块
+
+java 访问https
+
+url：协议、IP、port、页面地址、请求.响应的json数据格式、model的设计
+
+网络请求、回调函数、缓存、读写库分离、数据更新顺序、数据同步处理  任务模板.任务队列或者map+唯一标识符hashcode().线程池调度	超出最大容量后的抛异常处理
+标准正确数据的存放，数据的存取，数据存取的先后顺序
+
+版本更新时的可修改性和兼容性
+
+数据分类、全局缓存数据、局部缓存数据...
+动态的即flag标记作为判断条件
+
+1.行业标准
+2.自定义标准
+
+按刷新频率划分：
+V只请求一次
+M.C多次、定时甚至实时刷新
+
+业务逻辑变更、字段的添加.删减 程序个版本之间的更新及兼容性
+
+
+做多.做空：
+买.卖 期现间套利 国家经济发展方向
+
+交易所  买.卖双方(做多.做空)		大众散户
+市场运行状况	基本面
+人 事  物
+
+
+有趋势做趋势，无趋势则等待危机爆发
+消息、期.现货地区数据、政府报告、大资金量.交易量
+
+中金公司认为，粗略估计若A股以5%比例纳入MSCI指数体系，带来潜在资金流入规模约210亿美元；若全部纳入，潜在资金流入约3600亿美元
+当经济不景气的时候，央行会退出货币宽松政策，注入流动性来刺激经济
+
+flag标记区分dubug和release模式，来管理log
+
+
+
+
+
+登录、退出、全局异常捕获时、应用程序退出、进程结束前：将缓存数据持久化存储
+定时将缓存数据持久化存储
+其余时间只更新和读取缓存数据
+tair缓存管理
+
+熟悉产品需求，熟悉业务流程，将业务流程划分为各个功能模块
+各功能模块之间面向接口编程，接口就是规范，就是标准，便于模块化替换和修改
+
+版本更新及各版本之间的compatibility：
+1.增加接口，但不要随意修改
+2.业务逻辑修改：尽可能模块化替换和修改
+app启动、用户登录、用户退出、
+
+客户端工作交接：
+对着原型效果图(各个表结构)讲解所有网络请求中各个字段的意思和作用，并罗列成文档
+
+
+
+程序通用功能模块: 版本更新及个版本的兼容性、4大环境切换及log的日志打印、数据传输安全性及用户认证、全局异常处理、内存优化、性能优化
+业务需求.功能需求：网络访问.数据分类及缓存.图片加载.多线程.数据安全存储
+
+
+
+双向的耗时操作
+数据的分类及范围划分
+全局用linearlayout，局部用relativeLayout，便于view的更改
+图片.背景颜色.布局.动画
+
+分上下游，设置参数，优化代码
+数据分类并划分范围
+
+分布式系统的请求响应问题以及数据同步问题.即数据一致性问题
+数据共享、数据传递：数据同步或者数据一致性问题.线程间通信
+
+
+回调 轮询二选一
+超时的实现原理
+
+调用函数，传递参数，回调函数，传递参数
+
+消息摘要算法
+base64编码: 将不可见字符变为可见字符
+url编解码 map映射表+无歧义的唯一标识符
+
+
+http://kangning.baijia.baidu.com/article/538106
+美国政府在每个月的第一个星期五会公布非农业人口的就业数据，这个数据能够直观反映美国的经济状况，每次公布的那一刻都会让各种金融指标上串下跳。如果非农数据好于预期，说明美国经济很棒，美元也会走强，黄金价格就会下跌；如果非农数据糟于预期，说明美国经济很差，美元也会走弱，黄金价格就会上涨。
+具体到7月8日这次「非农夜」，美国非农人口就业数据好于预期，美元和美股都跟着上涨，黄金价格在数据公布后瞬间跌了1.8%，这对黄金来说已经是非常大的价格波动了。但是美元走强的负面因素并没有持续很久，金价在当天晚上又很快涨了回去，这时的账户金价格在293元/克左右震荡。
+如果想关心国际局势变化，炒黄金会比看新闻有更直观和准确的反馈。
+
+
+那么怎么限定一个注解是用在类上还是用在方法上？比如Override就是用在方法上的注解，Deprecated是既可以用在方法上面，也可以用在类上面，我们直接看看Override是怎么实现的吧
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Override {
+}
+ 
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value={CONSTRUCTOR, FIELD, LOCAL_VARIABLE, METHOD, PACKAGE, PARAMETER, TYPE})
+public @interface Deprecated {
+}
+我们发现这两个注解在定义的过程中都使用了其他的注解，像Target和Retention这种注解叫做元注解，我们分别看看它们的意思吧
+Target注解的功能就是表明你这个注解是用在什么地方的，它的值是一个枚举型
+1.CONSTRUCTOR:用于描述构造器
+2.FIELD:用于描述域
+3.LOCAL_VARIABLE:用于描述局部变量
+4.METHOD:用于描述方法
+5.PACKAGE:用于描述包
+6.PARAMETER:用于描述参数
+7.TYPE:用于描述类、接口(包括注解类型) 或enum声明
+Retention注解的功能差不多说明的就是你的注解的生命周期吧，就是什么时候失效，它的值如下
+1.SOURCE:在源文件中有效（即源文件保留）
+2.CLASS:在class文件中有效（即class保留）
+3.RUNTIME:在运行时有效（即运行时保留）
+我就介绍这两个元注解吧，其他的感觉也用的不是很多，如果你感兴趣可以自己Google一下
+ 
+注解的定义、使用、和解析
+用注解来简化代码，替代xml的解析
+
+
+
+
+跨工程的通用功能模块：网络访问、缓存、图片下载.处理.缓存、json解析、数据存储
+软件设计(4个特性+若干原则) 框架搭建(类设计、接口编写.参数及返回值)
+全局异常捕获处理
+面向对象：
+抽象.解耦：面向接口
+
+应用启动时初始化数据
+全局Context异常处理
+属性抽取到父类中，功能抽取到方法中
+
+面向切面编程.集中式管理
+本地数据分类，全局.局部范围划分User model用于各种网络请求
+数据面向对象存.取数据
+
+通知.回调.数据刷新
+
+页面布局局部用relativelayout， 全局用linearlayout：自动化，便于修改
+
+
+版本更新、多版本兼容
+token单设备登录.系统数据初始化.全局缓存map<key,value>.全局activity管理
+加密.解密 网络安全
+
+懂底层原理.能写出来.会讲出来
+熟悉各模块常用框架，能快速开发
+
+有规律的、周期性的全部自动化掉
+
+
+动态代理即接口代理，实现面向接口编程: 方法的声明、实现和调用
+面向切面编程.接口代理
+面向接口编程：方法的声明、实现和调用
+
+一个filter必须实现javax.servlet.Filter
+事件分发、消息处理机制
+
+全局、session、request、page作用域的集合容器缓存
+
+请求地址，参数
+编.解码表即map<key, value>映射
+xx管理即快速分类后的crud操作
+
+
+curl -d "opr=pwdLogin&userName=cuipengpeng2&pwd=cui%2C12345&rememberPwd=0" "http://1.1.1.2/ac_portal/login.php"
+
+目的1：通过脚本发送post请求。
+  答案： curl -d "leaderboard_id=7778a8143f111272&score=19&app_key=8d49f16fe034b98b&_test_user=test01" "http://172.16.102.208:8089/wiapi/score"
+
+  目的2：通过脚本发送post请求，顺便附带文本数据，比如通过"浏览"选择本地的card.txt并上传发送post请求
+  答案：  curl  -F "blob=@card.txt;type=text/plain"  "http://172.16.102.208:8089/wiapi/score?leaderboard_id=7778a8143f111272&score=40&app_key=8d49f16fe034b98b&_test_user=test01"   
+
+   其中-F 为带文件的形式发送post请求，   blob为文本框中的name元素对应的属性值。<type="text" name="blob">
+   
+
+
+向量的作用其实就是salt
+
+最大的好处是，可以令到即使相同的明文，相同的密钥，能产生不同的密文
+
+例如，我们用DES方式在数据保存用户密码的时候，可以另外增加一列，把向量同时保存下来，并且每次用不同的向量。这样的好处是，即使两个用户的密码是一样的，数据库保存的密文，也会不一样，就能降低猜测的可能性
+
+
+
+
+
+
+
+

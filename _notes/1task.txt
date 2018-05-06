@@ -1,0 +1,44 @@
+功能驱动
+布局设计及图片资源iconpng.com
+
+
+http://blog.csdn.net/justin_12/article/details/7279953
+http://blog.csdn.net/yan8024/article/details/6310048
+http://lxfgrace.iteye.com/blog/1609759
+
+破无线密码
+
+
+查看一个应用所占内存及当前页面所占内存
+
+DDMS和Trace view的区别
+
+ViewPager PagerAdapter  
+PulltoRefresh 
+SlidingMenu、Fragment、FragmentManager FragmentTransaction
+ActionBarShecdLock
+net返回的图片,圆角处理
+
+圆角图片http://blog.csdn.net/Android_Tutor/article/details/5981753
+http://blog.csdn.net/tianfeng701/article/details/7598143
+http://lipeng88213.iteye.com/blog/1189452
+
+服务器的移动端接口和web端接口是同一套接口吗？(类似于微博.地图开发API，对外提供一个.jar包？)
+
+http://blog.csdn.net/wenwucauc/article/details/2805235
+
+
+JSON的CRUD操作(json数据的发送.解析)
+文件的上传、下载
+读.写office
+图片处理
+
+android应用层源码.github第三方库
+
+IM应用
+音.视频、流媒体
+游戏应用
+
+
+
+

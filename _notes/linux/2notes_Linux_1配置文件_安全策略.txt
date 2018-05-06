@@ -1,0 +1,209 @@
+1.       重要数据完整性.(Tripwire或者其它替代品AIDE)
+2.       入侵检测系统(SNORT+ACID)
+3.       防火墙安全加固 (IPTABLE)
+4.       外部SSH安全连接(密钥或密码方式)
+ 
+系统安全检测工具
+1.       NMAP 端口扫描
+2.       Xprobe2 版本识别
+3.       Amap 识别远程服务器所提供服务
+4.       Hydra 暴力破解口令
+5.       NESSUS  安全远程漏洞扫描
+6.       Netcat 获取远程shell
+7.       Kismet 无线网络嗅探器
+8.       Tiger 检测已知安全问题
+ 
+最后用 loadruner 等自动测试工具来进行压力测试.
+ 
+一部份: Linux系统安全法则
+一.   BIOS安全，设定引导口令
+二.   隐藏版本信息(apache,php,openssl,mod_ssl  icmp返回信息)
+三.   安全策略.
+制定一个安全策略完全依赖于你对于安全的定义。下面的这些问题提供一些一般的指导方针：
+* 你怎么定义保密的和敏感的信息？
+* 你想重点防范哪些人？
+* 远程用户有必要访问你的系统吗？
+* 系统中有保密的或敏感的信息吗？
+* 如果这些信息被泄露给你的竞争者和外面的人有什么后果？
+* 口令和加密能够提供足够的保护吗？
+* 你想访问Internet吗？
+* 你允许系统在Internet上有多大的访问量？
+* 如果发现系统被黑客入侵了，下一步该怎么做？
+四.   口令要尽量大于8位字符,而且不能是单一的数字或者是字母,健议是字母数字与特殊符号的混合.
+五.   严格控制root权限,严格控制root组….特定的用户组才能使用sudo命令
+仅允许wheel 组用户登录进行系统管理 设置方法:
+[root@sample ~]# usermod -G wheel centospub 　← 将一般用户 centospub 加在管理员组wheel组中
+[root@sample ~]# vi /etc/pam.d/su 　← 打开这个配置文件
+#auth required /lib/security/$ISA/pam_wheel.so use_uid 　 ← 找到此行，去掉行首的“#”
+auth required /lib/security/$ISA/pam_wheel.so use_uid　 ← 变为此状态（大约在第6行的位置） 
+[root@sample ~]# echo "SU_WHEEL_ONLY yes" >> /etc/login.defs　← 添加语句到行末
+(另 在/etc/pam.d/su文件的头部加入下面两行代码 auth sufficient /lib/security/pam_rootok.so
+Debug
+Auth required /lib/security/pam_wheel.so
+Group=wheel
+)
+ 六.   编辑/etc/securetty，注释掉所有允许root远程登录的控制台，然后禁止使用所有的控制台程序，其命令如下:
+Rm –f /etc/security/console.apps/servicename
+七.   最少服务原则.
+     关闭不必要的服务
+[root@localhost /]# /sbin/chkconfig --level 2345 rhnsd off
+[root@localhost /]# /sbin/chkconfig --level 2345 isdn off
+[root@localhost /]# /sbin/chkconfig --level 2345 iiim off
+[root@localhost /]# /sbin/chkconfig --level 2345  rpcidmapd off
+[root@localhost /]# /sbin/chkconfig --level 2345  irqbalance off
+[root@localhost /]# /sbin/chkconfig --level 2345 nfslock off
+[root@localhost /]# /sbin/chkconfig --level 2345 portmap off
+[root@localhost /]# /sbin/chkconfig --level 2345 rpcgssd off
+[root@localhost /]# /sbin/chkconfig --level 2345 saslauthd on
+[root@localhost /]# /sbin/chkconfig --level 2345 spamassassin on
+[root@localhost /]# /sbin/chkconfig --level 2345 gpm off
+[root@localhost /]# /sbin/chkconfig --level 2345 microcode_ctl off
+[root@localhost /]# /sbin/chkconfig --level 2345 autofs off
+[root@localhost /]# /sbin/chkconfig --level 2345 pcmcia off
+[root@localhost /]# /sbin/chkconfig --level 2345 apmd off
+[root@localhost /]# /sbin/chkconfig --level 2345 cups off
+[root@localhost /]# /sbin/chkconfig --level 2345 netfs off
+[root@localhost /]# /sbin/chkconfig --level 2345 acpid off
+七.文件系统权限
+       找出系统中所有含s"位的程序,把不必要的"s"位去掉,或者把根本不用的直接删除,这样可以防止用户滥用及提升权限的可能性,其命令如下:
+       Find / -type f  (-perm -04000 –o –perm -02000) –exec ls –lg {} \ ;
+       Chmod a-s filename
+把重要文件加上不可改变属性:
+Chattr +I /etc/passwd
+Chattr +I /etc/shadow
+Chattr +I /etc/gshadow
+Chattr +I /etc/group
+Chattr +I /etc/inetd.conf
+等等
+ 
+八.Banner伪装
+入侵者通常通过操作系统、服务及应用程序版本来攻击，漏油列表和攻击程也是按此来分类，所以我们有必要作点手脚来加大入侵的难度。更改／etc/issue,因为reboot后重新加载，所以编辑/etc/rc.d/rc.local如下：#echo “” > /etc/issue
+                                                         #echo “$R” >>/etc/issue
+                                                         #echo “Kernel $(uname -r) on $a $(uname -m) >> /etc/issue”
+#
+#Cp –f /etc/issue /etc/issue.net
+#echo >> /etc/issue
+把以上行的#注释去掉.
+对攻击有所了解的人知道"端口重定向十反向管道"的美妙结合来穿越防火墙的例子吧?这种技巧已经运用太广，而危害很大。为了对抗这种难以防御的攻击，我们必须以牺牲一定的易用性为代价:
+Iptables -A input –j DROP
+以上规则将阻止由内而外的TCP主动选接。
+另外，用tftp或其他客户端反向攫取文件的攻击行为也很普遍，由于mfv以及诸如loki之类的工具依赖UDP，所以现在要把它彻底抹煞悼:
+Iptables –A output –o eth0 –p tcp –syn –j DROP
+　注:在更新系统和调试网络时需要把这两条规则临时去掉
+九. 提供服务的程序,把版本号等信息删除掉.
+       apache,php,openssl,mod_ssl  icmp(防止反向导管和DDOS攻击)
+ 
+       apache隐藏版本信息
+Linux中最常见的是Apache。
+默认的Apache配置里没有任何信息保护机制，并且 允许目录浏览。通过目录浏览，通常可以获得类似“Apache/1.3.27 Server at apache.linuxforum.net Port 80”或“Apache/2.0.49 (Unix) PHP/4.3.8”的信息。
+通过修改配置文件中的ServerTokens参 数，可以将Apache的相关信息隐藏起来。但是，Red Hat Linux运行的Apache是编译好的程序，提示信息被编译在程序里，要隐藏这些信息需要修改Apache的源代码，然后，重新编译安装程序，以替换里 面的提示内容。
+以Apache 2.0.50为例，编辑ap_release.h文件，修改“#define AP_SERVER_BASEPRODUCT \"Apache\"”为“#define AP_SERVER_BASEPRODUCT \"Microsoft-IIS/5.0\"”。编辑os/unix/os.h文件，修改“#define PLATFORM \"Unix\"”为“#define PLATFORM \"Win32\"”。修改完毕后，重新编译、安装Apache。
+Apache安装完 成后，修改httpd.conf配置文件，将“ServerTokens Full”改为“ServerTokens Prod”；将“ServerSignature On”改为“ServerSignature Off”，然后存盘退出。重新启动Apache后，用工具进行扫描，发现提示信息中已经显示操作系统为Windows。
+ Apache不允许查看目录
+以下为例
+Alias /icons/ "/usr/local/apache/icons/"
+<Directory "/usr/local/apache/icons">
+    Options Indexes MultiViews
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+把Indexes 去了即可
+ 隐藏 PHP 版本
+php.ini
+
+expose_php On
+改成
+expose_php Off
+十,重要的资料,文件要备份到第三机器上.
+二部份.安全加固工具的安装和使用(均未校验)
+1.       系统性能监控 rrdtool 安装使用..( RRDTOOL +CACTI + SNMP )
+安装Net-SNMP
+tar zxvf net-snmp-5.1.3.1.tar.gz
+cd net-snmp-5.1.3.1
+./configure
+make
+make install
+运行snmpget,snmpwalk测试是否安装成功
+出错地方(
+1./usr/bin/ld: cannot find –lelf   ?????
+ln -s /usr/lib/libelf.so.1  /usr/lib/libelf.so)
+ 安装CACTI
+将这个压缩包解压到网站根目录
+#cp cacti-0.8.6f.tar.gz /var/www/cacti
+#cd /var/www/cacti
+#tar xzvf cacti-0.8.6f.tar.gz
+#mv cacti-0.8.6f cacti
+#chown –R apache.apache cacti
+#cd cacti
+b) 配置Mysql数据库
+为cacti配置用户和数据库：
+#mysql –u root –p
+mysql>create database cactidb;
+mysql>grant all privileges on cactidb to cactiuser@localhost identified by ‘password’;
+mysql>quit
+配置Cacti连接数据库
+#vi /usr/local/apache2/htdocs/cacti/include/config.php
+$database_type = “mysql”;
+$database_default = “cactidb”;
+$database_hostname = “localhost”;
+$database_username = “cactiuser”;
+$database_password = “password”;
+c) 定时crontab运行cacti的收集数据程序
+#vi /etc/crontab
+*/5 * * * * /usr/local/bin/php /usr/local/apche2/htdocs/cacti/poller.php > /dev/null 2>&1
+d) 配置Cacti
+在浏览器上输入：
+http://IP/cacti
+进入cacti的初始设置页面：
+在这里我们要输入一些原始的信息：
+NEXT －》
+输入一些信息，如rrdtool、php、snmpwalk、snmpget的位置，使用ucd-snmp还是net-snmp等 －》
+输入原始的用户和密码：admin/admin －》
+更改admin用户的密码 －》
+点击 Save
+安装完成！！！
+现在可以在浏览器中进入Cacti的世界了！
+５． 测试
+四、被监控端配置
+大部分情况下，我们监控的是服务器，以RedHat Linux为例，看看如何打开SNMP服务。
+只有开启了SNMP服务，监控端才可以收集数据。
+打开默认的/etc/snmp/snmp.conf文件,更改如下配置:
+1、查找以下字段：
+代码:
+# sec.name source community
+com2sec notConfigUser default public
+将"comunity"字段改为你要设置的密码.比如"public".
+将“default”改为你想哪台机器可以看到你的snmp信息,如10.10.10.10。
+2、查找以下字段：代码:
+####
+# Finally, grant the group read-only access to the systemview view.
+# group context sec.model sec.level prefix read write notif
+access notConfigGroup "" any noauth exact all none none
+将"read"字段改为all.
+代码:
+#access notConfigGroup "" any noauth exact systemview none none
+3、查找以下字段：代码:
+## incl/excl subtree mask
+#view all included .1 80
+将该行前面的"#"去掉.
+保存关闭.
+4、运行/etc/init.d/snmpd start命令运行snmpd.
+5、如果有防火墙，打开UDP 161端口。
+最后运行netstat -ln查看161端口是否打开了.
+使用ntsysv，让snmp服务，每次开机自动运行。
+如果没有安装snmp服务，请在RH的安装光盘上找到net-snmp.rpm，再安装。
+五、测试
+打开本机的SNMP服务，
+打开http://localhost/cacti
+默认Cacti有LocalHost的四项参数，直接可以查看了。
+六、排错
+1. 首先检查一下rra/下面，有没有数据
+2. snmpwalk -v 2c -c public ServerIP if 用来测试被控对象(serverIP)是否开启了SNMP服务
+3. snmpwalk -v 2c ServerIP -c public .1.3.6.1.4.1.2021.10.1.3 查看被控端是否有CPU负载的数据返回
+4. /usr/local/bin/php /usr/local/apche2/htdocs/cacti/poller.php 用来测试PHP是否可以采集到数据。如果上面的都正确，但这步出错，很有可能是PHP配置的问题，或开启了SuLinux。
+5. 如果按第2步snmpwalk能采集到数据，但第3步无法采集，可能是PHP设置的问题，修改PHP.ini，很有可能是PHP权限问题。
+2.       数据完整性工具 Tripwrite
+3.       入侵检测系统 snort + acid的使用
+  Snort是一个轻便的网络入侵检测系统，可以完成实时流量分析和对网络上的IP包登录进行测试等功能，能完成协议分析，内容查找／匹配，能用来探测多种攻击和嗅探（如缓冲区溢出、秘密断口扫描、CGI攻击、SMB嗅探、拇纹采集尝试等）
+需要的软件包：(apache+php+mysql+snort+acid+adodb+jpgraph+libpcap+pcre

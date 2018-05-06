@@ -1,0 +1,74 @@
+Linux服务器管理
+/etc: 配置文件
+/usr：相当于c:\windows目录
+/proc: linux运行时信息
+▲Linux目录结构及作用、常用Linux命令.分类(80多个 -h)：        
+/                根目录
+/boot            启动引导目录		/grub启动引导
+/etc	         系统配置文件目录	/inittab启动模式./profile环境变量配置文件./passwd账户及密码配置文件./group用户组配置文件
+/bin             可执行命令目录
+/sbin            超级管理员命令目录 
+/lib             库函数目录
+
+/home            用户账户目录
+/root            root账户目录
+/opt		软件安装目录
+/dev             设备管理目录
+/mnt		设备挂载目录 
+
+Linux下c++编程、shell脚本、python的IDE(PyCharm)无代码自动提示功能，需纯手写代码   (python严格缩进语法来编程)
+
+原理.操作.代码积累.排错.日志记录.统计数据
+技术选型java、Linux：跨平台、远程管理
+需求管理Trello.JIRA
+代码管理github.svn、hg
+bug管理redmine
+文档管理wiki
+项目管理.类库管理Maven(pom.xml)> Ant(build.xml)> Makefile(Linux命令、文件之间的依赖关系(源文件.目标文件.可执行文件))
+foxMail邮件客户端：gmail邮箱	IM：QQ、易信、手机号
+http://www.douban.com/group/topic/31389566/
+http://www.cnblogs.com/jiqingwu/archive/2012/06/13/java_makefile.html
+
+张兴业：
+http://blog.csdn.net/xyz_lmn/article/category/922246  
+罗升阳：
+http://blog.csdn.net/luoshengyang 
+
+SMB服务器配置
+一、配置
+修改/etc/samba/smb.conf，添加：
+[root]
+   comment = Root Directories
+   browseable = yes
+   writeable = yes 
+   path = /
+   valid users = smb（用户名）
+
+二、添加用户
+Rh9:
+Smbadduser  用户名：用户名
+Smbpasswd  用户名
+
+RHEL4:
+Useradd smb   //添加smb系统用户
+Smbpasswd -a smb   //修改密码 
+
+win7下安装Linux_使用EasyBCD:
+1.创建未分配的磁盘分区	
+2.两次复制(将Linux的镜像文件中的image文件夹和isolinux目录下的vmlinuz和initrd.img文件提取出来，放在c盘根目录下。win7下要有FAT32格式的磁盘分区，用以存放Linux镜像文件)
+  一次编辑EasyBCD，Add new Entry。
+3.系统重启，开始安装。
+(hd0,0)是grub的分区符号，而/dev/sdb1这种分区符号是Linux下的。
+(EasyBCD.window下多系统引导，GRUB.Linux下多系统引导)
+
+Linux常用快捷键：
+Ctrl+Alt+T		打开终端
+Tab+Alt+方向键			切换窗口
+F11				窗口放大/缩小
+Ctrl+Alt+D			显示桌面
+pageUp/pageDown			翻页
+Alt+F4				关闭窗口
+Shift+Ctrl+T			新建Tab
+Ctrl+PageDown/PageUp	切换tab
+
+

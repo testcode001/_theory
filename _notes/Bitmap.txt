@@ -1,0 +1,76 @@
+类
+方法
+原理
+代码
+
+图片占内存大小：长x宽x像素字节数byte(默认值Bitmap.Config.ARGB_8888是4个bytes)
+Canvas
+Paint
+Matrix
+
+Bitmap
+Bitmap.Config.ARGB_8888 每个像素占用的字节数
+BitmapFactory
+BitmapFactory.Options
+
+Bitmap.createBitmap(...)
+bitmap.recycle() 
+options.inJustDecodeBounds = false;
+options.inPreferredConfig = Bitmap.Config.RGB_565 每个像素占用的字节数
+options.inSampleSize = 4; 缩略图.原图的1/16
+options.inPurgeable = true;  
+options.inInputShareable = true; 
+Bitmap bitmap = BitmapFactory.decodeStream(is,null,options)
+Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length); 
+bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);//30是压缩率，表示压缩了70%; 如果不压缩是100，表示压缩率为0
+Thumbnails.of(new File("path/to/directory").listFiles()).size(640, 480).outputFormat("jpg").toFiles("");
+http://blog.csdn.net/luhuajcdd/article/details/8948261
+http://blog.csdn.net/dahuaishu2010_/article/details/28622417
+
+优化Dalvik虚拟机的堆内存分配 
+privatefinalstaticfloatTARGET_HEAP_UTILIZATION=0.75f; 
+VMRuntime.getRuntime().setTargetHeapUtilization(TARGET_HEAP_UTILIZATION); 
+privatefinalstaticintCWJ_HEAP_SIZE=6*1024*1024;VMRuntime.getRuntime().setMinimumHeapSize(CWJ_HEAP_SIZE);//设置最小heap内存为6MB大小
+--------------------------------------------------------------------------------------------------------------
+Camera：
+
+Android Camera 源码分析
+Framework
+自动对焦
+自动白平衡
+设置分辨率
+http://www.2cto.com/kf/201401/272623.html
+Android中Camera的调用流程可分为以下几个层次：
+Package->Framework->JNI->Camera(cpp)--(binder)-->CameraService->Camera HAL->Camera Driver
+从HAL层向下就不是Android的标准代码了，各个厂商有自己不同的实现。但思路应该都是相同的：Camera遵循V4L2架构，利用ioctl发送VIDIOC_DQBUF命令得到有效的图像数据，接着回调HAL层的data callback接口以通知CameraService，CameraService会通过binder通知Camera.cpp
+
+SurfaceView
+SurfaceHolder.Callback
+SurfaceHolder
+Camera
+Camera.Parameters
+Camera.PictureCallback
+PreviewCallback获取每一帧数据，其中的data是yuv格式的，需要对其解码
+AutoFocusCallback
+MediaRecorder
+
+http://www.cnblogs.com/franksunny/archive/2011/11/17/2252926.html
+http://blog.csdn.net/geekstart/article/details/13630009
+http://www.cnblogs.com/gzggyy/archive/2011/08/01/2123920.html
+http://blog.csdn.net/yanzi1225627/article/details/8577682
+http://zhidao.baidu.com/link?url=Xg6SaPoM2eEBSJaE-Me4CFscMFMKZrZWpXcvoYVhdl7k7GTSpUTd2186iN5YCBBPUDZNI7Bg8Q5Z4pxF7_DyktB5ne5GzpFyKJ78Zlcf4Ki
+
+
+
+
+
+分辨率.宽高比
+色彩位深rgba8888、rgba4444、rgb565、
+压缩格式jpg、png(yuv422.rgb、raw、)
+
+帧率.每秒多少帧		PAL，NTSC，还有SECAM，这是全球现行的三种模拟技术彩色电视的制式
+音.视频编解码
+
+
+
+

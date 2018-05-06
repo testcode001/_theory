@@ -1,0 +1,288 @@
+命令行下的浏览器
+curl的配置文件：~/.curlrc
+curl参数：
+curl url #访问http页面内容，输出到标准输出
+-o page.html #将html源码保存在page.html文件中
+-u name:passwd #用户名.密码
+-L 表示如果在response header中如果有location的话就直接转向到location的地址（redirect地址）
+--noproxy 
+-x ip:port #proxy服务器ip及其端口
+--retry 10 #表示重试次数
+--retry-delay 60 #表示两次重试之间的时间间隔（秒为单位）
+-D head1.txt #将请求的header保存到head1.txt这个文件中去
+-c cookie0001.txt#把cookie写入到cookie0001.txt这个文件中
+-b cookie0001.txt #把上次的cookie信息追加到http request里面去
+-e "mail.linuxidc.com" #指定http的referer请求头，盗链
+-A "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" #指定浏览器版本 而"Mozilla/4.73 [en] (X11; U; Linux 2.2; 15 i686"则可以告诉对方你是一台 PC上跑着的Linux，用的是Netscape 4.73
+-E localcert.pem #访问https的时候使用本地证书
+curl –limit-rate http://www.xxx.com/action #限制url的传输速度
+curl –max-filesize 1024 http://www.xxx.com/action #限制下载文件大小，超过1M将不执行操作，并且返回出错
+POST方式传递过去的数据中若有特殊字符，需将特殊字符转义后发送给服务器端。如value值中包含有空格，则需要先将空格转换成%20：
+curl -d "value%201" http://hostname.com #模拟post请求,没-d参数时默认是get请求
+在新版本的CURL中，--data-urlencode参数会自动转义特殊字符。
+curl --data-urlencode "value 1" http://hostname.com
+curl –data-urlencode http://www.xxx.com/action?name=张三&sex=男  #正确的给url编码
+
+<form method="POST" enctype="multipar/form-data" action="http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi">
+<input type=file name=upload>
+<input type=submit name=nick value="go">
+</form>
+这样一个HTTP表单，我们要用curl进行模拟，就该是这样的语法：
+curl -F upload=@localfile -F nick=go http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi    #post方式上传文件
+curl --form "fileupload=@filename.txt" http://hostname/resource #上传文件
+-T localfile #PUT method上传一个文件  
+curl -T /home/neo/demo.jpg -u username:password ftp://www.leweiup.com
+
+curl多线程下载：
+$ curl -r 0-10240 -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3 &\
+$ curl -r 10241-20480 -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3 &\
+$ curl -r 20481-40960 -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3 &\
+$ curl -r 40961- -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3
+这样就可以分块下载啦。不过你需要自己把这些破碎的文件合并起来如果你用UNIX或苹果，用 cat zhao.part* > zhao.MP3就可以如果用的是Windows，用copy /b 来解决吧
+
+http://blog.csdn.net/suzhaoda/article/details/6179529
+http://blog.csdn.net/cuishi0/article/details/7038999
+http://blog.csdn.net/ithomer/article/details/7635301
+------------------------------------------------------------------------------------------------------------------------------------
+wget的配置文件: ~/.wgetrc
+http-proxy = 166.111.53.167:3128
+ftp-proxy = 166.111.53.167:3128
+wget参数：
+-O path/fileName下载到指定目录
+-o xx.html.log 使用小写字母o记录下载日志
+--spider  测试下载链接是否有效。
+wget --no-check-certificate https://www.xxx.com/dir/ --http-user=username --http-password=password 下载https
+--http-user=username --http-password=password 
+--ftp-user=username --ftp-password=password
+--tires=75  默认wget尝试20次链接。如果尝试75次，可以
+有的网站不允许客户在非浏览器环境下下载。使用--user-agent来设置
+--user-agent="Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.3) Gecko/2008092416 Firefox/3.0.3"
+wget -e "http_proxy=http://10.0.0.172:9201" "www.wo.com.cn" #-Y是否使用代理 -e执行命令
+-c断点下载 下载到一半需要停下来干别的事情，用^c就可以停顿住, 回来后继续下载。
+-b后台下载
+-r目录递归下载
+-i 文件名 #批量下载。wget -i download-file-list.txt #下载到当前路径下，并使用最后一个"/"后的字符串作为文件名
+-r -A.pdf  仅仅下载指定类型的文件。从一个网站中下载所有的pdf文件
+--accept=gz 只下载gz文件
+--reject=gif 下载时候禁止下载指定类型的文件 。例如下载站点时候，不打算下载gif动画图片。
+--no-cookies
+--header 
+--limit-rate=200k 
+------------------------------------------------------------------------------------------------------------------------------------
+上传文件到ftp server
+curl –u name:passwd -T size.mp3 ftp://www.quany.info/mp3/
+
+下载ftp目录：
+wget -m -np ftp://cilab-nas0.bj.intel.com/Public/Build/artifactory/Android-build-scripts/ --ftp-user=user --ftp-password=intel123
+-m mirror
+-np --no-parent不越过父目录
+下载单个文件：
+curl –u name:passwd ftp://www.quany.info/size.zip -o size.zip 
+
+创建ftp目录
+curl -u name:passwd --ftp-create-dirs ftp://www.quany.info/newDirName/
+
+查看ftp服务器文件：
+curl –u name:passwd ftp://www.quany.info/ 
+
+删除ftp server上的文件：
+curl –u name:passed ftp://www.quany.info/ -X 'DELE mp3/size.mp3'
+
+linux下常用FTP命令 上传下载文件
+1. ftp 192.168.1.1或者主机名
+服务器询问你用户名和密码，分别输入用户名和相应密码，待认证通过即可。
+
+2. 
+a) get下载单个文件 
+格式：get [remote-file] [local-file]
+ftp> get /usr/your/1.htm 1.htm (回车)
+
+b) mget下载目录, 命令前先执行:prompt off　　　　　　
+格式：mget [remote-files]
+ftp> cd /usr/your/
+ftp> mget *.* (回车)
+此时每下载一个文件，都会有提示。如果要除掉提示，则在mget *.* 命令前先执行:prompt off 
+注意：文件都下载到了linux主机的当前目录下。
+
+3.
+a) put上传单个文件
+格式：put local-file [remote-file]
+ftp> put 1.htm /usr/your/2.htm (回车)
+
+b) mput上传目录
+格式：mput local-files
+ftp> cd /usr/your （回车）
+ftp> mput *.htm　（回车）
+注意：上传文件都来自于主机的当前目录下。比如，在　/usr/my下运行的ftp命令，则只有在/usr/my下的文件linux才会上传到服务器/usr/your 下。
+
+4. 
+bye：中断与服务器的连接。
+ftp> bye (回车)
+
+5.
+rm 删除目录
+dele 删除文件
+mdelete fileName 	#删除文件
+prompt off 			#关闭提示
+------------------------------------------------------------------------------------------------------
+配置文件：
+系统级-->当前用户-->当前shell。配置变量采用就近原则
+source env.sh # 执行env.sh中的shell命令，在当前shell终端下批量设置环境变量. source可用"."来代替
+export PATH=路径:$PATH 	临时环境变量
+env			查看系统属性
+set列出所有变量		
+unset删除变量
+
+http://www.cnblogs.com/mchina/archive/2013/01/30/2880680.html
+screen命令执行耗时操作:
+一个screen session中可以有多个windows多窗口，日志，会话分离及恢复
+screen命令替代远程终端
+screen -S yourname #新建screen session，并进入screen session
+screen -ls #查看所有screen sessions_pid
+echo $PPID #查看当前所处的screen session_pid
+screen -d session_pid # 远程detach某个session
+“Ctrl+a”“d” #分离,后台运行screen session，回到shell中
+screen -r session_pid #恢复指定 screen session
+kill -9 PID #强行关闭某个screen session。
+screen -wipe #清除因异常而退出的screen session。
+快捷键：
+Ctrl+a”“c” #新建window
+"Ctrl+a""w" #查看所有windows及当前所处windows，*号表示当前window，-号表示上一次切换时的window。 检查当前是否处于screen session中
+C-a 1..9 -> 切换到第 1..9 个window
+“Ctrl+a”“n” #切换到下一个window
+"Ctrl+a""p" #切换到上一个window
+C-a C-a -> 在两个最近使用的 window 间切换 
+C-a a #来为当前窗口重命名，回车确认。
+exit #关闭当前窗口	所有窗口都关闭后，当前screen session就关闭了。
+C-a k #强行关闭当前window
+
+“Ctrl+a”“H”，来建立一个实时的会话日志来实现
+C-a [ #进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样
+    C-b Backward，PageUp 
+    C-f Forward，PageDown 
+    H(大写) High，将光标移至左上角 
+    L Low，将光标移至左下角 
+    0 移到行首 
+    $ 行末 
+    w forward one word，以字为单位往前移 
+    b backward one word，以字为单位往后移 
+    Space 第一次按为标记区起点，第二次按为终点 
+    Esc 结束 copy mode 
+C-a ] #Paste，把刚刚在 copy mode 选定的内容贴上
+“Ctrl+a”“?” #帮助
+screen使用快捷键“Ctrl-a” 作为信号把命令发送给screen而不是shell
+
+shell命令执行后台任务：
+1.命令 &
+2.nohup command &;exit退出终端才会生效。直接Ctrl+c会关闭任务
+---------------------------------------------------------------------------------------------------------------------
+查看服务是否已经运行 ps -aux | grep cron
+/sbin/service crond start //启动服务  
+/sbin/service crond stop //关闭服务  
+/sbin/service crond restart //重启服务  
+/sbin/service crond reload //重新载入配置
+”run-parts”这个参数，后面跟的是文件夹命名，而不是脚本名
+
+export VISUAL='vim' #更改crontab -e默认编辑器
+crontab -e编辑某个用户的任务 编辑的是/var/spool/cron下对应用户的cron文件,也可以直接修改/etc/crontab文件
+-l列出某个用户的任务计划
+-r删除某个用户的任务
+-u指定一个用户 
+定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
+
+cron表达式
+分     小时    日       月       星期     命令
+0-59   0-23   1-31   	1-12     0-6     linuxCommand/shell脚本路径     (取值范围,0表示周日,一般一行对应一个任务)
+记住几个特殊符号的含义:
+* #代表取值范围内的数字。 对于不指定的字段，要用“*”来填补其位置
+/ #代表”每”,
+- #代表从某个数字到某个数字,用来连接多个连续的时段
+, 连接多个不连续的时段
+例如：
+*/2 * * * * /bin/sh /home/admin/jiaoben/buy/deleteFile.sh
+*/15   *    *        *     *     ls       每15分钟执行一次ls命令 [即每个小时的第0 15 30 45 60分钟执行ls命令 ]
+30     6   */10      *     *     ls       每个月中，每隔10天6:30执行一次ls命令[即每月的1、11、21、31日是的6：30执行一次ls 命令。 ]
+
+cron服务每分钟不仅要读一次/var/spool/cron内的所有文件，还需要读一次 /etc/crontab。
+免密码登陆，建立ssh信任，这个可参照ssh资料。很简单，只需要建立两个密钥。
+
+输入输出重定向：
+输入重定向< 或 << #代码0，/dev/stdin,可省略
+输出重定向覆盖> 或 追加>> #代码1，/dev/stdout,可省略 
+标准错误输出2> 或 2>> 
+>>& 文件 #将命令执行时屏幕上所产生的任何信息附加到指定的文件中。 
+>& 文件名 #将屏幕上产生的任何信息写入指定的文件中
+>! 文件名 #输出重定向，若文件已存在，则覆盖。
+ls 1>/dev/null 2>/dev/null 与 ls >/dev/null 2>&1效果相同
+/dev/null #特殊的无底洞文件，所有输出都不会显示
+/dev/zero,是一个输入设备，你可你用它来初始化文件。
+
+【一次性计划任务:】
+at -f 文件名 hh:mm MM/DD/YY		启动计划任务 (计划任务放在/var/spool/at目录下)
+at -l							查看队列中的任务
+at -d 计划任务序号				删除计划任务
+/etc/at.allow和/etc/at.deny若两个文件都不存在则只有root用户可以使用at命令；若两个文件都存在且均为空，则所有用户都可以使用at命令
+----------------------------------------------------------------------------------------------
+screen/tmux命令执行耗时操作:
+一个screen session中可以有多个windows多窗口，日志，会话分离及恢复
+screen命令替代远程终端
+使用screen时不要开启大写
+http://www.cnblogs.com/mchina/archive/2013/01/30/2880680.html
+screen -S yourname #新建screen session，并进入screen session
+screen -ls #查看所有screen sessions_pid
+screen -d session_pid # 远程detach某个session
+“Ctrl+a”“d” #分离,后台运行screen session，回到shell中
+screen -r session_pid #恢复指定 screen session
+kill -9 PID #强行关闭某个screen session。
+screen -wipe #清除因异常而退出的screen session。
+
+Ctrl+a”“c” #新建window
+"Ctrl+a""w" #查看所有windows及当前所处windows，*号表示当前window，-号表示上一次切换时的window。 检查当前是否处于screen session中
+C-a 1..9 -> 切换到第 1..9 个window
+“Ctrl+a”“n” #切换到下一个window
+"Ctrl+a""p" #切换到上一个window
+C-a C-a -> 在两个最近使用的 window 间切换 
+C-a a #来为当前窗口重命名，回车确认。
+exit #关闭当前窗口	所有窗口都关闭后，当前screen session就关闭了。
+C-a k #强行关闭当前window
+分屏后，各区块共享screen的各个窗口：
+指定各区块所使用的窗口，会在区块的下方显示 
+C-a S	#显示器水平分割，，也支持，快捷键是。分屏以后，可以使用
+C-a |  	#垂直分屏 Screen 4.00.03版本以后支持
+C-a <tab>在各个区块间切换
+C-a X	#关闭当前焦点所在的屏幕区块，也可以用
+C-a Q	#关闭除当前区块之外其他的所有区块 
+“Ctrl+a”“H”，来建立一个实时的会话日志来实现
+“Ctrl+a”“?” #帮助
+screen使用快捷键“Ctrl-a” 作为信号把命令发送给screen而不是shell
+
+crontab定时器：
+crontab -e编辑某个用户的任务 编辑的是/var/spool/cron下对应用户的cron文件,也可以直接修改/etc/crontab文件
+-l列出某个用户的任务计划
+-r删除某个用户的任务
+-u指定一个用户 
+export VISUAL='vim' #更改crontab -e的默认编辑器
+定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
+分     小时    日       月       星期     命令
+0-59   0-23   1-31   	1-12     0-6     linuxCommand/shell脚本路径     (取值范围,0表示周日,一般一行对应一个任务)
+* #代表取值范围内的数字。 对于不指定的字段，要用“*”来填补其位置
+/ #代表”每”,
+- #代表从某个数字到某个数字,用来连接多个连续的时段
+, 连接多个不连续的时段
+例如：
+30     6   */10      *     *     ls       每个月中，每隔10天6:30执行一次ls命令[即每月的1、11、21、31日是的6：30执行一次ls 命令。 ]
+*/15   *    *        *     *     ls       每15分钟执行一次ls命令 [即每个小时的第0 15 30 45 60分钟执行ls命令 ]
+*/2 * * * * /bin/sh /home/admin/jiaoben/buy/deleteFile.sh
+
+查看服务是否已经运行 ps -aux | grep cron
+/sbin/service crond start //启动服务  
+/sbin/service crond stop //关闭服务  
+/sbin/service crond restart //重启服务  
+/sbin/service crond reload //重新载入配置
+”run-parts”这个参数，后面跟的是文件夹命名，而不是脚本名
+cron服务每分钟不仅要读一次/var/spool/cron内的所有文件，还需要读一次/etc/crontab。
+
+
+
+
+

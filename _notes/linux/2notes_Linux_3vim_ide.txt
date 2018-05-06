@@ -1,0 +1,599 @@
+多用命令行模式，而不是哑巴编辑模式
+
+
+vim配置文件、语法文件、插件文件中使用的都是vim专用的脚本语言VimScript。
+以行为执行单位
+使用:source命令来执行外部VimScript文件
+let age=29 #定义变量
+unlet age #删除变量
+if 语句使用方法与C大致相同：
+if(a > b)  
+    echo "a大于b"  
+else  
+    echo "a不大于b"  
+endif  
+while i>0  
+    let sum +=  i  
+    let i -= 1  
+endwhile  
+for i in range(1,100)  
+    let sum += i  
+endfor 
+都可以使用continue和break来改变循环，这与C完全一样
+function Min(num1, num2)  
+    if a:num1 < a:num2  
+        let smaller = a:num1  
+    else  
+        let smaller = a:num2  
+    endif  
+    return smaller  
+endfunction  
+    函数的名字首字母必须大写。Vim为了避免用户自定义函数与内置函数命名冲突，强制要求用户自定义函数名的首字母必须是大写字母。
+    函数的参数在函数体内使用的时候前面加上了a:，这表示是一个函数参数，否则运行时会报错，并提示num1是没有定义的变量。这就引出了一个很重要的话题：变量的作用域。
+    函数名称属于全局命名空间，在所有脚本中可用
+函数调用：
+let line = getline(".")  
+let repl = substitute(line, '\a', "*", "g")  
+call setline(".", repl) #使用关键字call 来显式调用函数。
+    s:name 脚本文件作用域，此时s:name这个变量只在当前脚本文件中有效，其他的脚本文件中如果也定义了同名的s:name也没关系，因为这两者彼此独立。这一点与C中的static关键字类似。
+    b:name 缓冲区作用域，b:name只在指定的缓冲区中有效
+    w:name 窗口作用域，w:name只在指定的窗口中有效
+    g:name 全局作用域，函数外定义的变量的默认值
+    v:name vim预定义的变量，注意预定义变量不同于vim的选项(option)变量。
+    l:name 函数内部的局部变量，函数内部定义的变量的默认值
+
+注意这些作用域只针对变量名，而不能作用于函数名。
+如果变量的名字以$开头，那么这个变量被认为是环境变量， 如echo $HOME  
+
+	
+	
+vim插件目录：
+~/.vim/plugin/
+~/.vim/doc/
+~/.vim/syntax/
+vim脚本语言：
+http://blog.csdn.net/smstong/article/details/20724191
+http://blog.csdn.net/smstong/article/details/20791329
+http://name5566.com/4065.html
+http://name5566.com/4002.html
+
+~/.vimrc: 立即生效 :so ~/.vimrc  #so即source
+filetype plugin indent on
+set completeopt=longest,menu
+set completeopt=preview,menu
+set showmatch
+set guioptions+=a 选中复制
+set mouse=a
+注释符"
+map是否起作用的一个关键因数是当前 vim打开文件后处于哪种模式之下。共6种模式 :help vim-modes
+vmap 和map类似，二者的区别在于前者用于所谓的Visual模式，后者用于通常的命令模式。
+map <F3> :Tlist<CR>  "按下F3就可以打开.关闭视图
+map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+:!cmd  			#vim中执行linux命令
+C表示ctrl: 如<C-LeftMouse>表示Ctrl＋鼠标左键点击
+A表示Alt
+S表示Shift
+<CR>表示回车
+<F1>				功能键F1
+<Space>  			插入空格
+<Tab>  				插入Tab
+<Esc>               Escape 键 
+<Up>                光标上移键
+<LeftMouse>			鼠标左键
+<Leader>			,键
+set autoindent  
+set tabstop=4  
+set shiftwidth=4 
+set smartindent 
+set cin 
+set tabstop=2 
+set expandtab
+
+set cursorline
+set background=dark
+set t_Co=256   vim在终端下的配色亮起来
+http://blog.csdn.net/wooin/article/details/1887737
+http://www.cnblogs.com/ma6174/archive/2011/12/10/2283393.html
+http://blog.csdn.net/fjb2080/article/details/7715636
+http://www.cnblogs.com/ggjucheng/archive/2011/12/15/2288795.html
+vim ide 吴垠
+
+supertab插件(Ctrl+p)：当前文件代码自动补全
+OmniCppComplete插件： 变量.函数代码自动补全 YouCompleteMe使用的是C/S结构，部分使用vim脚本编写
+TagList插件：结构化视图 		:Tlist Ctrl+w.Ctrl+w
+NERDTree插件：树形浏览文件系统的界面 :NERDTree
+MiniBufExplorer插件：tab页编辑文件 :b"num"打开指定的buffer
+Winmanager插件：将NERDTree界面和Taglist界面整合起来，使Vim更像VS！:WMToggle 
+wm管理所有视图，各个视图也可以单独管理
+A插件：.h/.c.cpp文件之间跳转	:A
+ctags命令：变量.函数定义 		ctrl+]查看定义，ctrl+]]查看光标所在.h文件的.cpp文件，ctrl+o返回原文件，ctrl+i光标依次前进
+cscope命令：变量.函数调用 		:cs help :cs find {querytype} {string}
+Grep插件：全文搜索
+
+代码阅读：
+vim单个文件搜索.替换.代码提示
+字符串搜索：
+#或者* 当前文件中搜索光标所在的单词	(变量.函数跳转)
+/string，回车，按n或N向后或向前查找 
+n #重复上一次搜索命令
+查看变量定义gD 
+光标依次返回ctrl+o 
+`` #光标在当前和上一次的位置之间切换
+A "jump" is one of the following commands: 
+"/", "?", "n","N", 
+"%", "(", ")", "[[", "]]", "{", "}", 
+"'", "`", "G", 
+":s", ":tag", 
+"L", "M", "H"
+% [[ ]] 
+退出vim字符串全文搜索: grep -1rn 'string' * 也即变量.函数的调用
+egrep、rgrep、fgrep
+pageUp.pageDown+Hign.Medium.Low.方向键	
+
+代码编写：
+代码自动补全Ctrl+p、supertab插件
+下移一行ddp 
+上移一行ddkP
+o移到下一个空行并进入插入模式
+u撤销 (命令模式) Ctrl+r重做即redo
+shell界面Ctrl+r查找历史命令
+:s///g命令来替换字符串, 批量添加.删除注释
+选中复制.粘贴：v选中行 ctrl+v选中列
+r，R：替换：r为替换光标所在的那一个字符；R会一直替换光标所在的 文字，直到安下【Esc】键为止
+
+命令模式下：$ 移动到行尾，0或者^ 移动到行开头
+编辑模式下：用home、end、pageUp、pageDown键
+- 将光标定位到上一行的行首 
++ 将光标定位到下一行的行首 
+w实现按单词前向定位, b实现按单词反向定位
+H.M.L
+ngg #命令模式下跳转到指定行
+12|  #将光标定位到当前行的第12列
+gg 移动到文件头
+G	移动到文件尾
+Ctrl+g #显示文件名和总行数
+. 重复前一个动作，常用在重复删除、重复粘贴
+复制一行则：yy
+复制当前光标所在的位置到行尾：y$
+复制当前光标所在的位置到行首：y^
+复制三行则：3yy，即从当前光标+下两行。
+yG #全部复制  ggyG
+:5,10 co 12  #复制多行到某一行下方
+:5,10 m 12 #剪切多行到某一行下方
+删除/剪切一行：dd
+前切三行：3dd,即从当前行+下两行被剪切了。
+:3104,5403d  #删除指定行, 删除从3104到5403的行
+d0 删至行首。 
+d$或者D 删至行尾。
+dG #全部删除
+x删除光标后的，
+X删除光标前的
+字符串替换：批量添加注释/删除注释
+:s/oldStr/newStr/g	#当前行进行替换，XXX是需要替换的字符串,YYY是替换后的字符串。
+:10,26s/oldStr/newStr/g 	#指定行范围替换
+:%s/oldStr/newStr/g	#全局替换
+:s/oldStr/newStr/g	#对指定部分进行替换，用V进入visual模式,选中后，再替换
+替换字符串中的"/" 用"\"转义，即用"\/"表示。
+
+可视模式下进行选中.复制.粘贴
+v 		选中行
+ctrl+v  选中列
+y复制
+p粘贴
+d剪切.删除
+
+n普通模式
+i插入模式
+:命令模式
+v可视模式
+
+1.ctrl-c复制后，在插入模式下按右键进行粘贴，粘贴登陆程序所在主机clipboard中的内容
+2.在命令模式下按p粘贴，粘贴ssh所在主机的寄存器中的内容
+
+用:sp [filename]打开另一文件，用^ww在文件之间切换
+:echo $MYVIMRC 	#查看vim读取的配置文件的位置
+vim启动慢，在~/.vimrc文件中配置如下：set clipboard=autoselect,exclude:cons\\\|linux\\\|$TERM #(echo $TERM) 或者vim -X 文件名
+
+vim格式化代码：
+~/.vimrc: 
+filetype plugin indent on
+set cindent shiftwidth=4
+1.按v进入可视模式，选中指定行，按一次> < 然后再按"."重复上一个命令， 多行缩进及返回
+单行的话可多次按> < 来缩进及返回
+2.按v进入可视模式，选中指定行，按"=" 格式化代码
+全选(G到文档尾->v进入可视模式->gg到文档头)后使用"="即可完成整个文档的自动排版
+3.在命令状态下对当前行用==, 或对多行用n==（n是自然数）表示自动缩进从当前行起的下面n行。 
+
+按v进入visual状态，选择多行，用>或<缩进或缩出 
+
+vim显示不可见字符	:set list ，现在 TAB 键显示为 ^I，而 $显示在每行的结尾，以便你能找到可能会被你忽略的空白字符在哪里。 
+----------------------------------------------------------------------------------
+vim查看c++源代码: 
+find . -type f -print | xargs grep -10 -i **** --color
+eclipse很不错, 下一个C/C++版本
+win下SouceInsight看代码, linux下面编译
+vim+cscope+ctags
+原来Linux下也有类似于Souce Insight工具 Linux下安装SI
+SourceInsight无法区分大小写，对于仅仅是大小写不同的文件，SourceInsight只会加入其中一个。
+ls | xargs grep -10 'str' --color
+http://blog.csdn.net/ly61baby/article/details/5785255
+| 
+| xargs
+sed、awk、regex多个文件批量替换
+编辑文件是先写入内存，此时可以撤销。按Ctrl+s后写入硬盘，就不可撤销了。
+
+▲Linux 下shell/c.c++编程
+vim编辑器         gcc/javac编译器         运行
+.c/.cpp/.sh       gcc -o 别名             ./
+.java             javac                    java
+编辑、编译、(连接)运行
+dos命令用程序打开文件：切换至文件目录   程序路径 文件名
+通配符：*多个字母或数字    ？单个字母或数字     [ ]某个范围内匹配
+
+vim插件YouCompleteMe
+~/.vimrc配置文件：
+将编辑状态下的命令即(:命令)写入~/.vimrc配置文件中，以后打开每个文件都有效。
+如
+set nu
+map ^p I#<ESC>
+ab mail peng@123.com 
+
+图形界面的文本编辑器gedit
+vim编辑器：
+须在英文键盘下进行模式切换
+			i	
+		 ---------->编辑模式
+命令模式<---------
+			esc	
+		----------->末行模式(wq/q!)
+		  shift+:
+		  
+		   v
+命令模式------>visual模式
+		<-------
+		   esc
+		------>块模式
+		Ctrl+v
+		
+快模式和visual模式下：		
+d剪切操作
+y复制操作
+p粘贴操作
+方向键选中	
+-------------------------------------------
+命令模式下移动光标：
+pageUp/pageDown+方向键 #
+gg		#第一行
+G		#最后一行
+:n 回车	#跳转到第n行 或者 在命令模式下输入 ngg 或者 nG
+^ #移动到行首第一个非空字符
+0 #移动到行首 
+$ #移动到行尾
+查看总行数：Ctrl+g
+
+H 	#移至屏幕顶部
+M	#	中部
+L	#	底部
+hjkl
+
+shell提示符下移动光标：
+home、end、方向键
+删除字符：ctrl+u、delete、
+
+末行模式：
+set nu		显示行号
+set nonu 	取消显示行号
+set smartindent 智能缩进
+syn on 语法高亮显示	
+-------------------------------------------
+:r 文件名	#导入文件内容
+:!linux命令	#执行linux命令
+:r !linux命令 	#将命令的执行结果导入到正在编辑的文件中，如时间戳
+
+:map 快捷键 vim命令 #定义快捷键,类似于alias定义命令别名 
+如：
+:map ^p I#<ESC> #快捷键ctrl+p即按I切换到行首插入模式，插入#注释，并按<ESC>返回命令模式。(定义快捷键时，^p需按ctrl+v,ctrl+p产生)
+:map ^e	0x 	#删除行首的"#"
+:unmap ^p 	#取消
+
+:ab mail peng@123.com 	#输入mail，空格，会变成peng@123.com (替换，插入模式下，输入a，空格/回车，会变成b)
+:unab mail 		#取消
+-------------------------------------------
+删除命令：
+x删除光标处的一个字符
+6x
+D删除光标至所在行行尾的字符
+d$ #剪切当前行光标所在的位置到行尾
+d^ #剪切当前行光标所在的位置到行首
+:5,10d 删除从第5行到第十10行
+dd
+6dd
+dG
+----------------------------------------------
+按v进入列编辑模式：
+y复制/d剪切.删除 p粘贴
+u撤销 (命令模式) Ctrl+r重做
+(小写p粘贴在光标后、大写P粘贴在光标前)
+.重复前一个动作
+
+命令模式：
+yy复制
+nyy
+yG #全部复制  ggyG
+dd 剪切
+ndd剪切
+p粘贴
+u撤销
+ctrl+r  #重做
+
+J或者\ 	#把当前行和下一行连起来
+：1，2co3	拷贝行1，行2在行3之后
+：4，5m6	移动行4，行5在行6之后
+:5,10 co 12  #复制多行到某一行处
+:5,10 m 12 #剪切多行到某一行处
+--------------------------------------------
+/string 回车 		#搜索字符串，n向下搜索，N向上搜索
+:set ic		#搜索时忽略大小写ignorecase
+:set noic	#区分大小写
+字符串替换：
+:5,10s/old/new/g	#在第5行到第10行范围内替换字符串。
+:%s/old/new/g		#百分百全文替换字符串
+:s/old/new/g		#当前行进行替换
+替换字符串中的"/" 用"\"转义，即用"\/"表示。
+http://blog.csdn.net/hao80879/article/details/8316211
+
+
+vim批量添加.删除注释
+方法一
+:起始行号,结束行号s/^/注释符/g		#添加注释(/即分隔符，g即global) 	:10,50s#^#//#g   	#在10 - 20行添加 // 注释
+:起始行号,结束行号s/^注释符//g		#取消注释							:10,20s#^//##g 		#在10 - 20行删除 // 注释
+方法二
+按v 进入列编辑模式,向下或向上移动光标,把需要注释的行的开头标记起来,然后输入://,再按Esc(两下),就会用符号"//"全部注释了
+http://blog.csdn.net/wangchong0/article/details/6801956
+
+r	 	#替换光标处所在字符
+R，按esc撤销 	#替换光标所在行的字符
+-----------------------------------------------	
+linux下文件比较工具：
+1.本地可视化比较：
+sudo apt-get-install diffuse
+2.远程命令行比较：
+vimdiff
+ColorDiff
+----------------------------------------------------------------------------------
+vim_ide:
+http://blog.csdn.net/wooin/article/details/1858917
+http://blog.csdn.net/zqlovlg/article/details/7983883
+
+http://www.cnblogs.com/pangchol/p/3472196.html
+sudo apt-get install clang libclang1 libclang-dev
+clang_complete
+vim实用技巧：
+http://easwy.com/blog/archives/tag/vim/
+
+1.
+vim+Tlist
+TagList插件： 提供变量.函数的结构化视图
+解压后copy到vim的插件目录
+:Tlist #打开。关闭视图
+Ctrl+w # 切换窗口
+~/.vimrc: 
+filetype plugin indent on 
+let Tlist_Show_One_File = 0            "同时显示多个文件的tag，而不只显示当前文件的
+let Tlist_Exit_OnlyWindow = 1          "如果taglist窗口是最后一个窗口，则退出vim
+
+let Tlist_File_Fold_Auto_Close=1 "同时显示多个文件中的tag时，taglist只显示当前文件tag，其他文件的函数列表折叠隐藏  
+let Tlist_Use_SingleClick= 1    " 缺省情况下，在双击一个tag时，才会跳到该tag定义的位置
+Tlist_Close_On_Select=1 		"选择了tag后自动关闭taglist窗口
+let Tlist_Process_File_Always=1  "taglist始终解析文件中的tag，不管taglist窗口有没有打开 
+let Tlist_Use_Right_Window=0 		   "1为让窗口显示在右边，0为显示在左边  
+let Tlist_WinWidth=40			#taglist窗口宽度
+let Tlist_Inc_Winwidth=1
+将光标移到变量处， 按下空格键
+
+http://blog.csdn.net/bokee/article/details/6633193
+http://blog.csdn.net/taoshengyang/article/details/6331217
+http://blog.csdn.net/longerzone/article/details/7789581
+搜索 ctags更新
+
+2.
+ctags命令：变量.函数定义跳转
+./configure --prefix= make make install (./configure --help)
+大多数unix系统都有ctags软件， which ctags
+1. 代码根目录运行命令 ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . #多了一个tags文件，这个就是索引文件
+--c++-kinds=+p : 为标签添加函数原型(prototype)信息  
+--fields=+iaS : 为标签添加继承信息(inheritance)，访问控制(access)信息，函数特征(function Signature,如参数表或原型等)  
+--extra=+q : 为类成员标签添加类标识 
+2. ~/.vimrc中增加以下这行：
+map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+set tags=tags;/  "若当前目录找不到tags文件，则到上层目录查找
+set autochdir
+ 
+
+3.
+cscope命令：查找变量.函数的调用
+./configure --prefix= make make install (./configure --help)
+大多数unix系统都有cscope软件，whihc cscope
+1. 代码根目录运行命令：cscope -Rbq -f path/xxx.out #这个命令会生成三个文件cscope.out, cscope.in.out, cscope.po.out
+2. ~/.vimrc: 
+cs add xxx.out #增加一个新的cscope数据库
+cs add path/xxx.out [pre-path] #增加一个新的cscope数据库
+#nmap <F2> :cs find s <C-R>=expand("<cword>")<CR><CR>
+#nmap <F3> :cs find c <C-R>=expand("<cword>")<CR><CR>
+http://blog.csdn.net/zhengkarl/article/details/6118796
+    "Switch to current dir  
+    function! My_ChangeToFilePath()  
+      try  
+        if exists("g:last_work_path")  
+          let g:last_last_work_path = g:last_work_path  
+        endif  
+      catch  
+        echo v:errmsg  
+      endtry  
+      let g:last_work_path = escape(getcwd(), " ")  
+      let str = expand("%:p:h")  
+      let str = s:Escape(str)  
+      "let str = escape(str, " ")  
+      execute "cd ".str  
+    endfunction  
+    function! My_ChangeToLastPath()  
+      execute "cd ".g:last_work_path  
+    endfunction  
+    "nmap <silent> <leader>cd :cd %:p:h<cr>  
+    "nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
+    nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
+    nmap <silent> <leader>cl :call My_ChangeToLastPath()<cr>  
+http://www.cnblogs.com/NeilHappy/archive/2013/05/29/3106358.html
+http://www.ibm.com/developerworks/cn/linux/l-vim-script-1/
+#set cscopequickfix=s-,c-,d-,i-,t-,e-
+http://blog.csdn.net/mci2004/article/details/7944074
+生成的cscope.files中保存的是相对路径，而不是绝对路径。这样的话，在cscope 中查找tags的时候，是没法打开相应的包含查找结果的文件的。怎么避免这个问题呢？有如下两个方法：
+1，在:cs find命令后的查找路径是当前项目的根目录，这个时候cscope.files中保存的就是所有项目文件的绝对路径了。
+2，在:cs add的时候，接一个prepend path
+:cs add [cscope.out] [pre-path] 
+3. vim中运行命令：
+:cs help
+:cs find {querytype} {string}
+搜索结束后再输入:cw 显示QuickFix窗口
+querytype：
+c	//查找调用本函数的函数	
+d	//查找本函数调用的函数
+e	//查找egrep模式，相当于egrep功能，但查找速度快多了
+f	//查找并打开文件，类似vim的find功能
+g	//查找函数、宏、枚举等定义的位置，类似ctags的功能
+i	//查找包含本文件的文件
+s	//查找C语言符号，即查找函数名、宏、枚举值等出现的地方
+t	//查找指定的字符串
+0或者s   —— 查找这个C符号
+1或者g  —— 查找这个定义
+2或者d  —— 查找被这个函数调用的函数（们）
+3或者c  —— 查找调用这个函数的函数（们）
+4或者t   —— 查找这个字符串
+6或者e  —— 查找这个egrep匹配模式
+7或者f   —— 查找这个文件
+8或者i   —— 查找#include这个文件的文件（们）
+例如：
+:cs find s work 查找所有当前光标所在符号出现过位置。 
+:cs find c work 查找所有调用当前光标所在函数的函数。
+
+4.
+supertab:
+http://www.vim.org/scripts/script.php?script_id=1643
+~/.vimrc文件中加上
+let g:SuperTabRetainCompletionType=2
+let g:SuperTabDefaultCompletionType="<C-X><C-O>" 或者 let g:SuperTabDefaultCompletionType="context"
+" 0 - 不记录上次的补全方式
+" 1 - 记住上次的补全方式,直到用其他的补全命令改变它
+" 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
+" 设置按下<Tab>后的补全方式为<C-X><C-O>. 后默认的补全方式是<C-P>
+
+5.
+OmniCppComplete插件：
+在~/.vimrc中加入以下几行：
+set nocp  
+filetype plugin on
+
+6.
+MiniBufExplorer插件：
+在~/.vimrc文件中加入以下几行：
+let g:miniBufExplMapWindowNavVim = 1   
+let g:miniBufExplMapWindowNavArrows = 1   
+let g:miniBufExplMapCTabSwitchBufs = 1   
+let g:miniBufExplModSelTarget = 1  
+let g:miniBufExplMoreThanOne=0  
+<Tab>   向前循环切换到每个buffer名上
+<S-Tab> 向后循环切换到每个buffer名上
+<Enter> 在打开光标所在的buffer
+d       删除光标所在的buffer
+在命令模式下：
+:b"num"   打开指定的buffer，"num"指的是buffer开始的那个数字，比如上图，我想打开list_audit.erb，输入:b7就ok了
+:bn   打开当前buffer的下一个buffer
+:bp   打开当前buffer的前一个buffer
+以下的两个功能需要在~/.vimrc中增加:
+let g:miniBufExplMapCTabSwitchBufs = 1
+<C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开
+<C-S-Tab> 向后循环切换到每个buffer上,并在但前窗口打开
+
+7.
+紧靠MiniBufExplorer下方左边的矩形区域就是NERDTree。在这个窗口，我们可以用鼠标或键盘方便的浏览整个文件系统，在某个文件上点击或回车，就可以在右边编辑区域打开该文件。
+
+8.
+Winmanager插件：
+在~/.vimrc文件中加入以下几行：
+let g:NERDTree_title="[NERDTree]"  
+let g:winManagerWindowLayout="NERDTree|TagList"  
+  
+function! NERDTree_Start()  
+    exec 'NERDTree'  
+endfunction  
+  
+function! NERDTree_IsValid()  
+    return 1  
+endfunction  
+  
+nmap wm :WMToggle<CR>
+打开Vim，按下组合快捷键w-m就可以我们的崭新的Vim了！再次按下w-m就可关闭界面 
+
+在~/.vim/plugin目录下的winmanager.vim文件中找到以下函数定义并添加内容：exe 'q'
+function! <SID>ToggleWindowsManager()  
+   if IsWinManagerVisible()  
+      call s:CloseWindowsManager()  
+   else  
+      call s:StartWindowsManager()  
+      exe 'q'  
+   end  
+endfunction
+
+9.
+Grep插件：
+~/.vimrc中增加了下面这句:
+nnoremap <silent> <F3> :Grep<CR>
+比如你想在/home/wooin/vim71/src/main.c中查找"FEAT_QUICKFIX", 则将光标移到"FEAT_QUICKFIX"上, 然后按下F3键, 如下图:  
+
+10.
+Visual Mark书签插件：
+用"mm"设置书签，如果你设置了多个书签, 你可以用F2键正向在期间切换, 用Shift+F2反向在期间切换.
+1 这个书签不能自动保存, 关闭vim就没了. 
+2 切换书签时不能在不同文件间切换, 只能在同一个文件中切换
+
+10.
+~/.vimrc中文支持
+let &termencoding = &encoding
+set encoding=utf-8
+set fileencoding=utf-8
+set fileencodings=ucs-bom,utf-8,chinese
+---------------------------------------------
+总结一下，我的vimrc里面的配置是：
+let &termencoding=&encoding
+set encoding=prc
+set fileencoding=gb18030
+set fileencodings=utf-8-bom,ucs-bom,utf-8,cp936,gb18030,ucs,big5
+编辑 ~/.profile，加入：export LC_ALL=zh_CN.GB18030
+
+termencoding----默认空值，也就是输出到终端不进行编码转换。
+encoding----与系统当前locale相同，所以编辑文件的时候要考虑当前locale，否则要设置的东西就比较多了。
+fileencoding----vim打开文件时自动辨认其编码，fileencoding就为辨认的值。为空则保存文件时采用encoding的编码，如果没有修改encoding，那值就是系统当前locale了。
+----------------------------------------------------------------------------------
+vi：
+命令模式下移动光标、删除字符等, 插入模式：只能输入字符，enter进入下一行
+方向键
+dd
+x
+R    //替换(覆盖)当前光标位置及后面的若干文本
+nG        //跳到行号为n的行 
+G         //跳至文件的底部 
+
+a      //在当前光标位置的右边添加文本 
+i       //在当前光标位置的左边添加文本 
+o     //在当前行的下面新建一行并进入插入模式
+
+文本三巨头：zsh、tmux 和 vim
+tmux/screen 分屏软件
+将zsh作为你的默认shell
+我将我的 .zshrc、 .vimrc 和 .tmux.conf 配置文件
+
+
+
+
+
+

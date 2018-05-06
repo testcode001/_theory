@@ -1,0 +1,156 @@
+everything：本地文件搜索
+findstr /? #windows下字符串查找
+findstr /S/I/N "str" *
+find
+grep
+
+一套鼠标.键盘多台主机：
+synergy(hotkey-"cursor is locked on screen" on后，不能通过平移切换屏幕，只能通过快捷键切换屏幕)
+1.主机之间可以相互ping通
+2.密码相同，
+3.synergy服务已启动 
+4.按server端电脑的位置配置，平移来切换屏幕
+synergy/synergyd/synergyserver或者synergyclient三个进程,并用netstat -ano/-ltpn来查看24800端口
+Screen name 可用edit菜单来修改，重启后生效。
+停止服务，卸载程序，删除目录后，两边都重新安装一遍
+
+StrokeIt鼠标手势
+-------------------------------------------------------------
+文件传输：
+linux与windows：F-Secure SSH File Transfer
+linux与linux之间：scp
+windows与windows：飞秋
+
+文件比较工具：
+Beyond Compare 3
+vimdiff: 
+首先保证系统中的diff命令是可用的。Vim的diff模式是依赖于diff命令的
+Ctrl-w, w  #两个文件之间切换光标
+zo（open) #展开折叠
+zc (close）#重新折叠
+]c  #下一个差异点
+[c  #上一个差异点
+dp （diff "put"） #把一个差异点中当前文件的内容复制到另一个文件里
+do (diff "obtain") #把另一个文件的内容复制到当前行中
+:diffupdate #重新刷新比较结果
+
+统计.监测.日志记录.数据备份
+快速环境搭建脚本
+-----------------------------------------------------------------------------------------------
+职场：
+foxmail(暴漏问题，抄送各manager)-IM-电话-当面
+公司里不是自己的事情不要做， 以避免出现问题时的责任追究问题
+-----------------------------------------------------------------------------------------------
+命令行即远程.自动化.跨平台.自动化生产线: 适当的时候执行sleep命令
+Linux下编辑器：
+vim_ide
+sudo apt-get install wine+SourceInsight远程编辑
+notepadqq
+linux.远程-linux.本地: 远程图形界面eclipse+putty+Xming
+tmux screen远程share编辑文件
+tmux:
+http://www.opstool.com/article/253
+http://blog.chinaunix.net/uid-26285146-id-3252286.html
+
+bash zsh
+
+本地windows图形化客户端：
+windows下编辑器：
+小程序用notepad++，大程序用eclipse
+VS+VA+SourceInsight
+putty+Xming: 远程X11转发
+
+连接远程server：
+git bash连接ssh服务器
+纳入git后，windows下查看.调试.编辑，linux下编译.链接.运行(断点调试.printLog.时间戳日志查询系统).打包.测试.部署/发布、-->push入库 (git多主机管理+分支管理/git嵌套管理工程...？)
+源码断点调试/源码printLog.堆栈信息
+binary文件printLog
+binary文件断点调试？
+notepad++连接FTP.ssh服务器
+eclipse连接ftp.ssh连接服务器	即eclipse远程编辑.调试
+eclipse notepad++ chrome vim firefox等都是支持插件开发的 
+eclipse、sourceInsight远程编辑.调试
+Ubuntu一套显示器多台主机：Xming+PuTTY实现X11转发：
+#vi /etc/ssh/sshd_config
+sudo apt-get install x11vnc
+X11Forwrding yes   #取消这一行的注释
+http://linux.chinaunix.net/techdoc/install/2008/09/25/1034397.shtml
+ssh -XY 远程主机名/IP
+export DISPLAY=本地IP:0.0   #DISPLAY环境变量格式如下host:NumA.NumB
+切换身份前的用户执行如下命令：xhost +
+
+工程自动化编译.打包：
+gcc g++ Makefile
+maven(pom.xml) ant(build.xml) pip
+
+
+git.repo.gerrit.ssh
+git bash：登录到本地进行传输
+
+1.远程命令行比较：
+vimdiff
+ColorDiff
+2.本地可视化比较：
+sudo apt-get-install diffuse
+diff
+patch
+自动发邮件
+---------------------------------------------------------------------------------------------
+which ccache #查看是否安装此命令
+sudo apt-get install ccache #加快编译速度.分布式编译
+http://www.ibm.com/developerworks/cn/linux/l-ccache.html
+mkdir -p ~/ccache
+vim  ~/.bashrc 
+export CCACHE_DIR=$HOME/ccache
+export USE_CCACHE=1
+ccache -M 50G
+
+cd ~/bin
+ln -s /usr/bin/ccache g++ (which ccache #查看命令安装路径)
+ln -s /usr/bin/ccache gcc
+ln -s /usr/bin/ccache cc
+ln -s /usr/bin/ccache c++
+
+ccache -M 50G
+ccache -s
+source ~/.bashrc
+
+https://btrfs.wiki.kernel.org/index.php/Conversion_from_Ext3
+http://www.ibm.com/developerworks/cn/linux/l-cn-btrfs/index.html
+---------------------------------------------------------------------------------------------
+cygwin模拟linux运行环境
+ndk交叉编译链
+
+FileSeek、notepad++ #windows下字符串搜索  
+findstr命令
+findstr /R/N/s "10.72.32.111" *  
+ /R        将搜索字符串作为一般表达式使用。
+ /S        在当前目录和所有子目录中搜索匹配文件。
+ /N        在匹配的每行前打印行数。
+everything
+syne一套键盘.鼠标    (结束进程、停止服务、卸载.删除后)重新安装一遍
+鼠标手势
+---------------------------------------------
+
+
+web开发：java、python
+底层.嵌入式：c/c++
+系统运维：shell、python
+python灰帽子
+
+Linux下编辑器：
+windows下编辑器：
+"c++"代码阅读：
+"c++"代码编写：
+"c++"调试：
+源码断点调试、print Log
+binary文件print Log
+列编辑模式
+
+
+
+
+
+
+
+ 

@@ -1,0 +1,184 @@
+#! /usr/bin/python
+# Filename : table_9x9.py
+# Author : Jesse
+# Date : 2011/08/13 21:50
+
+print '\n9x9 Table\n'
+
+for i in range(1, 10) :
+    for j in range(1, i+1) :
+        print j, 'x', i, '=', j*i, '\t',
+        # print '%d x %d = %d\t' %(j, i, j*i),
+    print '\n'
+
+print '\nDone!'
+
+
+
+http://www.w3cschool.cc/python/python-exceptions.html
+python:
+http://www.cnblogs.com/IPrograming/p/Python-socket.html
+http://blog.csdn.net/wklken/article/details/7935220
+
+http://blog.csdn.net/sasoritattoo/article/details/10020547
+windows＋Python＋virtualenv
+
+pip install SomePackage
+pip search "query"
+pip install --upgrade SomePackage
+pip install --upgrade SomePackage==version
+
+
+
+
+
+
+
+1 from 包名(即路径) import python文件名 (或者import python文件名)， 如：from pymongo import (common, helpers,message)
+2 from python文件名 import */类名/函数名
+import 包名  即import包名目录下的__init__.py文件。__init__.py该文件的内容是导入同一包下的所有文件
+python文件名即model名
+module：单个模块，一般是单个python文件；
+package：多个Python文件的组合。
+
+在于import A  和 from A import *两种的引用机制不同
+import A 是指使用A中所有的属性和方法（即变量和函数），在B中使用时，一定要A.属性 A.方法来调用，这时候调用的是A中原有的内容
+而from A import *是对A中所有属性和方法的引用，也就是A中所有属性和方法的一个备份，对于方法（即函数）可以正常使用，但是对于属性（即变量）的使用却有问题，
+
+PYTHONPATH是Python搜索路径，默认我们import的模块都会从PYTHONPATH里面寻找。
+进入python cmd，然后输入下面的代码可以打印PYTHONPATH：
+import sys 
+print sys.path
+
+类.函数定义、循环.选择语句以冒号结束: 有冒号的下一行往往要缩进：严格语法缩进
+python用缩进来保持类.函数.循环.选择语句等代码块的整体性，而不是用大括号。大括号是用来定义字典类型变量用的.即json字符串
+python中变量.函数.语句可以定义在任何地方，如语句可写在函数外边
+python中的语句末尾不需要分号;
+\ 用于连接本行和下一行
+
+python支持多重继承
+class B(A):
+class D(B, C):
+class 定义类
+def __init__(self,new_msg): 即构造函数, 支持重载 
+方法分为实例方法、类方法、静态方法和普通方法：
+构造函数和实例函数的第一个参数必须是self(指明是哪个对象调用的函数)且至少有一个参数、
+类方法用装饰器@classmethod(即注解)修饰且第一个参数必须是cls、
+静态方法用装饰器@staticmethod修饰
+普通方法即第一个参数不是self且没有相应的注解修饰
+类和实例都可以访问实例方法、类方法、静态方法，而普通方法只能通过类访问(函数可用python文件名来直接调用)
+类使用需要实例化. 如：b.B()。如：模块b中假设有类B，其中有变量v1，方法f1，类方法f2。那在模块a中调用方法是：
+import b
+a = b.B()
+aa = a.v1 #引用变量
+bb = a.f1() #引用函数
+cc = b.B.f2() #引用类方法
+属性分为实例属性和类属性：
+通过self.属性名定义或者实例.属性名访问的就是实例属性(否则就是个局部变量)
+在函数外面且在类里面定义的变量就是类属性，类属性能被实例和类共享并访问
+函数外定义变量为全局变量：函数内修改全局变量时，函数内必须先用用golbal声明全局变量，再做赋值等修改操作
+_xxx单下划线开头的成员变量叫做保护变量，意思是只有类对象和子类对象自己能访问到这些变量；不能用于’from module import *’ 
+__xxx双下划线开头的是私有成员，意思是只有类对象自己能访问，连子类对象也不能访问到这个数据。在类内部访问用self.__xxx
+__function()__以双下划线开头和结尾的方法，系统调用，即回调函数
+如果父类中有一个__xxx的变量的话，父类中的变量不会被子类中__xxx覆盖。如果是非私有的字段xxx，就会被子类中的覆盖掉。所以私有化也是保护关键变量的好选择。
+Python中类属性和实例属性按照从下往上的查找机制进行查找
+核心风格：避免用下划线_作为变量名的开始。
+
+
+def func(*tuple):  参数为元组  def func(**dict):参数为字典, 都是可变参数，可为空  
+*和**，也可以在调用的时候使用，即解包裹(unpacking)
+def func(a,b,c):
+    print a,b,c
+param = (1,3,4)
+func(*param)
+
+字符串用单引号或者双引号来表示
+def xxxxxx：
+（空格）xxxxx
+还有
+for xxxxxx：
+（空格）xxxxx
+if xxxxxx：
+（空格）xxxxx
+
+#单行注释
+
+'''
+多行注释
+'''
+"""
+多行注释
+"""
+
+list、set、map即中括号，小括号，大括号
+['a','b','c'] 定义列表
+(1,2,3,4) 定义元组，即常量一旦创建后则不能修改，经常作为函数返回值。元组tuple即只读列表数组
+{} 定义字典.即json字符串
+
+python内置属性:
+__name__   object的名字，
+__file__     路径名字
+__main__      执行的主module的名字
+__doc__    是对该module的描述，字符串
+__builtins__
+__package__
+__dict__
+当一个python文件作为单独的程序运行的时候，__name__ 的值将是一个特别的缺省值__main__，这条语句if __name__ == '__main__':就是程序的入口。
+如果是import模块, 那么 __name__ 的值通常为模块的文件名。
+
+python内置函数：
+filter
+map
+reduce
+http://jianfeihit.iteye.com/blog/1835272
+(1) help()函数
+help('os')函数：查看module文件路径及源码
+如果传一个字符串做参数的话，它会自动搜索以这个字符串命名的模块，方法等。
+如果传入的是一个对象，就会显示这个对象的类型的帮助。
+help('functionname')
+(2) dir()函数
+dir()函数返回任意对象的属性和方法列表。
+包括模块对象、函数对象、字符串对象、列表对象、字典对象等。
+dir() 函数适用于所有对象类型，包括字符串、整数、列表、元组、字典、函数、定制类、类实例和类方法。
+dir(__builtins__)  #内置
+(3) input()与raw_input()函数
+(4) print()函数
+(5) type()函数help函数
+
+python断点调试
+http://www.ibm.com/developerworks/cn/linux/l-cn-pythondebugger/
+1:在需要下断点的地方加入断点：
+import pdb
+pdb.set_tarce()
+
+2:pdb常用命令介绍
+查看源代码:l(list)
+监视变量:p(print)
+单步执行：n(next)
+进入函数：s(step)
+a 查看参数值
+加入断点：b(break)
+运行直到断点终止：c(continue)
+运行直到函数返回前：r(return)
+终止并退出:e(exit)
+注意：pdb和GDB在很多地方有相似之处。
+
+
+ipython  命令行模式下：tab键自动补全的python解释器
+sublime text3 及其插件
+
+markdown可用来做笔记，并在浏览器中打开
+
+
+字符串处理、时间日期处理、文件处理、访问网络、
+闭包 即代码块？
+装饰器函数.即注解
+生成器函数
+
+pil(python image library)、Pillow(64位)： python图像处理库
+
+
+
+
+
+

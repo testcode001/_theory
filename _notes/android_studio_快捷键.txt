@@ -1,0 +1,126 @@
+alt+1、esc
+ctrl+shift+f12
+Alt+enter 智能提示快捷键、导入包,自动修正等
+在Android studio 把keymap切换到eclipse中，
+查看类的方法的定义实现的快捷方式 ctrl + 鼠标右键
+查看接口定义方法的具体实现 ctrl + t
+
+
+
+http://www.jianshu.com/p/0911efbf8009
+
+开源项目：
+http://www.jianshu.com/p/8180cc105f01
+http://blog.csdn.net/u013693649/article/details/52328689
+最后，附上as的一些常见的快捷键：
+
+http://v.youku.com/v_show/id_XMTU0MTcyNjk3Ng==.html?from=s1.8-1-1.2
+问题是突然android studio 快捷提示不好使了
+我是这么解决的file->invalidate caches / restart....
+
+Ctrl+B 查看声明
+Ctrl+Alt+ left/right 返回至上次浏览的位置
+alt+F7查询当前元素的所有引用，然后按F3可以选择
+
+Ctrl+Shift+Space 自动补全代码
+切换Tab：alt+方向键
+alt+1： toggle project view
+Alt+home: navigation bar
+Double Shift全局文件搜索、也可以搜索窗口
+Ctrl+E打开最近文件  Ctrl+Shift+N搜索文件
+Ctrl＋F12: 显示当前文件的结构
+Ctrl+X 删除行
+Ctrl+D 复制行
+Ctrl+Alt+Space 类名或接口名提示
+Ctrl+P 方法参数提示
+列编辑模式：按住alt键不松，选择鼠标左键
+
+全局搜索：
+搜索类Ctrl+N
+全局查找Ctrl+shift+F
+
+
+Shift+F6 重构-重命名
+Ctrl+Shift+先上键
+Ctrl+/ 或 Ctrl+Shift+/ 注释（// 或者 ）
+Ctrl+空格 代码提示
+Ctrl+J 自动代码
+Ctrl+E 最近打开的文件
+Ctrl+H 显示类结构图
+Ctrl+Q 显示注释文档
+Alt+F1 查找代码所在位置
+Alt+1 快速打开或隐藏工程面板
+Ctrl+Alt+ left/right 返回至上次浏览的位置
+Alt+ left/right 切换代码视图
+Alt+ Up/Down 在方法间快速移动定位
+Ctrl+Shift+Up/Down 代码向上/下移动。
+F2 或Shift+F2 高亮错误或警告快速定位
+
+代码标签输入完成后，按Tab，生成代码。
+选中文本，按Ctrl+Shift+F7 ，高亮显示所有该文本，按Esc高亮消失。
+Ctrl+W 选中代码，连续按会有其他效果
+选中文本，按Alt+F3 ，逐个往下查找相同文本，并高亮显示。
+Ctrl+Up/Down 光标跳转到第一行或最后一行下
+
+最常用快捷键
+1.Ctrl＋E，可以显示最近编辑的文件列表
+2.Shift＋Click可以关闭文件
+3.Ctrl＋[或]可以跳到大括号的开头结尾
+4.Ctrl＋Shift＋Backspace可以跳转到上次编辑的地方
+6.Ctrl＋F7可以查询当前元素在当前文件中的引用，然后按F3可以选择
+7.Ctrl＋N，可以快速打开类
+8.Ctrl＋Shift＋N，可以快速打开文件
+9.Alt＋Q可以看到当前方法的声明
+10.Ctrl＋W可以选择单词继而语句继而行继而函数
+11.Alt＋F1可以将正在编辑的元素在各个面板中定位
+12.Ctrl＋P，可以显示参数信息
+13.Ctrl＋Shift＋Insert可以选择剪贴板内容并插入
+14.Alt＋Insert可以生成构造器/Getter/Setter等
+15.Ctrl＋Alt＋V 可以引入变量。例如把括号内的SQL赋成一个变量
+16.Ctrl＋Alt＋T可以把代码包在一块内，例如try/catch
+17.Alt＋Up and Alt＋Down可在方法间快速移动
+
+
+-----------------------------------------------------------------------------
+鼠标+快捷键：
+pageUp.pageDown+方向键
+
+切换tab页:
+ctrl+tab   
+ctrl+shift+tab
+ctrl+pageUp/pageDown
+ctrl+1.2.3...
+shift+方向键.pageUp/pageDown 选中
+
+浏览器快捷键：
+ctrl+t 新建 
+ctrl+w 删除
+ctrl+d 收藏夹
+ctrl+n 
+
+alt+tab 切换window
+alt+f4关闭window
+-----------------------------------------------------------------------------
+notepad++快捷键： 
+折叠所有层次 Alt+0 
+展开所有层次 Alt+Shift+0 
+http://www.cnblogs.com/exmyth/archive/2013/04/16/3024158.html
+Ctrl+shift+up/down		上下移动当前行
+Ctrl+d 复制当前行
+Ctrl+L 删除当前行
+Ctrl+N 新建立文件
+Ctrl+W 关闭当前tab
+ctrl+g 跳转到指定行
+Ctrl+shift+space		函数参数提示
+notepad++列编辑模式：
+1. 编辑连续的列区域：alt键+鼠标选取。
+2. 在不连续的列插入数据：按住ctl不放，同时用鼠标左键点击不连续的行即可
+先在菜单：设置-首选项-编辑中，选中“multi-editing settings”的"enable(ctl+mouse click/selection)"
+3. 在指定点到文档结尾所有列插入数据：鼠标先在要插入数据的指定点位置点击，再按alt+c，在弹出的对话框中输入要插入的数据，确定后就在后面所有列插入数据了。
+
+
+
+
+
+
+

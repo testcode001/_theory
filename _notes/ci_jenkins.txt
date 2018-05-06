@@ -1,0 +1,33 @@
+http://blog.csdn.net/hmsiwtv/article/details/19498255
+java -jar jenkins.war -httpPort=1234
+一个完整的持续集成系统由以下几部分组成：
+（1）一个自动构建过程，包括自动编译、分发、部署和测试等。可使用ANT或者Maven等工具；
+（2）一个代码存储库，即需要版本控制软件来保障代码的可维护性，同时作为构建过程的素材库。例如Subversion、Git、CVS；
+（3）一个持续集成服务器。Cruise Control、Jenkins等。
+
+分布式(远程登录).集群(运行服务开放端口等待请求)、远程、动态可扩展性
+1.版本控制工具：git
+(代码review工具：gerrit)
+2.持续集成工具： jenkins/hudson分布式build.测试、TeamCity、buildbot  
+3.项目构建工具：编写好全自动的项目编译脚本: 可基于Maven或Ant、 或者shell命令行.make
+4.(电子邮件？即时消息？RSS？通知机制)
+
+一台主机对应多个slave， 一个slave对应一种工作内容。
+一个slave可以包含多个project(jobs)
+一个project(job)可以包含多个build 
+一层一层的map映射关系写进文件/数据库
+
+slave的工作内容与属性"Remote FS root"属性和jobs的"build command"属性有关。
+name ：即slave在主页上显示的名字
+Labels：设置slave唯一的标识，在job中输入这个Labels，说明这个job在这个slave机器上做分布式运行
+slave上可同时执行的build数目与"# of executors"属性值有关。
+
+配置好slave和job(project)后，对project做build， build显示控制台输出
+
+http://www.cnblogs.com/zhuque/archive/2013/01/23/2873610.html
+http://www.cnblogs.com/GGHHLL/p/3251524.html
+http://www.cnblogs.com/itech/archive/2011/11/23/2260009.html
+http://www.bingfengsa.com/info/4114.html
+http://blog.csdn.net/wtyqm/article/details/21614839
+http://kurenai.elastos.org/2013/05/29/%E5%9F%BA%E4%BA%8Ejenkins%E7%9A%84%E8%87%AA%E5%8A%A8%E6%9E%84%E5%BB%BA%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91/
+http://blog.csdn.net/hmsiwtv/article/details/19498255
