@@ -25,7 +25,9 @@ shell从上到下，从左到右依次运行命令
 shell靠反引号`` 来改变一行中命令执行的先后顺序,没有运算符优先级之说
 shell脚本特殊符号：
 ''	""	``()						字符串.命令
-$ ${}								取变量值。中划线"_"可用在shell脚本的目录及文件名中， 但不可用在变量命名中。用"_"定义变量, "-" 分割变量
+$(linuxCommand)						获取linux命令的运行结果
+[]									if条件判断
+$ ${}								取变量值。中划线"-"可用在shell脚本的目录及文件名中， 但不可用在变量命名中。用"_"定义变量, "-" 分割变量
 shell脚本用 ${} 中划线"-"来分割变量
 |									命令管线
 ${}  #用作字符串替换时，"/"代表字符串的替换、:代表字符串的提取、#和%公别代表左截和右截
@@ -47,6 +49,15 @@ eval ls $pipe wc -l
 shell第1次扫描命令行时，它替换出pipe的 值｜，接着eval使它再次扫描命令行，这时shell把｜ 作为管道符号了。
 如果变量中包含任何需要shell直接在命令行中看到的字符（不是替换的结果），就可以使用eval。命令行结束符（； ｜ &），I／o重 定向符（< >）和引号就属于对shell具有特殊意义的符号，必须直接出现在命令行中。
 java运行shell脚本：Non-interactive mode: Running initial command then exiting非交互模式
+
+shell开启子进程的方式：1.bash 开启新进程执行shell脚本 2.管道 | 3.$(linuxCommand)操作符	4.&提交后台作业
+shell 开启子进程后，必须对子进程的执行状态进行判断		shell脚本必须用exit 0/exit 1显示指定退出，以返回上一条命令的执行状态
+shell用后台进程&实现多线程
+父进程退出时会向子进程发送信号：
+trap -l		
+trap `exit 0` 15  xxx信号		
+kill -9 0——杀死脚本自己及衍生出来的子进程
+ps -xj看bbb.sh和sleep 600在同一个进程组TPGID
 
 配置文件：
 shell脚本+export key=value形式的配置文件 (key是全局唯一标识符)
@@ -108,15 +119,6 @@ $0     #获取脚本名
 去掉文本中的颜色代码：
 vim中  :%s/^[\[[0-9];[0-9]m//g   #^红色部分按ctrl+v+[获得， v和[一块按
 sed -i 's/^[\[0;32m//g' fileName
-
-shell开启子进程的方式：1.bash 开启新进程执行shell脚本 2.管道 | 3.$(linuxCommand)操作符	4.&提交后台作业
-shell 开启子进程后，必须对子进程的执行状态进行判断		shell脚本必须用exit 0/exit 1显示指定退出，以返回上一条命令的执行状态
-shell用后台进程&实现多线程
-父进程退出时会向子进程发送信号：
-trap -l		
-trap `exit 0` 15  xxx信号		
-kill -9 0——杀死脚本自己及衍生出来的子进程
-ps -xj看bbb.sh和sleep 600在同一个进程组TPGID
 
 邮件通知机制
 邮件触发执行系统
@@ -296,8 +298,8 @@ shell脚本中的if [ ] 判断，数字用字母，字母用数字符号== != -z
         -k                       有t位，即粘贴位
 
 两个文件的比较判断
-        -nt                      file1比file2新
-        -ot                      file1比file2旧
+        -nt                      file1比file2新new
+        -ot                      file1比file2旧old
         -ef                      file1和file2是否为同一个文件， 一般用于判断硬链接				
 shell的if判断：判断文件、整数、字符串。 	
 多重条件判断：

@@ -1,6 +1,6 @@
 svn命令：
 代码下载：svn co repo_url .
-更新：svn up
+更新：svn up [-r version]
 添加文件：svn add . --force
 删除文件：svn rm
 提交：svn ci -m "log"	(需指定SVN_EDITOR环境变量)
@@ -21,7 +21,8 @@ svn resolved
 svn：
 http://blog.csdn.net/q199109106q/article/details/8655204
 http://blog.csdn.net/ithomer/article/details/6187464
-------------------------------------------------------------------------
+-----------------------------------------------------------------------
+
 常用git命令:
 git分布式操作
 工作区、本地库(暂存区、版本库)、远端库
@@ -76,6 +77,37 @@ git reset --hard sha-1值前6位 代码回滚到指定版本
 强推到远程：
 git push origin HEAD --force
 
+git stash [push -m "msg"]				#保存当前工作进度，会把暂存区和工作区的改动保存起来。执行完这个命令后，在运行git status命令，就会发现当前是一个干净的工作区，没有任何改动。使用git stash save 'message...'可以添加一些注释
+git stash list							#显示保存进度的列表。也就意味着，git stash命令可以多次执行。
+git stash pop [–index] [stash_id]
+git stash pop --index 					#恢复最新的进度到工作区和暂存区。（尝试将原来暂存区的改动还恢复到暂存区）
+git stash pop stash@{1}					#恢复指定的进度到工作区。stash_id是通过git stash list命令得到的 通过git stash pop命令恢复进度后，会删除当前进度。
+git stash apply [–index] [stash_id]		#除了不删除恢复的进度之外，其余和git stash pop 命令一样。
+git stash drop [stash_id]				#删除一个存储的进度。如果不指定stash_id，则默认删除最新的存储进度。
+git stash clear							#删除所有存储的进度。
+
+	
+git生成patch文件和打patch：
+git format-patch：生成patch
+git format-patch HEAD^ 　　　　　　　　　　　　　   #生成最近的1次commit的patch
+git format-patch HEAD^^　　　　　　　　　　　　　  	#生成最近的2次commit的patch
+git format-patch HEAD^^^ 　　　　　　　　　　　　　	#生成最近的3次commit的patch
+git format-patch HEAD^^^^ 　　　　　　　　　　　    #生成最近的4次commit的patch
+git format-patch <r1>..<r2>                       	#生成两个commit间的修改的patch（包含两个commit. <r1>和<r2>都是具体的commit号)
+git format-patch -1 <r1>                            #生成单个commit的patch
+git format-patch <r1>                               #生成某commit以来的修改patch（不包含该commit）
+git format-patch --root <r1>　　　　　　　　　　　　#生成从根到r1提交的所有patch
+git am：打patch
+git apply --stat 0001-limit-log-function.patch   　 # 查看patch的情况
+git apply --check 0001-limit-log-function.patch   　# 检查patch是否能够打上，如果没有任何输出，则说明无冲突，可以打上
+(注：git apply是另外一种打patch的命令，其与git am的区别是，git apply并不会将commit message等打上去，打完patch后需要重新git add和git commit，
+而git am会直接将patch的所有信息打上去，而且不用重新git add和git commit,author也是patch的author而不是打patch的人)
+git am 0001-limit-log-function.patch                # 将名字为0001-limit-log-function.patch的patch打上
+git am --signoff 0001-limit-log-function.patch      # 添加-s或者--signoff，还可以把自己的名字添加为signed off by信息，作用是注明打patch的人是谁，因为有时打patch的人并不是patch的作者
+git am ~/patch-set/*.patch　　　　　　　　　　　　　# 将路径~/patch-set/*.patch 按照先后顺序打上
+git am --abort                              		# 当git am失败时，用以将已经在am过程中打上的patch废弃掉(比如有三个patch，打到第三个patch时有冲突，那么这条命令会把打上的前两个patch丢弃掉，返回没有打patch的状态)
+git am --resolved                           		#当git am失败，解决完冲突后，这条命令会接着打patch
+ 
 
 git rebase改变基点
 git diff
@@ -91,3 +123,6 @@ git –add section.key value(默认是添加在local配置中)
 .git/config仓库级配置文件local
 ~/.gitconfig 全局级配置文件global
 ./etc/gitconfig 系统级配置文件system
+
+
+

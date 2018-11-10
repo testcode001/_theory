@@ -1,0 +1,66 @@
+http://www.jb51.net/article/37858.htm
+c++
+虚函数
+1.定义：在某基类中声明为 virtual 并在一个或多个派生类中被重新定 义的成员函数 [1]
+2.语法：virtual 函数返回类型 函数名（参数表） { 函数体 }
+3.用途：实现多态性，通过指向派生类的基类指针，访问派生类中同名覆盖成员函数，也就是允许子类override父类同名方法。
+虚函数的作用是实现动态联编，也就是在程序的运行阶段动态地选择合适的成员函数，在定义了虚函数后，可以在基类的派生类中对虚函数重新定义，在派生类中重新定义的函数应与虚函数具有相同的形参个数和形参类型（也就是完全相同的方法，不能只是函数名相同。）。以实现统一的接口，不同的定义过程。如果在派生类中没有对虚函数重新定义，则它继承其基类的虚函数。
+当程序发现虚函数名前的关键字virtual后，会自动将其作为动态联编处理，即在程序运行时动态地选择合适的成员函数。虚函数是C++多态的一种表现。动态联编规定，只能通过指向基类的指针或基类对象的引用来调用虚函数，其格式：
+1.指向基类的指针变量名->虚函数名（实参表）
+2.基类对象的引用名. 虚函数名（实参表）
+使用虚函数，我们可以灵活的进行动态绑定，当然是以一定的开销为代价。如果父类的函数（方法）根本没有必要或者无法实现，完全要依赖子类去实现的话，可以把此函数（方法）设为virtual 函数名=0 ，例如：virtual void fun() = 0，我们把这样的函数（方法）称为纯虚函数。如果一个类包含了纯虚函数，称此类为抽象类。
+总结：如果一个子类想要重写父类的方法，那么父类的这个成员方法必须是virtual的，也就是这个方法必须是虚函数。
+java
+在java中，所有方法默认就是虚拟的，只要方法不是声明为final类型的，那么肯定就是虚函数，不用为方法显示声明为virtual。在<core java2 :volum I>中提到："In Java, you do not need to declare a method as virtual. Dynamic binding is the default behavior. If you do not want a method to be virtual, you tag it as final"。所以我们发现，在java中，子类可以重写(override)父类的方法，而父类没有声明virtual。
+
+
+
+BitmapFactory.Options opts = new Options();
+// 不读取像素数组到内存中，仅读取图片的信息
+opts.inJustDecodeBounds = true;
+BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
+// 从Options中获取图片的分辨率
+int imageHeight = opts.outHeight;
+int imageWidth = opts.outWidth;
+// 获取Android屏幕的服务
+WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+// 获取屏幕的分辨率，getHeight()、getWidth已经被废弃掉了
+// 应该使用getSize()，但是这里为了向下兼容所以依然使用它们
+int windowHeight = wm.getDefaultDisplay().getHeight();
+int windowWidth = wm.getDefaultDisplay().getWidth();
+// 计算采样率
+int scaleX = imageWidth / windowWidth;
+int scaleY = imageHeight / windowHeight;
+int scale = 1;
+// 采样率依照最大的方向为准
+if (scaleX > scaleY && scaleY >= 1) {
+    scale = scaleX;
+}
+if (scaleX < scaleY && scaleX >= 1) {
+    scale = scaleY;
+}
+// false表示读取图片像素数组到内存中，依照设定的采样率
+opts.inJustDecodeBounds = false;
+// 采样率
+opts.inSampleSize = scale;
+Bitmap bitmap = BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
+iv_bigimage.setImageBitmap(bitmap);
+
+
+bitmap图片大小：长x宽x每个像素所占字节数
+1.长度
+2.宽度
+3.每个像素所占字节数
+4.压缩格式
+5.压缩比例
+BitmapFactory.Options中常用到的5个属性：
+inJustDecodeBounds：如果设置为true，将不把图片的像素数组加载到内存中，仅加载一些额外的属性数据到Options中。
+outHeight：图片的高度。
+outWidth：图片的宽度。
+inPreferredConfig = Bitmap.Config.RGB_565;
+inSampleSize：如果设置，图片将依据此采样率进行加载，不能设置为小于1的数。例如设置为4，分辨率宽和高将为原来的1/4，这个时候整体所占内存将是原来的1/16。
+
+
+
+
+

@@ -133,10 +133,11 @@ env			查看系统属性
 set列出所有变量		
 unset删除变量
 
-http://www.cnblogs.com/mchina/archive/2013/01/30/2880680.html
-screen命令执行耗时操作:
+screen/tmux命令执行耗时操作:
 一个screen session中可以有多个windows多窗口，日志，会话分离及恢复
 screen命令替代远程终端
+使用screen时不要开启大写
+http://www.cnblogs.com/mchina/archive/2013/01/30/2880680.html
 screen -S yourname #新建screen session，并进入screen session
 screen -ls #查看所有screen sessions_pid
 echo $PPID #查看当前所处的screen session_pid
@@ -155,6 +156,16 @@ C-a C-a -> 在两个最近使用的 window 间切换
 C-a a #来为当前窗口重命名，回车确认。
 exit #关闭当前窗口	所有窗口都关闭后，当前screen session就关闭了。
 C-a k #强行关闭当前window
+
+分屏后，各区块共享screen的各个窗口：
+指定各区块所使用的窗口，会在区块的下方显示 
+C-a S	#显示器水平分割，，也支持，快捷键是。分屏以后，可以使用
+C-a |  	#垂直分屏 Screen 4.00.03版本以后支持
+C-a <tab>在各个区块间切换
+C-a X	#关闭当前焦点所在的屏幕区块，也可以用
+C-a Q	#关闭除当前区块之外其他的所有区块 
+“Ctrl+a”“H”，来建立一个实时的会话日志来实现
+“Ctrl+a”“?” #帮助
 
 “Ctrl+a”“H”，来建立一个实时的会话日志来实现
 C-a [ #进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样
@@ -175,6 +186,18 @@ screen使用快捷键“Ctrl-a” 作为信号把命令发送给screen而不是s
 shell命令执行后台任务：
 1.命令 &
 2.nohup command &;exit退出终端才会生效。直接Ctrl+c会关闭任务
+
+linux 任务管理-后台运行与终止
+fg、bg、jobs、ctrl+z命令
+一、 &
+加在一个命令的最后，可以把这个命令放到后台执行 ,如gftp &,
+二、ctrl + z
+可以将一个正在前台执行的命令放到后台，并且处于暂停状态，不可执行
+三、jobs
+查看当前有多少在后台运行的命令
+jobs
+-l选项可显示所有任务的PID，jobs的状态可以是running, stopped,
+Terminated,但是如果任务被终止了（kill），shell
 ---------------------------------------------------------------------------------------------------------------------
 查看服务是否已经运行 ps -aux | grep cron
 /sbin/service crond start //启动服务  
@@ -188,7 +211,6 @@ crontab -e编辑某个用户的任务 编辑的是/var/spool/cron下对应用户
 -l列出某个用户的任务计划
 -r删除某个用户的任务
 -u指定一个用户 
-定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
 
 cron表达式
 分     小时    日       月       星期     命令
@@ -206,6 +228,7 @@ cron表达式
 cron服务每分钟不仅要读一次/var/spool/cron内的所有文件，还需要读一次 /etc/crontab。
 免密码登陆，建立ssh信任，这个可参照ssh资料。很简单，只需要建立两个密钥。
 
+crontab定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
 输入输出重定向：
 输入重定向< 或 << #代码0，/dev/stdin,可省略
 输出重定向覆盖> 或 追加>> #代码1，/dev/stdout,可省略 
@@ -222,65 +245,6 @@ at -f 文件名 hh:mm MM/DD/YY		启动计划任务 (计划任务放在/var/spool
 at -l							查看队列中的任务
 at -d 计划任务序号				删除计划任务
 /etc/at.allow和/etc/at.deny若两个文件都不存在则只有root用户可以使用at命令；若两个文件都存在且均为空，则所有用户都可以使用at命令
-----------------------------------------------------------------------------------------------
-screen/tmux命令执行耗时操作:
-一个screen session中可以有多个windows多窗口，日志，会话分离及恢复
-screen命令替代远程终端
-使用screen时不要开启大写
-http://www.cnblogs.com/mchina/archive/2013/01/30/2880680.html
-screen -S yourname #新建screen session，并进入screen session
-screen -ls #查看所有screen sessions_pid
-screen -d session_pid # 远程detach某个session
-“Ctrl+a”“d” #分离,后台运行screen session，回到shell中
-screen -r session_pid #恢复指定 screen session
-kill -9 PID #强行关闭某个screen session。
-screen -wipe #清除因异常而退出的screen session。
-
-Ctrl+a”“c” #新建window
-"Ctrl+a""w" #查看所有windows及当前所处windows，*号表示当前window，-号表示上一次切换时的window。 检查当前是否处于screen session中
-C-a 1..9 -> 切换到第 1..9 个window
-“Ctrl+a”“n” #切换到下一个window
-"Ctrl+a""p" #切换到上一个window
-C-a C-a -> 在两个最近使用的 window 间切换 
-C-a a #来为当前窗口重命名，回车确认。
-exit #关闭当前窗口	所有窗口都关闭后，当前screen session就关闭了。
-C-a k #强行关闭当前window
-分屏后，各区块共享screen的各个窗口：
-指定各区块所使用的窗口，会在区块的下方显示 
-C-a S	#显示器水平分割，，也支持，快捷键是。分屏以后，可以使用
-C-a |  	#垂直分屏 Screen 4.00.03版本以后支持
-C-a <tab>在各个区块间切换
-C-a X	#关闭当前焦点所在的屏幕区块，也可以用
-C-a Q	#关闭除当前区块之外其他的所有区块 
-“Ctrl+a”“H”，来建立一个实时的会话日志来实现
-“Ctrl+a”“?” #帮助
-screen使用快捷键“Ctrl-a” 作为信号把命令发送给screen而不是shell
-
-crontab定时器：
-crontab -e编辑某个用户的任务 编辑的是/var/spool/cron下对应用户的cron文件,也可以直接修改/etc/crontab文件
--l列出某个用户的任务计划
--r删除某个用户的任务
--u指定一个用户 
-export VISUAL='vim' #更改crontab -e的默认编辑器
-定时任务默认是以email的形式发送输出结果，可通过输入输出重定向将结果显示在文件中
-分     小时    日       月       星期     命令
-0-59   0-23   1-31   	1-12     0-6     linuxCommand/shell脚本路径     (取值范围,0表示周日,一般一行对应一个任务)
-* #代表取值范围内的数字。 对于不指定的字段，要用“*”来填补其位置
-/ #代表”每”,
-- #代表从某个数字到某个数字,用来连接多个连续的时段
-, 连接多个不连续的时段
-例如：
-30     6   */10      *     *     ls       每个月中，每隔10天6:30执行一次ls命令[即每月的1、11、21、31日是的6：30执行一次ls 命令。 ]
-*/15   *    *        *     *     ls       每15分钟执行一次ls命令 [即每个小时的第0 15 30 45 60分钟执行ls命令 ]
-*/2 * * * * /bin/sh /home/admin/jiaoben/buy/deleteFile.sh
-
-查看服务是否已经运行 ps -aux | grep cron
-/sbin/service crond start //启动服务  
-/sbin/service crond stop //关闭服务  
-/sbin/service crond restart //重启服务  
-/sbin/service crond reload //重新载入配置
-”run-parts”这个参数，后面跟的是文件夹命名，而不是脚本名
-cron服务每分钟不仅要读一次/var/spool/cron内的所有文件，还需要读一次/etc/crontab。
 
 
 
