@@ -1,6 +1,25 @@
-http://www.jb51.net/article/37858.htm
-c++
-虚函数
+jni：基础数据类型不需要转换，对象，数组，字符串需要数据类型转换。
+jni中c语言的值传递和地传递。
+c语言对象.指针赋值前须先malloc申请内存再赋值，最后free释放内存。
+将函数声明的的函数名用(*)括起来(*函数名)即成为函数指针
+http://c.biancheng.net/cpp/html/3248.html
+函数指针的定义形式为：
+returnType (*pointerName)(param list);
+参数列表中可以同时给出参数的类型和名称，也可以只给出参数的类型，省略参数的名称，这一点和函数原型非常类似。
+注意( )的优先级高于*，第一个括号不能省略，如果写作returnType *pointerName(param list);就成了函数原型，它表明函数的返回值类型为returnType *。
+
+C++父类中的虚函数用以实现“运行时多态”，即父类引用指向子类对象
+在虚函数的声明后边添加=0;即变为纯虚函数。C++父类中的纯虚函数用以实现抽象类，即只有声明，没有实现
+
+c++ IDE: 
+eclipse+CDT
+Dev c++
+http://c.biancheng.net/view/1740.html  
+MinGW(GCC的Windows移植版)
+tdm64-gcc-5.1.0-2W(GCC的Windows-64移植版)
+
+
+c++虚函数
 1.定义：在某基类中声明为 virtual 并在一个或多个派生类中被重新定 义的成员函数 [1]
 2.语法：virtual 函数返回类型 函数名（参数表） { 函数体 }
 3.用途：实现多态性，通过指向派生类的基类指针，访问派生类中同名覆盖成员函数，也就是允许子类override父类同名方法。
@@ -12,6 +31,7 @@ c++
 总结：如果一个子类想要重写父类的方法，那么父类的这个成员方法必须是virtual的，也就是这个方法必须是虚函数。
 java
 在java中，所有方法默认就是虚拟的，只要方法不是声明为final类型的，那么肯定就是虚函数，不用为方法显示声明为virtual。在<core java2 :volum I>中提到："In Java, you do not need to declare a method as virtual. Dynamic binding is the default behavior. If you do not want a method to be virtual, you tag it as final"。所以我们发现，在java中，子类可以重写(override)父类的方法，而父类没有声明virtual。
+
 
 
 
