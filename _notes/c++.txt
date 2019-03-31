@@ -4,7 +4,7 @@ c语言对象.指针赋值前须先malloc申请内存再赋值，最后free释�
 将函数声明的的函数名用(*)括起来(*函数名)即成为函数指针
 http://c.biancheng.net/cpp/html/3248.html
 函数指针的定义形式为：
-returnType (*pointerName)(param list);
+returnedType (*pointerName)(param list);
 参数列表中可以同时给出参数的类型和名称，也可以只给出参数的类型，省略参数的名称，这一点和函数原型非常类似。
 注意( )的优先级高于*，第一个括号不能省略，如果写作returnType *pointerName(param list);就成了函数原型，它表明函数的返回值类型为returnType *。
 
@@ -33,52 +33,6 @@ java
 在java中，所有方法默认就是虚拟的，只要方法不是声明为final类型的，那么肯定就是虚函数，不用为方法显示声明为virtual。在<core java2 :volum I>中提到："In Java, you do not need to declare a method as virtual. Dynamic binding is the default behavior. If you do not want a method to be virtual, you tag it as final"。所以我们发现，在java中，子类可以重写(override)父类的方法，而父类没有声明virtual。
 
 
-
-
-BitmapFactory.Options opts = new Options();
-// 不读取像素数组到内存中，仅读取图片的信息
-opts.inJustDecodeBounds = true;
-BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
-// 从Options中获取图片的分辨率
-int imageHeight = opts.outHeight;
-int imageWidth = opts.outWidth;
-// 获取Android屏幕的服务
-WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-// 获取屏幕的分辨率，getHeight()、getWidth已经被废弃掉了
-// 应该使用getSize()，但是这里为了向下兼容所以依然使用它们
-int windowHeight = wm.getDefaultDisplay().getHeight();
-int windowWidth = wm.getDefaultDisplay().getWidth();
-// 计算采样率
-int scaleX = imageWidth / windowWidth;
-int scaleY = imageHeight / windowHeight;
-int scale = 1;
-// 采样率依照最大的方向为准
-if (scaleX > scaleY && scaleY >= 1) {
-    scale = scaleX;
-}
-if (scaleX < scaleY && scaleX >= 1) {
-    scale = scaleY;
-}
-// false表示读取图片像素数组到内存中，依照设定的采样率
-opts.inJustDecodeBounds = false;
-// 采样率
-opts.inSampleSize = scale;
-Bitmap bitmap = BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
-iv_bigimage.setImageBitmap(bitmap);
-
-
-bitmap图片大小：长x宽x每个像素所占字节数
-1.长度
-2.宽度
-3.每个像素所占字节数
-4.压缩格式
-5.压缩比例
-BitmapFactory.Options中常用到的5个属性：
-inJustDecodeBounds：如果设置为true，将不把图片的像素数组加载到内存中，仅加载一些额外的属性数据到Options中。
-outHeight：图片的高度。
-outWidth：图片的宽度。
-inPreferredConfig = Bitmap.Config.RGB_565;
-inSampleSize：如果设置，图片将依据此采样率进行加载，不能设置为小于1的数。例如设置为4，分辨率宽和高将为原来的1/4，这个时候整体所占内存将是原来的1/16。
 
 
 

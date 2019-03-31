@@ -1,8 +1,3 @@
-类
-方法
-原理
-代码
-
 图片占内存大小：长x宽x像素字节数byte(默认值Bitmap.Config.ARGB_8888是4个bytes)
 Canvas
 Paint
@@ -26,6 +21,103 @@ bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);//30是压缩率，表示压�
 Thumbnails.of(new File("path/to/directory").listFiles()).size(640, 480).outputFormat("jpg").toFiles("");
 http://blog.csdn.net/luhuajcdd/article/details/8948261
 http://blog.csdn.net/dahuaishu2010_/article/details/28622417
+
+位深
+长宽像素大小
+图片压缩格式、压缩百分比
+
+获取图片属性
+按比例缩放后(1.长或宽与特定数值的比 2.图片自身的长宽比，3.屏幕的长与图片的长.屏幕的宽与图片的宽比)，设置图片格式
+重新生成图片
+
+1.decode bitmap 的时候，尽量配置下Options，例如：inSameSize
+2.Bitmap使用完以后，调用 bitmap.recycle()来释放内存
+3.如果应用是基于图片的应用，尽量采用LazyLoad和DymanicRecycle
+4.decode bitmap 的时候，将decode代码 try catch 出来，catch oom error，避免程序crash，可以在catch里面做一些释放内存操作
+
+public static int calculateInSampleSize(BitmapFactory.Options options,  
+            int reqWidth, int reqHeight) {  
+          
+        final int height = options.outHeight;  
+        final int width = options.outWidth;  
+        int inSampleSize = 1;  
+  
+        if (height > reqHeight || width > reqWidth) {  
+  
+            final int heightRatio = Math.round((float) height  
+                    / (float) reqHeight);  
+            final int widthRatio = Math.round((float) width / (float) reqWidth);  
+  
+            inSampleSize = heightRatio < widthRatio ? widthRatio : heightRatio;  
+        }  
+  
+        return inSampleSize;  
+    } 
+	
+
+   private static int calculateInSampleSize(BitmapFactory.Options options,
+            int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+
+BitmapFactory.Options opts = new Options();
+// 不读取像素数组到内存中，仅读取图片的信息
+opts.inJustDecodeBounds = true;
+BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
+// 从Options中获取图片的分辨率
+int imageHeight = opts.outHeight;
+int imageWidth = opts.outWidth;
+// 获取Android屏幕的服务
+WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+// 获取屏幕的分辨率，getHeight()、getWidth已经被废弃掉了
+// 应该使用getSize()，但是这里为了向下兼容所以依然使用它们
+int windowHeight = wm.getDefaultDisplay().getHeight();
+int windowWidth = wm.getDefaultDisplay().getWidth();
+// 计算采样率
+int scaleX = imageWidth / windowWidth;
+int scaleY = imageHeight / windowHeight;
+int scale = 1;
+// 采样率依照最大的方向为准
+if (scaleX > scaleY && scaleY >= 1) {
+    scale = scaleX;
+}
+if (scaleX < scaleY && scaleX >= 1) {
+    scale = scaleY;
+}
+// false表示读取图片像素数组到内存中，依照设定的采样率
+opts.inJustDecodeBounds = false;
+// 采样率
+opts.inSampleSize = scale;
+Bitmap bitmap = BitmapFactory.decodeFile("/sdcard/a.jpg", opts);
+iv_bigimage.setImageBitmap(bitmap);
+
+
+bitmap图片大小：长x宽x每个像素所占字节数
+1.长度
+2.宽度
+3.每个像素所占字节数
+4.压缩格式
+5.压缩比例
+BitmapFactory.Options中常用到的5个属性：
+inJustDecodeBounds：如果设置为true，将不把图片的像素数组加载到内存中，仅加载一些额外的属性数据到Options中。
+outHeight：图片的高度。
+outWidth：图片的宽度。
+inPreferredConfig = Bitmap.Config.RGB_565;
+inSampleSize：如果设置，图片将依据此采样率进行加载，不能设置为小于1的数。例如设置为4，分辨率宽和高将为原来的1/4，这个时候整体所占内存将是原来的1/16。
+
+	
 
 优化Dalvik虚拟机的堆内存分配 
 privatefinalstaticfloatTARGET_HEAP_UTILIZATION=0.75f; 
@@ -59,9 +151,6 @@ http://blog.csdn.net/geekstart/article/details/13630009
 http://www.cnblogs.com/gzggyy/archive/2011/08/01/2123920.html
 http://blog.csdn.net/yanzi1225627/article/details/8577682
 http://zhidao.baidu.com/link?url=Xg6SaPoM2eEBSJaE-Me4CFscMFMKZrZWpXcvoYVhdl7k7GTSpUTd2186iN5YCBBPUDZNI7Bg8Q5Z4pxF7_DyktB5ne5GzpFyKJ78Zlcf4Ki
-
-
-
 
 
 分辨率.宽高比
