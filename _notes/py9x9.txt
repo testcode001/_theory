@@ -104,9 +104,11 @@ dis python 反汇编，当对某条语句不理解原理时，可以用dis.dis �
 https://www.cnblogs.com/jiangchunsheng/p/9275881.html
 字符串处理、时间日期处理、文件处理、
 访问网络: Requests
+beautiful soup解析html页面：beautifulsoup4+re正则
 图像处理库:  pil(python image library)、Pillow(64位)
 爬虫相关：Scrapy
 数据库处理：pymongo
+web自动化测试：selenium
 
 小括号，中括号，大括号即定义元组,列表,字典json串
 (1,2,3,4) 定义元组，即常量一旦创建后则不能修改，经常作为函数返回值。元组tuple即只读列表数组
