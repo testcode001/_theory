@@ -1,3 +1,32 @@
+jni：
+基础数据类型操作可直接赋值并强转
+字符串，数组，对象的创建.释放，读.写操作需调用jni的api
+基础数据类型与字符串，数组，对象的嵌套
+集合等复杂数据类型用数组+对象替代
+JNI内存泄露处理方法：基础数据类型指针.c类型执行用ReleaseXX方法释放。java数据类型用DeleteLocalRef方法释放
+https://www.iteye.com/blog/amazontzy-1962367
+local reference table overflow (max=512)
+https://blog.csdn.net/xpz445094213/article/details/46633889
+https://blog.csdn.net/win2k3net/article/details/6613440
+https://blog.csdn.net/xyang81/article/details/44873769
+GetMethodID中sig参数对函数的签名(jdk命令javap)：
+https://blog.csdn.net/u010126792/article/details/82348438
+https://blog.csdn.net/buding_code/article/details/53117220?utm_source=blogxgwz1
+https://www.jianshu.com/p/b428a55815cd
+JNI 支持3中不透明的引用：局部引用、全局引用和弱全局引用。
+https://blog.csdn.net/huguohu2006/article/details/7397055
+c和java字符串互转
+https://blog.csdn.net/zhoudailiang/article/details/50471483
+jni和c/c++多线程的处理
+https://blog.csdn.net/popop123/article/details/1511180
+https://www.cnblogs.com/bulengjianghu/p/android_JNI_nativeThread.html
+
+java基础数据类型和byte相互转换：即左移<<，右移>>的位运算
+https://www.cnblogs.com/wbcqz/p/9236570.html
+java的byte和Bit之间的转换：即左移<<，右移>>的位运算
+http://www.javacui.com/Theory/268.html
+
+------------------------------------------------------------------------------
 jni：基础数据类型不需要转换，对象，数组，字符串需要数据类型转换。
 jni中c语言的值传递和地传递。
 c语言对象.指针赋值前须先malloc申请内存再赋值，最后free释放内存。
@@ -28,16 +57,11 @@ java
 
 
 c++ IDE: 
+vs code(轻量级，跨平台)
 eclipse+CDT
 Dev c++
 http://c.biancheng.net/view/1740.html  
 MinGW(GCC的Windows移植版)
 tdm64-gcc-5.1.0-2W(GCC的Windows-64移植版)
-
-
-
-
-
-
 
 
