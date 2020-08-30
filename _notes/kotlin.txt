@@ -1,0 +1,89 @@
+面向过程.面向对象+OC+shell+c++
+继承类似于c++，形参类似于OC，定义变量函数类似于js和python，变量取值类似于shell
+
+kotlin视频教程 
+https://www.jianshu.com/p/c69d63b70650
+闭包(closure)
+http://www.365yg.com/item/6446657322759488014/
+https://www.runoob.com/kotlin/kotlin-extend.html
+var变量
+const val常量
+https://www.jianshu.com/p/e8752c880088
+https://www.kotlincn.net/docs/reference/object-declarations.html
+变量取值类似于shell用${varName}
+https://blog.csdn.net/qq_30219217/article/details/73381503
+
+Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent() 
+变量名在前，数据类型在后
+private lateinit var name: String 		//lateinit 是用来告诉编译器，name 这个变量后续会妥善处置的。
+private var name: String = "zhangsan"  
+类属性或者局部变量定义必须用var或者val修饰，局部变量可不写变量类型:DataTpye，因为有自动类型推到？如果局部变量没有初始化 则需要明确表明 变量类型
+形参可选用var或者val修饰,但必须有变量名:变量类型？类的主构造函数最好有val或var修饰，这样形参可在整个类中访问。类的次构造函数形参一定不能有val或var修饰。
+定义方法必须以fun开头，函数的返回值用:分隔。Unit表示无返回值，可省略
+函数的变长参数可以用 vararg 关键字进行标识：fun update(vararg v:Int){...}
+
+constructor主构造函数（在类体外部声明.直接放在类名后面，通常为主要而简洁的初始化类的方法）和次构造函数声明必须有前缀constructor（在类体内部声明）
+如果类有一个主构造函数，每个次构造函数可以使用this关键字，直接委托或者通过别的次构造函数间接委托给主构造函数。次构造函数最终都是调用主构造函数来创建对象的。
+创建对象的调用顺序：先调用主构造函数->直接代理主函数的构造函数->间接代理主函数的构造函数->我们调用的构造函数。
+Koltin中的类可以有一个 主构造器，以及一个或多个次构造器，主构造器是类头部的一部分，直接放在类名后面:
+class Person constructor(firstName: String) {...}
+如果主构造器没有任何注解，也没有任何可见度修饰符，那么constructor关键字可以省略。
+class Person(firstName: String) {...}
+主构函数不能包含任何代码，初始化代码放在以init关键字作为前缀的初始化块中；可以有多个init，也可以没有init，init的执行顺序是根据写的顺序来的
+//初始化语句块
+ init {
+     mName=_name
+}
+ 
+super<父类名.接口名>.method()表明你想调用哪个父类.接口的方法
+父类open或者abstract的class和method，才可以被子类继承:和强制显式override。继承方式类似于c++用:。kotlin继承类和实现接口都用:
+Kotlin的类声明默认是final和public的
+使用fun声明的函数默认为final修饰，不能被子类重写。如果允许子类重写该函数，那么就要手动添加 open 修饰它, 子类重写方法使用 override 关键词
+Kotlin中的类和接口跟Java中对应的概念有些不同，比如接口可以包含属性声明。嵌套类并不是默认在内部的。它们不包含外部类的隐式引用。
+重写属性和重写方法其实大致是相同的，但是属性不能被重载。
+companion object {}中用来修饰 静态常量，或者静态方法，单例等等
+kotlin单例模式：用object替换class即可。
+kotlin 开启新线程，多线程同步：
+在kotlin中使用@Synchronized注解和@Volatile注解，这些注解和Java中的synchronized有同样的效果。
+在kotlin中，每一个类都是从Any继承过来的，但是Any并没有声明wait(),notify()和notifyAll()方法。但是你仍然能够使用java.lang.Object的实例作为lock，并且调用相关的方法。
+
+kotlin面向对象-委托和代理关键字by
+data class数据类即model类，其构造函数中必须存在至少一个参数，并且所有参数必须使用val或var修饰。数据类不能继承其他类 (但是可以实现接口)。
+data class必须满足以下要求:
+1.主构造函数至少有一个参数，且主构造函数的所有参数需标记为val 或 var;
+2.数据类不能是抽象、开放、密封或者内部的;
+如果data class需要无参构造函数,则所有属性必须有默认值:
+data class User(val name: String = "", val age: Int = 0)
+inner class A		内部类
+sealed class密封类有点类似于枚举
+https://www.runoob.com/kotlin/kotlin-data-sealed-classes.html
+https://www.cnblogs.com/Jetictors/p/8647968.html
+https://www.jianshu.com/p/163ed3618788
+
+class Hello
+val clazz = Hello::class.java  // 拿到的是 Kotlin 的 KClass。如果想要拿到 Java 的 Class 实例，那么就需要类名.class ,对象.getClass();Class.forName("");。
+kotlin语法跟java的不同
+https://www.cnblogs.com/dubo-/p/6880599.html
+闭包即.匿名函数.花括号代码块，格式如下
+([Type param01...]) {
+  codeBlock;
+};
+Kotlin中，所有的类都是继承于Any类，这是这个没有父类型的类。即当我们定义各类时，它默认是继承于Any这个超类的
+运算符重载关键字operator
+
+kotlin自定义回调函数：
+
+Kotlin调用c/c++代码：
+java用关键字native声明jni方法，kotlin用关键字external声明jni方法。如 external fun stringFromJNI():String 声明一个无参返回值为String的jni方法。
+
+kotlin集合：
+private var mVideoBeanList:MutableList<VideoDataBean> = mutableListOf<VideoDataBean>()
+https://www.cnblogs.com/Jetictors/p/9237108.html
+https://www.cnblogs.com/Jetictors/p/9241867.html
+https://github.com/Jetictors
+
+kotlin - Coroutine协程：
+协程就像非常轻量级的线程。线程是由系统调度的，线程切换或线程阻塞的开销都比较大。而协程依赖于线程，但是协程挂起时不需要阻塞线程，几乎是无代价的，协程是由开发者控制的。所以协程也像用户态的线程，非常轻量级，一个线程中可以创建任意个协程。
+https://www.jianshu.com/p/76d2f47b900d
+
+

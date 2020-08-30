@@ -98,27 +98,27 @@ http://blog.csdn.net/fjb2080/article/details/7715636
 http://www.cnblogs.com/ggjucheng/archive/2011/12/15/2288795.html
 vim ide 吴垠
 
-supertab插件(Ctrl+p)：当前文件代码自动补全
-OmniCppComplete插件： 变量.函数代码自动补全 YouCompleteMe使用的是C/S结构，部分使用vim脚本编写
-TagList插件：结构化视图 		:Tlist Ctrl+w.Ctrl+w
-NERDTree插件：树形浏览文件系统的界面 :NERDTree
-MiniBufExplorer插件：tab页编辑文件 :b"num"打开指定的buffer
-Winmanager插件：将NERDTree界面和Taglist界面整合起来，使Vim更像VS！:WMToggle 
-wm管理所有视图，各个视图也可以单独管理
-A插件：.h/.c.cpp文件之间跳转	:A
-ctags命令：变量.函数定义 		ctrl+]查看定义，ctrl+]]查看光标所在.h文件的.cpp文件，ctrl+o返回原文件，ctrl+i光标依次前进
-cscope命令：变量.函数调用 		:cs help :cs find {querytype} {string}
-Grep插件：全文搜索
+1.supertab插件(Ctrl+p)：当前文件代码自动补全
+2.A插件：.h/.c.cpp文件之间跳转	:A  :AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
+3.Grep插件：全文搜索
+4.NERDTree插件：树形浏览文件系统的界面 :NERDTree   Ctrl+ww(两个w)，在各个视图之间切换.  :q 在指定视图内后，q可关闭该视图 
+5.MiniBufExplorer插件：tab页编辑文件 :b"num"打开指定的buffer
+6.Winmanager插件：将NERDTree界面和Taglist界面整合起来，使Vim更像VS！:WMToggle 
+wm管理所有视图，各个视图也可以单独管理。
+
+7.ctags命令：变量.函数定义 		ctrl+]查看定义，ctrl+]]查看光标所在.h文件的.cpp文件，ctrl+o返回原文件，ctrl+i光标依次前进
+8.cscope命令：变量.函数调用 		:cs help :cs find {querytype} {string}
+9.OmniCppComplete插件： 变量.函数代码自动补全 YouCompleteMe使用的是C/S结构，部分使用vim脚本编写
+10.TagList插件：结构化视图 		:Tlist Ctrl+ww在编辑区域和各个视图之间切换
+其中cscope命令、OmniCppComplete插件、TagList插件需要依赖ctags命令，其他插件可独立运行。
 
 代码阅读：
 vim单个文件搜索.替换.代码提示
 字符串搜索：
 #或者* 当前文件中搜索光标所在的单词	(变量.函数跳转)
-/string，回车，按n或N向后或向前查找 
+/string，回车，按n或N向后或向前查找 (/从开头搜索, ?从结尾处搜索)
 n #重复上一次搜索命令
-查看变量定义gD 
-光标依次返回ctrl+o 
-`` #光标在当前和上一次的位置之间切换
+查看变量定义gD(go define)、光标依次返回ctrl+o 、`` #光标在当前和上一次的位置之间切换
 A "jump" is one of the following commands: 
 "/", "?", "n","N", 
 "%", "(", ")", "[[", "]]", "{", "}", 
@@ -126,9 +126,12 @@ A "jump" is one of the following commands:
 ":s", ":tag", 
 "L", "M", "H"
 % [[ ]] 
+{      转到上一个空行
+}      转到下一个空行 （[ and ] 也分别是两个指令）
 退出vim字符串全文搜索: grep -1rn 'string' * 也即变量.函数的调用
 egrep、rgrep、fgrep
-pageUp.pageDown+Hign.Medium.Low.方向键	
+pageUp.pageDown+Hign.Medium.Low.方向键
+用:sp [path/filename]打开另一文件，用^ww在文件之间切换	
 
 代码编写：
 代码自动补全Ctrl+p、supertab插件
@@ -409,6 +412,8 @@ ctags命令：变量.函数定义跳转
 map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
 set tags=tags;/  "若当前目录找不到tags文件，则到上层目录查找
 set autochdir
+ctags：
+Ctrl-]：跳转到光标所在的变量名或函数处。"Ctrl-o"或“Ctrl-t”退回原来的地方。
  
 
 3.
@@ -487,6 +492,12 @@ let g:SuperTabDefaultCompletionType="<C-X><C-O>" 或者 let g:SuperTabDefaultCom
 " 1 - 记住上次的补全方式,直到用其他的补全命令改变它
 " 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
 " 设置按下<Tab>后的补全方式为<C-X><C-O>. 后默认的补全方式是<C-P>
+
+a.vim插件: c/h文件间相互切换
+:A，打开.cpp和.h对应的文件，
+:AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
+map av : AV<cr>  （最常用）
+
 
 5.
 OmniCppComplete插件：

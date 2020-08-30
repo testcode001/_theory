@@ -1,5 +1,5 @@
 svnÃüÁî£º
-´úÂëÏÂÔØ£ºsvn co repo_url .
+´úÂëÏÂÔØ£ºsvn co repoUrl .
 ¸üĞÂ£ºsvn up [-r version]
 Ìí¼ÓÎÄ¼ş£ºsvn add . --force
 É¾³ıÎÄ¼ş£ºsvn rm
@@ -7,9 +7,9 @@ svnÃüÁî£º
 ÏÈ¸üĞÂºóÌá½»(½â¾ö³åÍ»)
 ²é¿´±¾µØÒÑĞŞ¸ÄµÄÎÄ¼şÄÚÈİsvn diff -r version1:version2 [path]
 
-ÏÂÔØ·ÖÖ§ÉÏÖ¸¶¨°æ±¾µÄ´úÂë£ºsvn co -r version repo_url .
+ÏÂÔØ·ÖÖ§ÉÏÖ¸¶¨°æ±¾µÄ´úÂë£ºsvn co -r version repoUrl .
 Ö¸¶¨·ÖÖ§ÉÏ´úÂë»Ø¹ö£º
-1.ÏÂÔØ×îĞÂ´úÂë²¢½øÈëÏàÓ¦Ä¿Â¼ÏÂ 2.svn merge -r rHEAD:[Òª»Ø¹öµ½µÄ°æ±¾] repo_url (»á²úÉú³åÍ»£¬½â¾ö³åÍ»ºó£¬Ìá½») 3.svn ci -m "log"
+1.ÏÂÔØ×îĞÂ´úÂë²¢½øÈëÏàÓ¦Ä¿Â¼ÏÂ 2.svn merge -r rHEAD:[Òª»Ø¹öµ½µÄ°æ±¾] repoUrl (»á²úÉú³åÍ»£¬½â¾ö³åÍ»ºó£¬Ìá½») 3.svn ci -m "log"
 
 svn revert	»Ø¹ö´úÂë£º±¾µØÒÑĞŞ¸Äµ«Î´Ìá½»µ½·şÎñÆ÷
 svn cat -r version [filename] ÏÔÊ¾Ö¸¶¨°æ±¾µÄÎÄ¼şÄÚÈİ
@@ -25,35 +25,38 @@ http://blog.csdn.net/ithomer/article/details/6187464
 
 ³£ÓÃgitÃüÁî:
 git·Ö²¼Ê½²Ù×÷
-¹¤×÷Çø¡¢±¾µØ¿â(Ôİ´æÇø¡¢°æ±¾¿â)¡¢Ô¶¶Ë¿â
-git clone repo_url ´´½¨±¾µØ²Ö¿â (git init)
+¹¤×÷Çø¡¢Ôİ´æÇø¡¢±¾µØ¿â¡¢Ô¶³Ì¿â£¬±¾µØ·ÖÖ§£¬Ô¶³Ì·ÖÖ§
+git clone repoUrl ´´½¨±¾µØ²Ö¿â (git init)
 git branch -r ²é¿´Ô¶³Ì·ÖÖ§
-git checkout remoteBranchName/tag_name/ -b localBranchName ¼ì³öÔ¶³Ì·ÖÖ§
+git checkout -b localBranchName origin/Ô¶³Ì·ÖÖ§Ãû|tag_name/ ¼ì³öÔ¶³Ì·ÖÖ§
 git submodule init
 git submodule update
 git commit --amend 
 git push origin feature-v4:refs/for/feature-v4
 
-git·ÖÖ§¹ÜÀíÃüÁî£º
-git branch -a ²é¿´ËùÓĞ±¾µØºÍÔ¶³Ì·ÖÖ§
-´´½¨·ÖÖ§
-git branch -b branchName
-git branch branchName SHA-1µÄcommit±êÊ¶ (git log --pretty=oneline)
-git branch newBranch oldBranch ´´½¨·ÖÖ§newBranch
-git checkout ¨Cb newBranch oldBranch ´´½¨·ÖÖ§newBranch²¢ÇĞ»»µ½¸Ã·ÖÖ§
-ÇĞ»»·ÖÖ§
-git checkout localBranchName
-ºÏ²¢·ÖÖ§
-git merge -m "log" dev °Ñdev·ÖÖ§ºÏ²¢µ½master·ÖÖ§(µ±Ç°ÔÚmaster·ÖÖ§ÏÂ)¡£merge¼´merge from
-É¾³ı·ÖÖ§
-git branch ¨Cd dev2
+git·ÖÖ§¹ÜÀíÃüÁîCRUD£º
+´´½¨.¼ì³ö.É¾³ıÔ¶³Ì·ÖÖ§£ºfrom..to..
+git push origin ±¾µØbranch:Ô¶³Ìbranch [--force]		ÍÆËÍ±¾µØ¸ü¸Äµ½Ô¶³Ì·ÖÖ§¡£Èç¹û¸ÃÔ¶³Ì·ÖÖ§²»´æÔÚ£¬Ôò»á´´½¨Ô¶³Ì·ÖÖ§
+git pull origin <Ô¶³Ìbranch>:<±¾µØbranch> 
+git checkout -b ±¾µØ·ÖÖ§Ãû origin/Ô¶³Ì·ÖÖ§Ãû   		#¼ì³öÔ¶³ÌÖ¸¶¨·ÖÖ§   
+git push origin :Ô¶³Ìbranch							:×ó±ßµÄ±¾µØ·ÖÖ§Îª¿Õ£¬±íÊ¾É¾³ıÔ¶³Ì·ÖÖ§¡£ÕâµÈÍ¬ÓÚÍÆËÍÒ»¸ö¿ÕµÄ±¾µØ·ÖÖ§µ½Ô¶³Ì·ÖÖ§£¬µÈÍ¬ÓÚ git push origin --delete master
+´´½¨.ÇĞ»».ºÏ²¢merge.É¾³ı±¾µØ·ÖÖ§
+git checkout ¨Cb newBranch  	´´½¨·ÖÖ§newBranch²¢ÇĞ»»µ½¸Ã·ÖÖ§
+git pull
+git branch --set-upstream-to=origin/<Ô¶³Ìbranch> localBranchName  °Ñ±¾µØ·ÖÖ§ºÍÔ¶³Ì·ÖÖ§½øĞĞ¹ØÁª
+git branch newBranch 	´´½¨±¾µØ·ÖÖ§
+git checkout localBranchName 			ÇĞ»»·ÖÖ§
+git branch -a 							²é¿´ËùÓĞ±¾µØºÍÔ¶³Ì·ÖÖ§
+git merge dev v-m "log"  »òÕßgit cherry-pick commitId  °Ñdev·ÖÖ§ºÏ²¢µ½µ±Ç°master·ÖÖ§(µ±Ç°ÔÚmaster·ÖÖ§ÏÂ)¡£merge¼´merge from
+git cherry-pick commitId01^..commitId05  ×¢ÒâÖĞ¼äµÄÁ½¸öµãºÍ^£¬±íÊ¾°ÑÁ½¸öcommitÇø¼äµÄËùÓĞcommit¶¼¸´ÖÆ¹ıÈ¥¡£È¥µô^±íÊ¾²»°üº¬µÚÒ»¸öcommitid
+git branch ¨CD/-d localBranchName  É¾³ı±¾µØ·ÖÖ§
 
 git status²é¿´ÒÑĞŞ¸ÄµÄÎÄ¼ş
 git diff ²é¿´±¾µØÒÑĞŞ¸ÄµÄÎÄ¼ş?
 gitk ²é¿´Ìá½»ÈÕÖ¾
-git log --pretty=oneline
-git cherry-pick sha-1µÄcommit±êÊ¶ ½«Ä³´ÎÌá½»commitÓ¦ÓÃµ½µ±Ç°·ÖÖ§ (¸ÃÃüÁî¿ÉÍ¨¹ıgit merge»ògit rebase´úÌæ)£¨µ¹ÊıµÚ¶ş¸öĞèÒªĞŞ¸ÄµÄÌá½»£©
-git pull origin master --rebase#´Ó·şÎñÆ÷¸üĞÂ±¾µØ´úÂë¿âºÍ¹¤×÷¿½±´.
+git log --pretty=oneline --graph
+git cherry-pick commitId ½«Ä³´ÎÌá½»commitÓ¦ÓÃµ½µ±Ç°·ÖÖ§ (¸ÃÃüÁî¿ÉÍ¨¹ıgit merge»ògit rebase´úÌæ)£¨µ¹ÊıµÚ¶ş¸öĞèÒªĞŞ¸ÄµÄÌá½»£©
+git pull origin master --rebase#´Ó·şÎñÆ÷¸üĞÂ±¾µØ´úÂë¿âºÍ¹¤×÷¿½±´. (git pull == git fetch+merge)
 git fetch´Ó·şÎñÆ÷¸üĞÂ±¾µØ¿â(µ«²»¸üĞÂ¹¤×÷¿½±´)
 git branch ²é¿´±¾µØ·ÖÖ§
 git checkout localBranchName ÇĞ»»·ÖÖ§
@@ -63,17 +66,21 @@ git add .
 git rm -rf
 git commit -a -m "log" #Ìá½»µ½±¾µØ¿â
 git commit --amend ĞŞ¸ÄÉÏ´ÎµÄÌá½»
-git push origin(repo_url) localBranchName:remoteBranchName #Ìá½»Ô¶¶Ë¿â
-git push origin :test  É¾³ıÔ¶³Ì·ÖÖ§ :×ó±ßµÄ·ÖÖ§Îª¿Õ
+git push origin localBranchName:remoteBranchName #Ìá½»Ô¶¶Ë¿â
 ÏÈ¸üĞÂ£¬ºóÌá½»¡£½â¾ö³åÍ»£ºgit mergetoolÖ´ĞĞÓÃÔ¤ÏÈÅäÖÃµÄBeyond Compare½â¾ö³åÍ»; git commit
-git checkout ${commit} /path/to/file  ¼ì³öÖ¸¶¨°æ±¾µÄÄ³¸öÎÄ¼ş¼Ğ
 ÏÂÔØ·ÖÖ§ÉÏÖ¸¶¨°æ±¾µÄ´úÂë
-git reset --hard HEAD^         »ØÍËµ½ÉÏ¸ö°æ±¾
-git reset --hard HEAD~3        »ØÍËµ½Ç°3´ÎÌá½»Ö®Ç°£¬ÒÔ´ËÀàÍÆ£¬»ØÍËµ½n´ÎÌá½»Ö®Ç°
-git reset --hard commit_id     ÍËµ½/½øµ½ Ö¸¶¨commitµÄshaÂë
-git reset --hard sha-1ÖµÇ°6Î» ´úÂë»Ø¹öµ½Ö¸¶¨°æ±¾
-Ç¿ÍÆµ½Ô¶³Ì£º
-git push origin HEAD --force
+git reset --hard HEAD^         		»ØÍËµ½ÉÏ¸ö°æ±¾
+git reset --hard HEAD~3        		»ØÍËµ½Ç°3´ÎÌá½»Ö®Ç°£¬ÒÔ´ËÀàÍÆ£¬»ØÍËµ½n´ÎÌá½»Ö®Ç°
+git reset --hard commitID    		ÍËµ½/½øµ½ Ö¸¶¨commitµÄshaÂë
+git reset --hard sha-1ÖµÇ°6Î» 		´úÂë»Ø¹öµ½Ö¸¶¨°æ±¾
+git merge commitID					´úÂë»Ø¹öºó£¬mergeµ½Ö¸¶¨°æ±¾
+git checkout <commitID> <filename>	git¼ì³öÖ¸¶¨°æ±¾µÄÄ³¸öÎÄ¼ş(»¹Ô­Ä³¸öÎÄ¼şµ½Ö¸¶¨°æ±¾)
+git checkout HEAD <filename>		git¼ì³ö°æ±¾»ØÍËºóµÄÄ³¸öÎÄ¼ş
+
+¶Ô±¾µØ¿âµÄ¶à´ÎÌá½»£¬ÔÚpushµ½Ô¶³Ì²Ö¿âÖ®Ç°°ÑÕâ¼¸¸ö±¾µØµÄcommitºÏ²¢ÎªÒ»¸ö£º
+git reset --hard d1dff09fd56
+git merge --squash HEAD@{1}
+git commit -m "feature B complete"
 
 git stash [push -m "msg"]				#±£´æµ±Ç°¹¤×÷½ø¶È£¬»á°ÑÔİ´æÇøºÍ¹¤×÷ÇøµÄ¸Ä¶¯±£´æÆğÀ´¡£Ö´ĞĞÍêÕâ¸öÃüÁîºó£¬ÔÚÔËĞĞgit statusÃüÁî£¬¾Í»á·¢ÏÖµ±Ç°ÊÇÒ»¸ö¸É¾»µÄ¹¤×÷Çø£¬Ã»ÓĞÈÎºÎ¸Ä¶¯¡£Ê¹ÓÃgit stash save 'message...'¿ÉÒÔÌí¼ÓÒ»Ğ©×¢ÊÍ
 git stash list							#ÏÔÊ¾±£´æ½ø¶ÈµÄÁĞ±í¡£Ò²¾ÍÒâÎ¶×Å£¬git stashÃüÁî¿ÉÒÔ¶à´ÎÖ´ĞĞ¡£
@@ -85,44 +92,19 @@ git stash drop [stash_id]				#É¾³ıÒ»¸ö´æ´¢µÄ½ø¶È¡£Èç¹û²»Ö¸¶¨stash_id£¬ÔòÄ¬ÈÏÉ¾³ı
 git stash clear							#É¾³ıËùÓĞ´æ´¢µÄ½ø¶È¡£
 
 git tagºÍgit logµÄ¹¦ÄÜ²î²»¶à£¬¶¼ÊÇÓÃÓÚ°æ±¾»ØÍË£¬µ«ĞÂ¹¦ÄÜ¿ª·¢»ò½ô¼±bugµÄÌá½»Ö»ÄÜĞÂ½¨branchÀ´Íê³É¡£¼´ĞÂ½¨branchµÄ¹¦ÄÜ´óÓÚgit tag
-from..to..
-´´½¨.¹ØÁª.É¾³ıÔ¶³Ì·ÖÖ§£º
-git push origin ±¾µØbranch:Ô¶³Ìbranch
-git pull origin <Ô¶³Ìbranch>:<±¾µØbranch>
-git branch --set-upstream-to=origin/<Ô¶³Ìbranch> ±¾µØ·ÖÖ§
-git push origin :Ô¶³Ìbranch
-´´½¨.ÇĞ»».merge.É¾³ı±¾µØ·ÖÖ§
-git checkout -b ±¾µØ·ÖÖ§Ãû
-git merge ÆäËûbranch  »òÕßgit cherry-pick commitId  ½«ÆäËû·ÖÖ§ºÏ²¢µ½µ±Ç°·ÖÖ§
-git branch ¨CD ±¾µØ·ÖÖ§Ãû
-¼ì³öÔ¶³ÌÖ¸¶¨·ÖÖ§£º
-git pull
-git checkout -b ±¾µØ·ÖÖ§Ãû origin/Ô¶³Ì·ÖÖ§Ãû  »òÕßgit checkout Ô¶³Ì·ÖÖ§Ãû£¬git»á×Ô¶¯¹ØÁª
-
-²é¿´±êÇ©,´òÓ¡ËùÓĞ±êÇ©
-git tag
-´òÓ¡·ûºÏ¼ìË÷Ìõ¼şµÄ±êÇ©
-git tag -l 1.*.*
-²é¿´¶ÔÓ¦±êÇ©×´Ì¬
-git checkout 1.0.0
-´´½¨±êÇ©(±¾µØ)
-´´½¨ÇáÁ¿±êÇ©
-git tag 1.0.0-light
-´´½¨´ø±¸×¢±êÇ©(ÍÆ¼ö)
-git tag -a 1.0.0 -m "ÕâÊÇ±¸×¢ĞÅÏ¢"
-Õë¶ÔÌØ¶¨commit°æ±¾SHA´´½¨±êÇ©
-git tag -a 1.0.0 0c3b62d -m "ÕâÊÇ±¸×¢ĞÅÏ¢"
-½«±¾µØ±êÇ©·¢²¼µ½Ô¶³Ì²Ö¿â, ·¢ËÍËùÓĞ
-git push origin --tags
-Ö¸¶¨°æ±¾·¢ËÍ
-git push origin 1.0.0
-É¾³ı±êÇ©(±¾µØ)
-git tag -d 1.0.0
-É¾³ıÔ¶³Ì²Ö¿â¶ÔÓ¦±êÇ©
-Git°æ±¾ > V1.7.0
-git push origin --delete 1.0.0
-¾É°æ±¾Git
-git push origin :refs/tags/1.0.0
+git tagµÄCRUD²Ù×÷
+git tag -a 1.0.0 -m "msg"  			´´½¨´ø±¸×¢±êÇ©(ÍÆ¼ö)
+git tag -a 1.0.0 0c3b62d -m "msg" 	Õë¶ÔÌØ¶¨commit°æ±¾´´½¨±êÇ©
+git tag 1.0.0-light					´´½¨±êÇ©(±¾µØ).´´½¨ÇáÁ¿±êÇ©
+git tag								²é¿´±êÇ©,´òÓ¡ËùÓĞ±êÇ©
+git tag -l  1.*.* 					´òÓ¡·ûºÏ¼ìË÷Ìõ¼şµÄ±êÇ©
+git checkout tagÃû					»¹Ô­°æ±¾µ½Ö¸¶¨tag
+git checkout ·ÖÖ§Ãû					²é¿´Íêtag³öµÄ´úÂëºó¿ÉÒÔÖ´ĞĞÇĞ»»·ÖÖ§·µ»ØÏÖÔÚµÄ·ÖÖ§Î»ÖÃ
+git tag -d 1.0.0					É¾³ı±êÇ©(±¾µØ)
+git push origin 1.0.0				·¢ËÍÖ¸¶¨°æ±¾
+git push origin --tags 				½«±¾µØ±êÇ©·¢²¼µ½Ô¶³Ì²Ö¿â, ·¢ËÍËùÓĞ
+git push origin --delete 1.0.0		É¾³ıÔ¶³Ì²Ö¿â¶ÔÓ¦±êÇ© (Git°æ±¾>V1.7.0)
+git push origin :refs/tags/1.0.0 	É¾³ıÔ¶³Ì²Ö¿â¶ÔÓ¦±êÇ©  ¾É°æ±¾Git
 	
 gitÉú³ÉpatchÎÄ¼şºÍ´òpatch£º
 git format-patch£ºÉú³Épatch
@@ -144,7 +126,13 @@ git am --signoff 0001-limit-log-function.patch      # Ìí¼Ó-s»òÕß--signoff£¬»¹¿ÉÒ
 git am ~/patch-set/*.patch¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡# ½«Â·¾¶~/patch-set/*.patch °´ÕÕÏÈºóË³Ğò´òÉÏ
 git am --abort                              		# µ±git amÊ§°ÜÊ±£¬ÓÃÒÔ½«ÒÑ¾­ÔÚam¹ı³ÌÖĞ´òÉÏµÄpatch·ÏÆúµô(±ÈÈçÓĞÈı¸öpatch£¬´òµ½µÚÈı¸öpatchÊ±ÓĞ³åÍ»£¬ÄÇÃ´ÕâÌõÃüÁî»á°Ñ´òÉÏµÄÇ°Á½¸öpatch¶ªÆúµô£¬·µ»ØÃ»ÓĞ´òpatchµÄ×´Ì¬)
 git am --resolved                           		#µ±git amÊ§°Ü£¬½â¾öÍê³åÍ»ºó£¬ÕâÌõÃüÁî»á½Ó×Å´òpatch
- 
+
+git remote -h
+git remote add <name> <url> 	´´½¨±ğÃû
+git remote remove <name>		É¾³ı±ğÃû
+git remote 						²é¿´±ğÃû
+git remote show `git remote`	²é¿´±ğÃû¼°·ÖÖ§ÏêÇé
+git remote rename <old> <new>	±ğÃûÖØÃüÃû
 
 git rebase ÈîÒ»·å  ÁÎÑ©·å
 rebase²Ù×÷¿ÉÒÔ°Ñ±¾µØÎ´pushµÄ·Ö²æÌá½»ÀúÊ·ÕûÀí³ÉÖ±Ïß£»¼´¶Ô±¾µØÎ´pushµÄcommitµÄCRUD²Ù×÷

@@ -1,0 +1,339 @@
+将demo放于cocos2d-x目录的project目录下，VS打开并运行
+
+cocos2d-x工程编译：
+1.创建工程
+2.编译.链接：编辑Android.mk文件 即makefile文件	(cygwin环境下运行build_native.sh脚本编译, 使用ndk交叉编译工具)
+3.拷贝java库运行：jni调用.so库
+
+
+
+http://www.cocos.com/doc/article/index?type=wiki&url=/doc/cocos-docs-master/manual/framework/native/wiki/how-to-start-a-new-cocos2d-x-game/zh.md
+
+Cocos2d-x场景生命周期
+http://www.cxyclub.cn/n/45960/
+http://www.2cto.com/kf/201406/306087.html
+以Scene为基本显示单位
+Sprite必须添加到Layer中，Layer必须添加到Scene中
+设置Sprite的Position和Action
+设置layer的z轴位置
+背景层
+动画层：页面绘制、坐标检测与转换
+事件处理层
+
+图层构成画面：创建图层.创建精灵...、setPosition(ccp(...))、addChild  ()
+图层用来划分模块并处理事件响应
+图层的默认坐标和大小？
+EAGLView相当于一个窗口
+游戏引擎：起一个定时器每隔1/60秒刷新一下屏幕	(EAGLView使用了opengl es来画图，速度快，效率高)
+坐标转换：
+UI坐标系<---->世界坐标系(OpenGL坐标系)<---->图层坐标系<---->锚点坐标系
+setPosition(ccp(...))时，注意锚点默认值：图层锚点的默认值是(0, 0)，精灵锚点的默认值是(0.5f，0.5f)	(锚点的属性：1.坐标 2.缩放)
+画出精灵图像：1.确定坐标 2.根据锚点值画出精灵图像
+都是用sprite1的坐标去加减sprite2的坐标，针对本地坐标系就用减法，针对世界坐标系就用加法。
+字体类：
+CCLableTTF、CCLableBMFront、CCLableAtlas
+cocos2d-x的UI控件库
+菜单scene、游戏scene(游戏背景层、精灵层、触摸层)、结束scene
+CCSprite是一个具备动作行为的二维纹理图片。
+画出精灵对象：
+1.确定坐标
+2.根据锚点值画出精灵对象。	(锚点的默认值是(0.5f, 0.5f))  锚点代表图片的缩放和位置
+一个plist文件(xml文件)对应一个png图片。(红孩儿工具箱、Zwoptex、TexturePacker)
+CCSpriteFrameCache加载plist文件  (全局缓存)
+CCSpriteFrame
+CCSpriteBatchNote加载png图片
+动作.动画：
+创建精灵、创建动作，精灵运行动作
+设置精灵tag属性
+CCAction的子类：
+即时动作CCActionInstant：
+Place
+Hide
+Show
+CCFlipX水平翻转 
+onFlipY垂直翻转
+CCCallFunc家族：回调函数 
+  
+持续动作CCActionInterval：平移.缩放.旋转.明暗
+移动到 – CCMoveTo
+移动– CCMoveBy
+跳跃到 – CCJumpTo   设置终点位置和跳跃的高度和次数。
+跳跃 – CCJumpBy   设置终点位置和跳跃的高度和次数。
+贝塞尔 – CCBezierBy  支持 3 次贝塞尔曲线:P0-起点,P1-起点切线方向,P2-终点切线方向,P3-终点。
+放大到 – CCScaleTo   设置放大倍数,是浮点型。
+放大 – CCScaleBy
+旋转到 – CCRotateTo
+旋转 – CCRotateBy
+变暗到 – CCFadeTo
+由无变亮 – CCFadeIn
+由亮变无 – CCFadeOut
+闪烁 – CCBlink   设定闪烁次数
+色调变化到 – CCTintTo
+色调变换 – CCTintBy
+
+组合动作：
+序列动作CCSequence.
+同步动作CCSpawn、
+重复动作CCRepeat.CCRepeatForever、
+延时动作CCDelayTime、
+Reverse反向动作
+变速动作CCActionEase：
+CCEaseAction和 CCSpped
+EaseIn 由慢至快。
+EaseOut 由快至慢
+EaseInOut 由慢至快再由快至慢。
+EaseSineIn
+由慢至快。
+EaseSineOut 由快至慢
+EaseSineInOut 由慢至快再由快至慢。
+EaseExponentialIn 由慢至极快。
+EaseExponentialOut 由极快至慢。
+EaseExponentialInOut 由慢至极快再由极快至慢。
+Speed 人工设定速度,还可通过 SetSpeed 不断调整。
+
+2.动画动作：CCAnimate、CCAnimation动画动作支持反向动作
+类似gif的帧动画：几张图片连续播放的动画
+Tween补间动画：一张图片的平移.缩放.旋转.明暗动画
+
+3.CCAction的直接子类CCSpeed、CCFollow
+4.扩展动作：3D动作类CCGridAction及其子类
+动作接口： 
+http://labs.easymobi.cn/?p=1687
+
+游戏的生命周期：applicationDidFinishLaunching()、pause().applicationDidEnterBackground()、applicationWillEnterForeground().resume()
+CCScene的生命周期：onEnter、onEnterTransitionDidFinish、onExit、onExitTransitionDidStart	(每个方法中必须调用父类同名的方法，以避免丢失触碰信息和内存泄露)
+CCLayer的生命周期：onEnter、onEnterTransitionDidFinish、onExit	(每个方法中必须调用父类同名的方法，以避免丢失触碰信息和内存泄露)
+
+
+定时器
+1CCNode对象的schedule、unschedule方法
+2.CCTimer
+
+事件处理.即回调函数的触发
+cocos2d-x观察者模式
+(消息传递机制、消息处理机制)
+1.CCTouchDispatcher主要派生的有三个类：CCLayer、CCTargetedTouchDelegate单点触摸、CCStandardTouchDelegate多点触摸
+每一个CCNode对象都可以具有触摸事件机制
+2.菜单点击后的回调函数
+3.动作执行完成后的回调函数
+
+接收CCTouch、分发CCTouchDispatcher、处理CCTouchDelegete	(CCLayer与用户交互相关的函数)
+touchesBegin
+touchesMove
+touchesEnd
+touchesCanceled
+
+加速度计处理,如摇晃手机来控制左右方向
+CCAccelerometer
+CCAccelerometerDelegete
+
+CCLayer的触摸事件
+CCMenu->CCLayer->CCNode
+CCMenuItem
+CCMenuItemFont、CCMenuItemImage
+
+virtual void onEnter();//初始化函数 利用导演类注册代理函数
+virtual void onExit();//这里不像CCLayer 我们需要手动注销代理函数
+void Paddle::onEnter()
+{
+    CCDirector* pDirector = CCDirector::sharedDirector();
+    pDirector->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
+    CCSprite::onEnter();
+}
+void Paddle::onExit()
+{
+    CCDirector* pDirector = CCDirector::sharedDirector();
+    pDirector->getTouchDispatcher()->removeDelegate(this);
+    CCSprite::onExit();
+}
+CCDirector用来切换场景、获取事件分发器、获取屏幕大小。	(单例模式，采用了队列方式来管理CCScene)
+CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+visibleSize.width
+visibleSize.height
+
+碰撞检测：
+1.碰撞后的回调函数
+2.定时器实时检测碰撞
+矩形判断.碰撞检测：
+矩形包含点、矩形碰撞检测、矩形包含矩形
+两个物体必须在同一层上？障碍物以与背景层相同的速度速度向后移动
+AABB碰撞检测规则：将两个物体的坐标投影在坐标系中，只有在两个坐标轴都发生重叠的情况下，两个物体才意味着发生了碰撞。
+
+粒子效果：
+1.CCTextureCache初始化一张图片
+2.粒子编辑器ParticleDesigner：产生一个plist文件。
+
+粒子对象、粒子池、发射器、衰减器
+CCParcitleSystem
+使用CCParcitleSystemQuad的直接子类来实现粒子效果。
+粒子的生命周期：
+发射器的作用：初始化及设置粒子的属性
+发射器分为重力模式Gravity和半径模式Radius，可通过修改CCParcitleSystem对象的emitterMode属性来选择发射器类型。
+开发者必须清楚地知道发射器的每个属性的作用，才能够通过设置得到想要的效果。
+粒子效果编辑器：导出一个plist文件(/一张纹理图片)，用代码加载来实现粒子效果。
+通常在游戏主题完成之后，再来添加粒子效果。 
+
+关卡用json文件来表示
+贝塞尔曲线
+界面间数据传递
+CCDrawingPrimitives专门用来调试游戏用的
+
+地图制作.背景音乐：
+CCTMXTiledMap：读取并解析tmx文件
+CCTMXObjectGroup
+CTMXLayer
+地图编辑器.tmx文件、动画编辑器*SpriteX、MotionWelder、红孩儿工具箱
+游戏背景类型：
+1.横屏滚动、竖屏滚动
+2.斜45°视角
+3.俯视
+多层背景滚动效果CCParallaxNode
+
+背景音乐采用mp3格式，音效采用ogg格式，使用SimpleAudioEngine类来控制(单例模式)
+
+物理引擎Box2D：
+Box2D世界中的物体分为静态物体如大地、动态物体如小鸟.子弹等
+在cocos2d世界中创建一个对象后，在Box2D世界中也要创建一个相对应的对象
+b2World---->b2Fixture---->属性、b2Shape
+
+OpenGL ES画线
+-----------------------------------------------
+CCNode：
+是一个显示对象，具有显示对象的属性
+CCNode还有三个明显的特点：
+1.容器作用，可包含CCNode对象作为子节点。对应方法为addChild、getChildByTag、removeChild
+2.CCNode对象都可以调用定时器。对应方法为schedule、unschedule
+3.CCNode对象都可以执行动作。对应方法为runAction、stopAction
+添加子节点时，若当前节点处于运行状态，则会立即调用onEnter和onEnterTransitionDidFinish方法。
+CCNode与坐标转换相关的函数、与碰撞检测相关的函数。
+CCNode与场景转换相关的函数：
+
+定时器即周期性执行的回调函数。启动.暂停.恢复.取消定时器
+游戏逻辑就是在定时器的回调函数中实现的。
+
+创建动作，并让CCNode运行。
+当一个CCNode对象销毁时，引擎首先会停止它的所有动作及定时器。
+每个CCNode对象都有一个CCCamera对象，CCCamera只是用来增加3D效果。
+
+CCScene:
+每个CCNode节点都只有一个父节点，但可有多个子节点(CCNode提供了更改父节点的函数setParent())
+当父节点被绘制在界面中时，其拥有的所有子节点也将被绘制在界面中。所以若要显示一个CCNode子节点，则需要将其加入当前场景对象的链表关系中
+当游戏中进行场景切换时，内存中会留有两个场景对象，开发者需避免在场景切换时导致内存不足的情况。
+
+CCLayer：
+作用：建立与用户的交互功能，如触屏、重力加速度、按键等
+默认情况下，图层是不接受用户操作的，开发者需要显式调用函数来开启图层接收用户操作，如setTouchEnabled、setAccelerometerEnabled、setKeypadEnabled
+图层是由远及近的顺序来绘制，而信息传递则是由近及远。
+每一个图层可以包含文本Lable、按钮button、精灵sprite、地图TileMap
+---------------------------------------
+网络通信：
+POSIX的多线程技术:多线程同步、线程池、定时器
+c++中使用curl库来实现http通信
+c++中支持Socket通信的第三方库有很多，但都是基于BSD Socket接口实现的。
+
+文件操作模块：
+文件读取只是用了一个类CCFileUtils来实现功能。(单例模式)
+CCUserDefault用来保存用户数据至xml文件中。(单例模式)
+CCRenderTexture用来保存绘制纹理时产生的图片，支持PNG和jpg两种保存格式。
+
+内存管理
+http://v.youku.com/v_show/id_XNTk1MjUzMjgw.html
+
+兔子大战转基因：
+http://my.oschina.net/arthas/blog/100062
+
+
+
+-------------------------------------------------------------------------------------------------------------
+OC语法：
+调用方法用[]，调用属性用.
+类型用()括起来，参数用 前缀+: 分割
+方法用+、-来标识
+定义属性用@property
+定义协议即数据结构用<协议名>{...}
+--------------------------------------------------------------------------------------------------
+vs快捷键：
+
+代码阅读：
+Visual Assist X 快捷键：
+Shift+Alt+S 字符串全文搜索/打开指定方法或变量
+Shift+Alt+O 打开指定文件
+Alt+M 打开当前文件中的指定方法
+	
+Alt+G：查看光标处变量或函数的定义.声明。	Ctrl+‘—’依次返回
+Alt+O .h/.cpp切换
+Shift+Alt+F 查看光标处的变量或函数所有调用
+Ctrl+‘—’依次返回	依次前进
+
+F12查看定义
+Shift+F12:	查看调用
+Ctrl+k.d   格式化代码
+Shift+Alt+Enter: 切换全屏编辑
+显示行数：工具->选项->文本编辑器->C/C++->行号
+
+代码编写：
+Alt+右箭头/Ctrl+j 代码自动补全
+字符串重构
+tab自动补全.确定
+Ctrl+k.c注释   k.u取消注释
+Ctrl+c 复制当前行
+Ctrl+x、Ctrl+l	删除当前行
+Ctrl+Shift+Enter 移至下一个空行
+移动当前行
+Ctrl+g	跳转到指定行
+Shift+Tab	向左缩进
+
+Ctrl+[.s	与文本编辑器同步
+Ctrl+m.m 折叠.打开当前方法
+Ctrl+m.o折叠所有方法 
+Ctrl+m.p展开所有方法
+Ctrl+k.s
+
+调试：
+不断注释调试
+binary文件printLog调试
+源码断点调试/源码printLog调试
+Ctrl+Shift+F9: 删除全部断点
+
+Visual Assist X 快捷键：
+3、Alt + Shift + Q：鼠标定位到函数名上，若是在h文件中，按此快捷键会弹出右键菜单，里面有个选项--创建定义；若是在cpp文件中，则按此快捷键会弹出右键菜单，里面有一个选项--创建声明。 这在定义好接口之后，再来写实现时，配合Alt+O是非常快捷的。当然，这种情况下，鼠标右击与Alt+O配合会更快，嘿嘿。
+4、Alt + Shift + R：当想改掉一个类名或是其他东西的命名时，可能已经有很多地方引用这个名称了，这时按下此快捷键，可以很方便的辅助你重命名。
+配合ViEmu，以及visual studio本身的快捷键，这个开发环境简直太爽了。
+快捷键参考：http://www.wholetomato.com/products/features/shortcut.asp
+
+Alt+Left Arrow NavigateBack   后台
+Ctrl+Shift+V Parse 弹出最近10个copy的内容菜单
+Shift+Alt+Q RefactorContextMenu 弹出重构菜单
+Shift+Alt+C RefactorCreateFromUsage
+Alt+Left Arrow #NavigateBack   后台
+Alt+Down Arraw #ScopeNext
+Alt+Up Arraw #ScopePrevious
+
+vs常用快捷键：
+Ctrl+;	根据文件名打开指定文件
+Ctrl+F	打开指定方法、全文搜索
+
+Visual Assist X 10.7.1940.0代码自动补全插件
+
+
+
+include路径:
+可以将curl-7.21.1\include\curl目录拷贝到我们的工程目录下，也可以在VS工程里面指定引用目录
+项目->属性->配置属性->C/C++->常规->附加包含目录->$(ProjectDir)
+工具-》选项-》项目-》VC++目录-》
+http://www.cnblogs.com/hwangbae/archive/2012/06/24/2560463.html
+http://www.cnblogs.com/gulvzhe/archive/2012/03/14/2396230.html
+http://www.cppblog.com/eping/archive/2010/09/06/126027.html
+http://blog.csdn.net/lingdxuyan/article/details/4389634
+
+lib库路径:
+libcurld.dll拷贝到我们的应用程序目录下，然后在VS项目属性页中设置要包含的静态库。步骤：项目——>项目属性——>配置属性——>链接器”--“输入”--“附加依赖项”，
+输入lib/libcurld_imp.lib 依具体情况而
+error LNK2019：这种问题一般都是由于缺少相应的库文件
+属性”--“链接器”--“输入”--“附加依赖项”
+
+
+
+
+
+

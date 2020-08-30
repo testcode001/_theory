@@ -1,0 +1,111 @@
+android云呼
+https://sv.baidu.com/videoui/page/videoland?context=%7B%22nid%22%3A%22sv_10198447056703913486%22%7D
+
+日元萌乃币
+https://blog.csdn.net/Blockchain_lemon/article/details/88653230
+
+手机端
+
+ETH：麦子、trust、tokenpoket、more、meet one
+EOS：tokenpocket、麦子
+
+
+以太坊网络浏览器Etherscan，它可依告诉玩家区块链上发生的一切。它不仅能帮助玩家验证交易成功，还能追踪其他关于交易和地址的有用细节。
+对标以太坊钱包MetaMask做的EOS插件钱包scatter，但是scatter相比MetaMask还要更强大一些
+务必做好钱包私钥备份，它是你控制钱包的唯一凭证，一旦丢失将不可找回。
+
+
+
+Solidity入门神器——CryptoZombies
+https://cryptozombies.io/
+https://solidity.readthedocs.io/en/v0.5.8/
+对标RSK，以太坊超级侧链Loom Network, Loom Network成立于2017年
+https://loomx.io/
+EthFiddle 拥有超过 10000 用户，是目前最受欢迎的 Solidity 代码分享网站。可以在上面编译、运行、测试全网任何 Solidity 代码片段，友好的界面让任何开发者都能迅速上手。
+https://ethfiddle.com/
+SolidityX用于编写可扩展、高安全性应用的实用语言
+https://solidityx.org/
+
+你可以去DelegateCall.com/zh试试——它与Steemit在架构上相似，但不是一个博客网站，而是一个关于区块链和以太坊编程的问答网站。
+
+用以太坊作为基础层意味着基于DApp链的资产（如ERC20和ERC721代币）将会有以太坊的安全保证，尤其是当由Plasma支持时。
+
+DevC++
+
+
+重点：dapp游戏开发 https://www.jianshu.com/p/279006965311
+
+
+支持多链的钱包btc.eth.eos.xrp.usdt.bch.etc.ltc.dash【TrustWallet、imtoken】【tokenpocket 麦子】
+eos最好用的钱包是啥？MyEtherWallet
+安全的不易被黑、被盗的热钱包(冷钱包，硬件钱包)
+xx区块浏览器: eth区块浏览器、btc区块浏览器、eos区块浏览器
+https://etherscan.io/
+https://www.blockchain.com/explorer
+https://coinmarketcap.com/
+eth区块链查询网址
+https://v.qq.com/x/page/z0517hhjoz5.html
+https://support.token.im/hc/zh-cn/articles/360003124553-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Etherscan-
+eos是基于erc20的吗？
+https://www.jianshu.com/p/efcb2edb72b6
+
+
+https://www.dapp.com/zh
+https://www.dappradar.com/
+https://www.huobi.co/zh-cn/
+https://www.binance.co/cn
+
+
+
+https://www.blockchain.com/
+https://coinmarketcap.com/
+https://www.dapp.com/zh
+https://www.dappradar.com/
+https://www.huobi.co/zh-cn/
+https://www.binance.co/cn
+手机端
+
+ETH：麦子、trust、tokenpoket、more、meet one
+EOS：tokenpocket、麦子
+
+
+以太坊网络浏览器Etherscan，它可依告诉玩家区块链上发生的一切。它不仅能帮助玩家验证交易成功，还能追踪其他关于交易和地址的有用细节。
+
+对标以太坊钱包MetaMask做的EOS插件钱包scatter，但是scatter相比MetaMask还要更强大一些
+
+务必做好钱包私钥备份，它是你控制钱包的唯一凭证，一旦丢失将不可找回。
+
+
+
+Solidity入门神器——CryptoZombies
+https://cryptozombies.io/
+https://solidity.readthedocs.io/en/v0.5.8/
+对标RSK，以太坊超级侧链Loom Network, Loom Network成立于2017年
+https://loomx.io/
+EthFiddle 拥有超过 10000 用户，是目前最受欢迎的 Solidity 代码分享网站。可以在上面编译、运行、测试全网任何 Solidity 代码片段，友好的界面让任何开发者都能迅速上手。
+https://ethfiddle.com/
+SolidityX用于编写可扩展、高安全性应用的实用语言
+https://solidityx.org/
+
+你可以去DelegateCall.com/zh试试——它与Steemit在架构上相似，但不是一个博客网站，而是一个关于区块链和以太坊编程的问答网站。
+
+用以太坊作为基础层意味着基于DApp链的资产（如ERC20和ERC721代币）将会有以太坊的安全保证，尤其是当由Plasma支持时。
+
+
+https://www.jianshu.com/p/279006965311
+
+
+支持多链的钱包：btc.eth.eos.xrp.usdt.bch.etc.ltc.dash.atom【TrustWallet、imtoken】【tokenpocket 麦子】
+eos最好用的钱包是啥？MyEtherWallet
+安全的不易被黑、被盗的热钱包(冷钱包，硬件钱包)
+xx区块浏览器: eth区块浏览器、btc区块浏览器、eos区块浏览器
+https://etherscan.io/
+eth区块链查询网址
+https://support.token.im/hc/zh-cn/articles/360003124553-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Etherscan-
+eos是基于erc20的吗？
+https://www.jianshu.com/p/efcb2edb72b61
+
+查看火币app历史交易记录及手续费
+
+
+

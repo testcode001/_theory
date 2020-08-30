@@ -1,6 +1,6 @@
 jni：
 基础数据类型操作可直接赋值并强转
-字符串，数组，对象的创建.释放，读.写操作需调用jni的api
+字符串，数组，对象的创建.释放.读.写操作需调用jni的api
 基础数据类型与字符串，数组，对象的嵌套
 集合等复杂数据类型用数组+对象替代
 JNI内存泄露处理方法：基础数据类型指针.c类型执行用ReleaseXX方法释放。java数据类型用DeleteLocalRef方法释放
@@ -26,9 +26,9 @@ https://www.cnblogs.com/wbcqz/p/9236570.html
 java的byte和Bit之间的转换：即左移<<，右移>>的位运算
 http://www.javacui.com/Theory/268.html
 
-------------------------------------------------------------------------------
-jni：基础数据类型不需要转换，对象，数组，字符串需要数据类型转换。
-jni中c语言的值传递和地传递。
+android jni用vscode或者vimide编写
+-------------------------------------------------------------------------------------------------------------
+jni中c语言的值传递和址传递。
 c语言对象.指针赋值前须先malloc申请内存再赋值，最后free释放内存。
 
 c语言函数指针: 将函数声明的的函数名用(*)括起来(*函数名)即可
@@ -37,6 +37,34 @@ http://c.biancheng.net/cpp/html/3248.html
 returnedType (*pointerName)(param list);
 参数列表中可以同时给出参数的类型和名称，也可以只给出参数的类型，省略参数的名称，这一点和函数原型非常类似。
 注意( )的优先级高于*，第一个括号不能省略，如果写作returnType *pointerName(param list);就成了函数原型，它表明函数的返回值类型为returnType *。
+C语言函数指针及其定义和用法
+c语言指针在使用前一定要初始化或动态申请内存
+http://c.biancheng.net/view/228.html
+结构体指针的调用
+http://c.biancheng.net/view/2033.html
+C语言动态内存分配详解
+http://c.biancheng.net/view/223.html
+
+函数声明三要素：名字，形参，返回值。
+.h函数的声明：没有花括号{}方法体
+函数的实现：有花括号{}方法体
+.h: 
+#ifndef    __HARDWARE_H__
+#define    __HARDWARE_H__
+#include "string"
+using namespace std;
+
+  //代码部分
+#endif
+
+#ifdef
+#else
+#endif
+.cpp:
+#include"../include/xx.h"
+.cpp的函数实现要用类名限定符修饰classA::
+方法或属性的调用要用命名空间namespace限定符修饰spaceA::+类名限定符修饰spaceA::classA::。 using namespace std; using namespace cv;
+与java相比，c++不方便的一点是所有的头文件依赖都要手动导入即#include"../include/xx.h"
 
 C++父类中的虚函数用以实现“运行时多态”，即父类引用指向子类对象
 在虚函数的声明后边添加=0;即变为纯虚函数。C++父类中的纯虚函数用以实现抽象类，即只有声明，没有实现
@@ -49,19 +77,492 @@ c++虚函数
 2.语法：virtual 函数返回类型 函数名（参数表） { 函数体 }
 3.用途：实现多态性，通过指向派生类的基类指针，访问派生类中同名覆盖成员函数，也就是允许子类override父类同名方法。
 虚函数的作用是实现动态联编，也就是在程序的运行阶段动态地选择合适的成员函数，在定义了虚函数后，可以在基类的派生类中对虚函数重新定义，在派生类中重新定义的函数应与虚函数具有相同的形参个数和形参类型（也就是完全相同的方法，不能只是函数名相同。）。以实现统一的接口，不同的定义过程。如果在派生类中没有对虚函数重新定义，则它继承其基类的虚函数。
-当程序发现虚函数名前的关键字virtual后，会自动将其作为动态联编处理，即在程序运行时动态地选择合适的成员函数。虚函数是C++多态的一种表现。动态联编规定，只能通过指向基类的指针或基类对象的引用来调用虚函数，其格式：
+当程序发现虚函数名前的关键字virtual后，会自动将其作为动态联编处理，即在程序运行时动态地选择合适的成员函数。虚函数是C++多态的一种表现。
+动态联编规定，只能通过指向基类的指针或基类对象的引用来调用虚函数，其格式：
 1.指向基类的指针变量名->虚函数名（实参表）
 2.基类对象的引用名.虚函数名（实参表）
-java
-在java中，所有方法默认就是虚拟的，只要方法不是声明为final类型的，那么肯定就是虚函数，不用为方法显示声明为virtual。在<core java2 :volum I>中提到："In Java, you do not need to declare a method as virtual. Dynamic binding is the default behavior. If you do not want a method to be virtual, you tag it as final"。所以我们发现，在java中，子类可以重写(override)父类的方法，而父类没有声明virtual。
+在C++语言中，如果某个类有虚函数，那么大多数编译器都会自动的为其对象维护一个隐藏的“虚指针（virtul-pointer）”，虚指针指向一个全局“虚表（virtual-table）”。
+虚函数表是属于类的，而不是对象的。也就是说，即使有成千上万个A对象，虚表也仅有一个，这些对象共用一个类虚表。编译器会自动的为每个对象创建一个隐藏的“虚指针”__vptr，它指向类 A 的虚表，
+虚函数表中存放若干函数指针，这些函数指针指向类中的虚函数。
+虚函数机制的空间开销是微乎其微的，事实上，每一个对象只需要一个额外的“虚指针”__vptr就能够调用类的虚函数。
+同样的，时间开销也很小：相比于常规函数的调用，虚函数的调用只不过多出了额外的两个步骤：
+1.获取虚表指针
+2.得到虚表从虚表中取出虚函数的地址
+非虚函数是静态解析的，即在编译时即可根据指针指向的对象确定是否被调用。
+虚函数是动态解析的，也即在程序被编译后，运行时才根据对象的类型，而不是指向对象的指针类型决定其是否被调用，这就是所谓的“动态绑定”。
+https://baijiahao.baidu.com/s?id=1653132502323288772&wfr=spider&for=pc
+c++基础：多态.虚函数，纯虚函数.抽象类，多继承。template函数模板.类模板即c++的泛型编程。
+https://pan.baidu.com/s/1c049lk#list/path=%2F
+virtual虚函数即多态：父类virtual虚函数在子类中被重写后，该函数即可实现多态特性
+纯虚函数即抽象类：virtual 返回值类型 函数名(形参)=0; 即只有函数声明，没有函数体
+base类virtual虚析构函数作用：即通过delete父类指针释放子类资源[调用子类析构函数]
+virtual虚继承只能解决部分c++多继承的二义性问题，特殊情况须指明调用的全路径
+纯虚函数即抽象类的多继承没有二义性问题
+vptr指针与虚函数表
+父类指针和子类指针执行++的步长不一样
+在java中，所有方法默认就是虚拟的，只要方法不是声明为final类型的，那么肯定就是虚函数，不用为方法显示声明为virtual。
+在<core java2 :volum I>中提到："In Java, you do not need to declare a method as virtual. Dynamic binding is the default behavior. If you do not want a method to be virtual, you tag it as final"。
+所以我们发现，在java中，子类可以重写(override)父类的方法，而父类没有声明virtual。
+
+虚继承--解决c++多继承.菱形继承的二义性和数据冗余的问题
+虚继承语法：     class 派生类名：virtual 访问控制 基类名1，virtual 访问控制 基类名2
+普通多继承语法： class 派生类名：访问控制 基类名1，访问控制 基类名2
+https://www.cnblogs.com/yjd_hycf_space/p/6721179.html
+https://www.cnblogs.com/long5683/p/11402194.html
+http://c.biancheng.net/view/2280.html
+c++继承和虚继承virtual public的区别？
+https://blog.csdn.net/weixin_30617737/article/details/101852090
+http://c.biancheng.net/view/2280.html
+C++三种权限继承public/protected/private：举例protected说明：
+1.三种属性能力的强弱：public<protected<private
+2.保护继承相当于先将从父类继承的所用成员都放在子类的protected部分：
+3.然后和公有继承一样，根据三种属性能力的强弱决定成员的属性在子类中究竟是public、protected还是private
+
+函数指针：
+正向调用：解耦，实现调用者和实现者的分离
+反向调用即回调函数
+
+c++模板函数.模板类(即泛型编程.类型参数化)：templete <typename T1, typename T2...>+函数实现/类定义
+模板函数/模板类调用时,类型必须具体化<Type1,Type2...>。如functionName<Type1,Type2...>(params)
+模板类的声明.h和实现.cpp一般不分离，若要分离则模板类实现后缀一般为.hpp，其他文件引用模板类时必须include".hpp"实现文件，而不是".h"声明文件。
+stl标准模板库(算法3.容器7.迭代器1.内存分配器1)：是一套功能强大的C++模板类。boost？
+容器提供迭代器begin()和end()，算法使用迭代器；常见的一些迭代器类型：iterator、reverse_iterator(反向迭代器)、只读迭代器const_iterator和const_reverse_iterator,
+vector<int>::iterator itor = vec.begin(); itor++;
+http://c.biancheng.net/stl/
+https://blog.csdn.net/u010183728/article/details/81913729
+https://blog.csdn.net/piaoxuezhong/article/details/54348787
+http://www.cplusplus.com/reference/bitset/bitset/?kw=bitset
+C++ STL13个头文件，这些在std命名空间中定义using namespace std; : 
+<array><vector>(数组)<deque>(双向数组)<string> <list>(双向链表)<set>(红黑树)<map> <iterator> <queue><stack>  <algorithm><numeric><functional> <memory><utility> (<array><string>除外)(<iostream> <stdio.h>)
+<bitset>并不是标准的STL容器。bitset并没有iterator，也没有begin()和end()。<bitset>的大小是不可变的，它的大小由模板参数N确定，N是整数常量。
+这样设计的理由是bitset中的元素就是bit位，不能容纳任何其他元素，并且bitset中bit位有特定的操作都需要实现，例如与、或、非以及异或。因此，不能够也不需要把bitset设计成STL标准容器。
+按照 C++ 标准库的规定，所有标准头文件都不再有扩展名。以 <vector> 为例，此为无扩展名的形式，而 <vector.h> 为有扩展名的形式。
+迭代器本身就是一个指针，使用时需要解引用*iterator
+C++容器大致分为序列式容器和关联式容器。序列式容器包括 array、vector、list、deque 和 forward_list。4种关联式容器分别为 map、set、multimap、multiset
+关联式容器存储的元素，默认会根据各元素的键值的大小做升序排序，关联式容器所具备的这些特性，归咎于该类型容器底层选用了「红黑树」这种数据结构来组织和存储各个键值对。
+C++ 11还新增了4种哈希容器，即 unordered_map、unordered_multimap 以及 unordered_set、unordered_multiset，但底层采用的是哈希表，而不是红黑树。
+http://c.biancheng.net/view/vip_3433.html
+class中重写仿函数后，可用set容器实现复杂数据类型的自动排序
+如果一个类将 () 运算符重载为成员函数，这个类就称为函数对象类，这个类的对象就是函数对象（又称仿函数）。
+http://c.biancheng.net/view/6593.html
+https://www.runoob.com/cplusplus/cpp-stl-tutorial.html
+站在编译器的角度思考问题：模板函数.模板类是编译器通过两次编译实现具体类型代码的自动编写
+数据结构
+http://c.biancheng.net/view/3431.html
+http://c.biancheng.net/view/vip_3433.html
+
+.inl文件是内联函数的源文件  .hpp文件是模板函数，模板类的源文件
+内联函数通常在c++头文件中实现，但有内联函数较多的时候，会将这部分具体定义的代码添加到.inl文件中，然后在.h头文件的末尾将其引入#include "xx.inl"
+由此也可以看到inl文件的例外一个用法的影子——模板函数、模板类的定义代码的存放。
+对于比较大的工程来说，出于管理方面的考虑，模板函数、模板类的声明部分一般存放在一个或少数几个文件中，而将其定义部分存放在inl文件中，然后在相应的头文件中包含进来。
+内联函数定义：在返回值类型前面加上inline关键字。
+内联函数和普通函数的区别在于：当编译器处理调用内联函数的语句时，不会将该语句编译成函数调用的指令，而是直接将整个函数体的代码插人调用语句处，就像整个函数体在调用处被重写了一遍一样。
+有了内联函数，就能像调用一个函数那样方便地重复使用一段代码，而不需要付出执行函数调用的额外开销。很显然，使用内联函数会使最终可执行程序的体积增加。
+以空间换取时间，或增加空间消耗来节省时间，这是计算机学科中常用的方法。
+友元是一种在类体内进行声明，在类外部(即在.cpp实现文件中没有类限定符classA::修饰)实现的全局函数。从语法上看，它与普通函数一样，即在定义上和调用上与普通函数一样。
+友元函数关键字friend。友元函数是全局函数，不属于类，在.cpp实现文件中没有类限定符classA::修饰。友元函数的特点是能够访问类中的私有成员。
+友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类。
+https://blog.csdn.net/erzr_zhang/article/details/51869649
+
+c++宏定义即纯字符串替换，最好用小括号()确定运算顺序 #define 
+运算符重载关键字operator：operator和运算符一起使用，表示一个运算符重载函数(本质可理解为一个函数)，在理解时可将operator和运算符（如operator=）视为一个函数名
+在类体中声明（定义）需要重载的操作符，声明方式跟普通的成员函数一样，只不过操作符重载函数的名字是“operator +紧跟其后的一个C++的操作符”。
+<< >> 这两个运算符只能用友元函数实现运算符重载，其他运算符重载用类的成员函数实现。
+https://blog.csdn.net/liitdar/article/details/80654324
+c++用new与不用new创建对象的区别：https://www.cnblogs.com/zhousong918/p/10489366.html
+不用new，从栈上创建：函数内局部变量，自动分配与回收，效率高，但是分配的内存量有限。此种创建方式，使用完后不需要手动释放，该类析构函数会自动执行
+用new，从堆上创建：由程序员控制，malloc、new，free、delete。而new申请的对象，则只有调用到delete时再会执行析构函数。
+C++构造函数初始化列表：A(int x,int y) : propertyNameA(x),propertyNameB(y){...}  //充当部分函数体，对属性成员进行初始化
+https://www.cnblogs.com/wkfvawl/p/10902220.html
+https://www.runoob.com/w3cnote/cpp-construct-function-initial-list.html
+在子类构造函数实现(.cpp文件)中的后边，加上一个冒号(:)，然后加上父类的带参构造函数，这就是父类构造函数的显式调用。如：
+son():father(propertyName){...} //显示调用父类的构造函数
+
+c++的4种数据类型转换：语法 Type b = static_cast<Type>(a);
+去const属性用const_cast
+基本类型转换用static_cast
+多态类之间的类型转换用dynamic_cast
+不同类型的指针类型转换用reinterpret_cast
+
+等号左边有指针，引用.解引用(*pointer)，变量; 等号右边是对象 
+&在等号左边是定义引用， 在等号右边是取地址符
+*在等号左边是定义指针，在等号右边是解引用.取指针数据
+C++引用在本质上是什么，它和指针到底有什么区别？
+引用即变量的别名，使用前必须初始化，一旦赋值不能改变。
+https://blog.csdn.net/qq_34243930/article/details/81638852
+https://www.cnblogs.com/codingmengmeng/p/5865510.html
+https://www.cnblogs.com/haoyul/p/7282613.htm
+c++操作符：
+*用于定义指针，&用于定义引用或者取地址符，~用于定义析构函数，类继承用:
+指针调用用->，引用或者实例对象调用用点. ，命名空间和类的静态方法或属性调用::
+宏定义：
+#define 宏名(参数) 宏变量.宏函数   即字符串替换  避免函数调用时进栈.出栈的性能影响。但不是类型安全的。宏函数的每个参数及整个宏体都最好加一个括号。
+#undef 宏名
+
+typedef void *HANDLE，如何理解呢？
+对于void* 神通广大，因为它作为函数参数or函数返回值，能够接受任何类型的指针；也就是来者不拒，是指针就接受。但应用的时候，应该注意，void * 必须指向具体的类型；例如：
+void * HappyPt;
+int* pi=static_cast<int*>HappyPt;; //注意喽，在这里具体到了int*哦！
+用typedef来定义与平台无关的类型。
+https://blog.csdn.net/Andrewniu/article/details/80566324
+typedef int a[10];	//把a声明为具有10个int元素的数组的类型别名
+typedef void (*p)(void); 	//把p声明为一种函数指针的类型别名
+虽然在功能上，typedef可以看作一个跟int PARA分离的动作，但语法上typedef属于存储类声明说明符，因此严格来说，typedef int PARA整个是一个完整的声明。
+比如原函数是   void   func(void); 那么定义的函数指针类型就是typedef   void   (*Fun)(void); 
+然后用此类型生成一个指向函数的指针：Fun  func1; 当func1获取函数地址之后，那么你就可以向调用原函数那样来使用这个函数指针：   func1(void);
+
+std::shared_ptr和std::mutex都是C++11的标准函数.类, auto、nullptr是c++11中的关键字
+C++11提供了两种智能指针：shared_ptr允许多个指针指向同一个对象；unique_ptr则独占所指向的对象。智能指针的使用方式与普通指针类似。
+基于shared_ptr智能指针, 当shared_ptr析构的时候，new出来的对象也会被delete掉，以此避免内存泄漏。
+标准库还定义了一个weak_ptr的伴随类，他是一种弱引用，指向shared_ptr所管理的对象。这三种类型都定义在memory头文件中
+//一般的初始化方式
+shared_ptr<string> pint(new string("normal usage!"));
+//推荐的安全的初始化方式
+shared_ptr<string> pint1 = make_shared<string>("safe uage!");
+最安全的分配和使用动态内存的方法是调用一个名为make_shared的标准库函数，此函数在动态内存中分配一个对象并初始化它，返回此对象的shared_ptr。
+与智能指针一样，make_shared也定义在头文件memory中。
+auto pau = make_shared<string>("auto");    //!更简单，更常用的方式。
+#include <memory> // shared_ptr
+#include <mutex>  // mutex
+#include <pthread.h>
+using namespace std;
+
+.cpp:
+#include <iostream> 
+namespace A{...}
+using namespace A #即包名+类名
+using namespace std; //c++命名空间。c语言默认都是全局作用域
+malloc free//c
+new delete//c++
+c++程序中使用c代码：extern "C"{}关键字代码块：表示使用的是c代码
+编译检查语法错误，链接检查函数或变量的定义是否存在
+https://blog.csdn.net/bleedingfight/article/details/80906556
+.a和.so文件
+https://www.cnblogs.com/luntai/p/5291354.html
+
+c++没有反射怎么实现json对象的序列化和反序列化？
+-------------------------------------------------------------------------------------------------------------
+c++编译.链接：
+
+java的编译器只有sun一家的， 而c++的编译器有多个版本
+所以java的实现标准统一，而c++有多个不同的实现？
+
+c++标准只有声明，没有实现？由各个编译器实现？
+http://www.cplusplus.com/reference/cstring/
+http://libcxx.llvm.org/
+
+c标准委员会和C++标准委员会
+各大编译器厂商都会以它的标准为设计编译器。只有符合ANSI标准的基础下，各自厂商才可以对各语言进行扩展。
+
+Standard C++基金会
+https://isocpp.org/
 
 
+编译环境问题：
+编译器分类.版本.编译选项
+标准库版本/第三库版本
+http://www.zhihu.com/question/20201972
+
+GCC使用的C++标准库是libstdc++
+这是项目地址：http://gcc.gnu.org/libstdc++/
+
+clang++用的C++库：
+http://libcxx.llvm.org/
+svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx
+
+/usr/include/c++/4.6/bits/stl_queue.h
+
+windows下c++ 标准库路径
+linux下c++ 标准库路径
+http://www.cnblogs.com/qq78292959/archive/2012/03/21/2409378.html
+
+Source Insight常用快捷键：
+Ctrl + F 字符串全文搜索
+选择一个变量或方法后右键Lookup References…就可以进行查找
+Alt +, 后退；Alt+.前进.
+Alt + G (或者F7) 打开Symbol Window.
+
+source insight 3.5的注册码：
+SI3US-361500-17409
+
+
+make
+http://www.ruanyifeng.com/blog/2015/03/build-website-with-make.html
+
+http://blog.csdn.net/zengraoli/article/details/11522563
+http://blog.csdn.net/windows_nt/article/details/9630567
+http://blog.sina.com.cn/s/blog_5cf4a61d0100xr00.html
+http://bbs.9ria.com/thread-206437-1-1.html
+http://www.himigame.com/curl-libcurl/878.html
+http://blog.csdn.net/w13770269691/article/details/8847800
+
+
+平台类型：linux、windows
+平台位数：32、64
+平台动态链接库的依赖问题
+指定编译器版本 	编译选项	Makefile方式编译?
+编译器类型：编译可以用gcc/g++,而链接可以用gcc -lstdc++或者g++
+编译器位数
+编译.链接.运行时默认的文件查找路径及顺序，以及文件名
+默认头文件.类库.命令的查找路径及顺序
+平台开发时的api接口
+http://www.cnblogs.com/zyl910/archive/2012/08/14/gcc64_make.html
+http://tieba.baidu.com/p/234600296
+http://blog.csdn.net/duguteng/article/details/22036561
+
+c++调用第三方库，最好用源码来自己编译，避免c++因编译.链接带来的乱七八糟的问题。
+编译.链接时：
+默认头文件查找路径及头文件名
+默认类库查找路径及库文件名
+运行时：
+默认类库查找路径及库文件名
+编译：查看语法错误，因语法错误编译失败，出现类似“某某未定义”的错误。
+链接：查找外部符号的定义，在链接时会出现“未处理的外部符号‘某某’，该符号在某某位置处被引用”的错误。
+
+编译时系统默认.h文件的搜索路径及顺序：
+1. gcc编译时，可以设置-I选项以指定头文件的搜索路径，如果指定多个路径，则按照顺序依次查找。
+Makefile中指定.h文件的搜索路径，gcc/g++命令行中指定.h文件的搜索路径
+".h" 先在当前目录下搜索，再在系统目录下搜索   
+<.h> 只在系统目录下搜索
+.h具体到文件/具体到目录，但不会递归去查找文件
+2.通过查找gcc的环境变量C_INCLUDE_PATH/CPLUS_INCLUDE_PATH/OBJC_INCLUDE_PATH来搜索头文件位置。
+3. 再找内定目录搜索，分别是
+ /usr/include
+ /usr/local/include
+ /usr/lib/gcc-lib/i386-linux/2.95.2/include  (gcc-lib头文件目录)
+
+链接：
+默认命令.类库.头文件的查找路径及顺序
+LIBRARY_PATH 连接时库文件的搜索路径
+LD_LIBRARY_PATH运行时库文件的搜索路径
+http://blog.chinaunix.net/uid-20620288-id-3157119.html
+http://blog.csdn.net/statdm/article/details/7751000
+
+eclipse中添加第三方库
+http://blog.sina.com.cn/s/blog_6f74890d01018zsm.html
+http://blog.163.com/baosongliang@126/blog/static/194935702013101335758601/
+http://howtofix.pro/how-to-solveduring-startup-program-exited-with-code-0xc/
+
+win平台关于加载dll文件的顺序，如下:
+应用程序所在目录→当前目录→Windows SYSTEM目录→Windows目录→PATH环境变量指定的路径
+Dependency Walker 、Process Explorer
+
+Linux中以下命令可以查看可执行文件的依赖库：ldd a.out Makefile xxd
+注意：在修改了 /etc/ld.so.conf 文件或者在系统中安装了新的函数库之后，需要运行一个命令：ldconfig ，该命令用来刷新系统的共享库缓存，即 /etc/ld.so.cache 文件
+nm命令可以列出一个函数库文件中的符号表
+nm、ar、ldd、ldconfig和ld.so 
+
+gcc和g++的区别和联系是什么:
+（1）gcc和g++都是GNU(组织)的一个编译器。
+（2）后缀名为.c的程序和.cpp的程序g++都会当成是c++的源程序来处理。而gcc不然，gcc会把.c的程序处理成c程序。
+（3）对于.cpp的程序，编译可以用gcc/g++，而链接可以用g++或者gcc -lstdc++。（个人觉得这条是最重要的）	
+
+编译器的工作过程
+http://kb.cnblogs.com/page/508336/
+开发者可以在编译阶段选择可执行文件连接外部函数库的方式：到底是编译时连接.静态连接  还是运行时连接.动态连接
+现实中，大部分软件采用动态连接，共享库文件。这种动态共享的库文件，Linux平台是后缀名为.so的文件，Windows平台是.dll文件，Mac平台是.dylib文件。
+动态连接是外部函数库不进入安装包，只在运行时动态引用。好处是安装包会比较小，多个应用程序可以共享库文件；
+缺点是用户必须事先安装好库文件，而且版本和安装位置都必须符合要求，否则就不能正常运行。
+
+不管怎么说， 函数指针.回调函数是继续自C语言的，因而，在C++中，应只在与C代码建立接口，或与已有的回调接口打交道时，才使用回调函数。除了上述情况，在C++中应使用虚拟方法或函数符（functor），而不是回调函数。
+
+c++编译、链接：
+在.h文件中，通过#define定义一个名字，并且通过条件编译#ifndef...#endif使得编译器可以根据这个名字是否被定义：避免类被多次定义
+.h文件只是在预编译的时候完整拷贝其内容
+#include的作用是在预编译的时候把它后面所写的那个文件的内容，完完整整地、一字不改地包含到当前的文件中来，别无其他。
+只有.c/.cpp文件参与编译、链接。
+
+一个符号在整个程序中可以被声明多次，但必须要且仅要被定义一次。试想，如果一个符号出现了两种不同的定义，编译器该听谁的？就会编译报错
+.h头文件中只能存在变量或者函数的声明，而不要放定义。但是，这个规则是有三个例外的：类class的定义、全局的const对象、内联函数（inline）的定义
+类的定义中包含着数据成员和函数成员。数据成员是要等到具体的对象被创建时才会被定义（分配空间），但函数成员却是需要在一开始就被定义的，这也就是我们通常所说的类的实现。
+即只能在头文件中写形如：extern int a;和void f();的句子，这些才是声明。不能写上int a;或者void f() {}这样定义的句子
+http://blog.csdn.net/xupan_jsj/article/details/7855090
+
+Linux下c++编程：
+1，使用gedit，或者任何文本编辑器（最好有语法高亮，自动缩进功能）编写您的代码。
+2，编写代码时，使用标准库的函数和数据结构，或者其它已经实现的模块，或者linux系统API调用。
+3，碰到不知道的标准库，或者linux API，使用man命令查询，没有的话，到网上查询。
+4，编写makefile.	(自动生成Makefile文件：autoscan, aclocal, autoconf, automake这四个工具.)
+5，在g++上添加 -g参数，加入调试符号。
+6，使用gdb调试或者打印log测试。
+7，去掉-g参数，release。
+8，结束。
+工具介绍：
+gcc/g++ 编译器 
+gdb 调试工具 
+valgrind 内存泄露检查 
+doxygen 文档组织工具
+c++常用第三方库： GTK, QT,STL，boost、curl、socket库、解析xml/json库
+-------------------------------------------------------------------------------------------
+c++语法：
+#pragma指示编译器完成一些特定的动作
+typedef 定义类型别名
+const	定义常量
+
+模板即泛型：模板函数.模板类
+template <typename T>
+...declaration...
+指针传递变量，被称为引用传递。
+字符串即字符数组、字符指针
+一维数组即一级指针，二维数组即二级指针
+"\" makefile、shell、c++中用于连接本行和下一行。
+
+template
+extern可以置于变量或者函数前
+在C++环境下使用C函数的时候，常常会出现编译器无法找到obj模块中的C函数定义，从而导致链接失败的情况，应该如何解决这种情况呢？
+extern “C” 则告诉编译器在编译fun这个函数名时按着C的规则去翻译
+extern "C++" {代码块}
+#pragma
+
+
+搜索：c语言32个关键字
+32位系统内存最大寻址范围0xffffffff，支持最大内存为2的32次方byte，即4GB
+
+c++推荐使用单继承，而多继承时应使用virtual继承以避免二义性(调用函数不知道调用哪个基类的成员变量和函数、节省内存空间)
+virtual继承和普通继承
+
+virtual函数是基类中的接口，是派生类中的实现，基类的析构函数~必须是virtual的
+virtual函数: 先调用自身的，在调用父类的。没有virtual则直接调用父类的
+virtual函数用于父类指针指向子类对象时的多态的实现
+虚函数的调用是在运行时确定的
+
+只拥有纯虚函数的类是抽象类，不能被实例化
+virtual函数：virtual void foo();
+纯虚函数: virtual void foo()=0;
+
+typedef定义类型别名
+函数指针类型(typedef)	函数指针变量
+二、函数指针变量与回调函数
+C++不支持const函数指针，我们只能定义非const函数指针变量
+函数如下
+void foo(int a, int b)
+{
+    cout << a + b << endl;
+}
+1、直接定义函数指针
+void (*pf)(int, int);   // 定义函数指针变量pf
+     pf = foo;               // 赋值使其指向函数foo --- (1)
+     pf = &foo;              // 赋值使其指向函数foo --- (2)
+                             // (1)与(2)均ok
+ 
+     pf(6, 7);               // 通过函数指针调用函数:输出13 --- (3)
+     (*pf)(6, 7);            // 通过函数指针调用函数:输出13 --- (4)
+                             // (3)与(4)均ok
+2、利用类型别名定义
+typedef void (*FunPtr)(int, int);　　// 定义函数指针类型
+FunPtr pf;              // 定义函数指针变量pf
+
+     pf = foo;               // 赋值使其指向函数foo --- (1)
+     pf = &foo;              // 赋值使其指向函数foo --- (2)
+                             // (1)与(2)均ok
+ 
+     pf(6, 7);               // 通过函数指针调用函数:输出13 --- (3)
+     (*pf)(6, 7);            // 通过函数指针调用函数:输出13 --- (4)
+                             // (3)与(4)均ok
+
+指针常量 char* const pStr = "123";(pStr值不可修改，但*pStr可修改)
+指向常量的指针 const char* pStr = "123";(pStr可修改，但*pStr不可修改)
+指针.数组：是一个数组，数组中的每个元素都是指针。
+数组.指针：是一个指针，指向数组的指针
+指针.函数：是一个函数，函数的返回值是是一个指针。
+函数.指针：是一个指针，指向函数的指针。函数指针作为参数，用来实现回调函数。
+字符数组或者字符指针以'\0'结尾。
+
+c：
+定义：int (*pFunction)(float,char,char)=NULL;
+赋值：pFunction=&func2;
+调用：(*pFunction)(10.0,’a’,’b’);
+c++:
+定义：int (MyClass::*pMemberFunction)(float,char,char)=NULL;
+赋值：pMemberFunction= &mc.func1;  //必须要加取地址符号
+调用：(mc.*pMemberFunction)(10.0,’a’,’b’);
+指针函数：是一个函数，返回值类型是指针。
+函数的返回值类型是一个函数指针：
+float (* func(char args) ) (float ,float)
+其函数名为func，其参数的个数为1个char args；
+其返回变量类型为：float(*)(float,float)，是一个函数指针。
+
+*和[]对指针降级即解引用，操作指针所指向的地址的值
+http://blog.csdn.net/sruru/article/details/7916296
+http://www.cnblogs.com/charley_yang/archive/2010/12/15/1907384.html
+
+c++构造函数、~析构函数
+c++静态属性成员初始化：只能在.cpp文件的方法的外边初始化，初始化格式为：类型 类名::变量名 = 变量值
+new创建对象、new的返回值是一个指针
+this指代当前指针
+手动分配和释放内存: new 和delete一定要成对使用。
+(指针初始化,避免野指针：pointer=NULL;pointer=new Object(),指针释放：delete pointer;pointer=NULL;)
+delete指针后，一定要将该指针赋值为0	(避免野指针、若同一指针delete两次，程序可能会崩溃
+
+c++如何创建一个对象/引用？ 定义一个对象，并直接调用方法。
+指针间的赋值 	(2张背景地图循环移动) 
+一级指针、二级指针，变量是0级指针
+
+命名空间.类名::
+指针->
+对象.	(引用即对象的别名)
+*定义指针、取地址所存放的值		&取地址符、定义引用	
+定义类：	: public 类名, : private 类名(多继承.实现，c++中没有定义接口/抽象类的关键字)
+方法实现：	返回值类型 类名::方法名()			
+
+final函数不能被重写
+虚函数：父类引用指向子类对象时实现多态性。子类可实现也可不实现
+纯虚函数：子类必须实现,相当于java接口中的方法。含有纯虚函数的类不能实例化。virtual void print(...)=0，声明函数时添加"=0"
+关于虚函数，在多态当中，一定要将基类的析构函数设置为虚函数并将其实现，只有这样，才能够达到按对象构造的逆序来析构对象；
+否则，析构的时候，只会析构基类的那一部分，那么派生类那一部分就无法成功析构了。
+
+重写overrie：子类重新定义父类中有相同名称和参数的虚函数
+重定义即隐藏redefine：子类重新定义父类中有相同名称的非虚函数 (参数可同.可不同)
+
+
+
+函数指针与回调函数：函数指针类型、函数指针变量
+c++用指针来实现引用，实现址传递
+结构体对象调用.
+
+进程组.进程.线程池
+异步IO的事件框架
+http://www.zhihu.com/question/23156257
+函数入口.生命周期.事件机制：调用流程
+
+不同OS调度.管理线程的方式是不一样的
+c++多线程同步：
+使用新的mutex互斥锁机制，而不是过去普遍出现在内核中的semaphore信号量机制
+软中断信号
+
+-------------------------------------------------------------------------------------------------------------
 c++ IDE: 
-vs code(轻量级，跨平台)
+vs code(开源, 跨平台, 轻量级)
 eclipse+CDT
 Dev c++
+Emacs
 http://c.biancheng.net/view/1740.html  
 MinGW(GCC的Windows移植版)
 tdm64-gcc-5.1.0-2W(GCC的Windows-64移植版)
+
+vscode插件：c++、Code Runner、Cmake、Cmake Tools、Remote-SSH(两端都要打开vscode)、Bracket Pair Colorizer(括号匹配)
+vs code远程开发：teamviewer
+代码编写：代码自动补全
+文件搜索查找(vim)Ctrl-p
+全局字符串查找	
+查看定义-右键go define
+查看所有的引用-右键find all references
+头文件和源文件相互跳转-右键
+
+VS-Image Watch插件
+https://blog.csdn.net/iracer/article/details/83413877
+https://docs.opencv.org/2.4/doc/tutorials/introduction/windows_visual_studio_image_watch/windows_visual_studio_image_watch.html#windows-visual-studio-image-watch
+https://opencv.org/image-watch-plugin-for-visual-studio/
+https://blog.csdn.net/qq_15947787/article/details/72804292
+video： https://channel9.msdn.com/posts/Introducing-Image-Watch
+Image Watch窗口左上角的单选按钮（Locals / Watch）选择下面的图像列表中显示的内容：
+Locals列出当前作用域中的所有OpenCV图像对象（此列表自动填充）。 
+Watch显示已固定用于连续检查的图像表达式。 
+左侧图像列表显示基本信息，例如宽度，高度，通道数，以及缩略图（如果有），右侧大图显示当前鼠标位置像素的坐标和色彩分量值。
+在右侧图像上使用滚轮操作实现缩放，放大到一定尺寸后将同时显示像素的BGR分量，如上图所示。
+Ubuntu 18.04中安装gdb-imagewatch的方法
+https://blog.csdn.net/m0_46244540/article/details/104452472
+
+
 
 
