@@ -17,6 +17,7 @@ svn log | more 查看提交日志
 svn st		查看文件或者目录状态
 svn info
 svn resolved
+svn patch？
 
 svn：
 http://blog.csdn.net/q199109106q/article/details/8655204

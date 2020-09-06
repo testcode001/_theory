@@ -163,40 +163,6 @@ hsv颜色空间： 亮度v(取值范围0-255)，色度h(取值范围0-360)，饱
 opencv显示和保存图像时，图像位深depth必须是8位的，如果是16,32位的则要做相应的转换。
 
 
---------------------------------------------------------------------------------------------------------------------
-opengles纹理操作:
-1.激活纹理层级GL_TEXTURE0.即纹理容器
-2.生成纹理ID.或生成帧缓冲ID.即显存地址
-3.绑定纹理类型.或绑定帧缓冲类型(GLES30.GL_TEXTURE_2D、GLES11Ext.GL_TEXTURE_EXTERNAL_OES、sampler2D)：将纹理id和相应的纹理类型进行绑定
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, mFrameBuffers[0]);
-4.设置纹理参数：纹理参数通过纹理类型来设置纹理
-
-onDrawFrame()方法中对shager中的变量进行赋值：启用顶点属性，顶点属性指针赋值(顶点坐标.纹理坐标)...
-6.显示纹理glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_drawOrder.length, GLES20.GL_UNSIGNED_SHORT, m_drawListBuffer);
-eglSwapBuffers(display, winSurface); //窗口显示，交换双缓冲区
-
-数据源-->Surface-->SurfaceTexture-->GlSurfaceView(textureID)、TextureView
-1.LocalVideo(ijkPlayer.setDataSource())
-2.UsbDevice(MediaCodec)：
-3.Camera
-
-shader脚本：
-美颜：红润，磨皮，美白
-美型：大眼，瘦脸，红腮，红唇
-shader内置函数
-
-OpenGL ES						
-https://blog.csdn.net/junzia/article/category/6462864
-https://blog.csdn.net/jxt1234and2010/article/details/53440644
-glFramebufferTexture2D
-https://www.jianshu.com/p/29a7dde7d21f
-opengl EGL						
-https://blog.csdn.net/ieearth/article/details/71180457						
-https://blog.csdn.net/iEearth/article/details/78845105
-opengl shader内置函数
-https://blog.csdn.net/u010607947/article/details/76431474?utm_source=blogxgwz5						
-
 
 
 

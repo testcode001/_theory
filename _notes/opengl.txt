@@ -1,0 +1,108 @@
+数据源-->Surface-->SurfaceTexture-->GlSurfaceView(textureID)、TextureView
+1.LocalVideo(ijkPlayer.setDataSource())
+2.UsbDevice(MediaCodec)：
+3.Camera
+
+shader脚本：
+美颜：红润，磨皮，美白
+美型：大眼，瘦脸，红腮，红唇
+shader内置函数
+
+OpenGL ES						
+https://blog.csdn.net/junzia/article/category/6462864
+https://blog.csdn.net/jxt1234and2010/article/details/53440644
+glFramebufferTexture2D
+https://www.jianshu.com/p/29a7dde7d21f
+opengl EGL						
+https://blog.csdn.net/ieearth/article/details/71180457						
+https://blog.csdn.net/iEearth/article/details/78845105
+opengl shader内置函数
+https://blog.csdn.net/u010607947/article/details/76431474?utm_source=blogxgwz5						
+
+
+在 OpenGL 坐标系统 文章中，根据点的坐标变换得出了如下的公式：
+Vector{clip_gl_Position}=Matrix{projection投影矩阵} * Matrix{view/eye视图矩阵} * Matrix{model模型矩阵} * Vector{local_a_Position坐标向量}
+这个公式每左乘一个矩阵，都代表了一种坐标系的变换。
+转化为着色器脚本语言如下：
+attribute vec4 a_Position;
+uniform mat4 u_ModelMatrix;
+uniform mat4 u_ProjectionMatrix;
+uniform mat4 u_ViewMatrix;
+void main()
+{
+    gl_Position  = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;//看起来三个变换的顺序跟我们期望的相反了，但这正是矩阵左乘造成的结果。
+}
+frustumM和perspectiveM都可以创建透视投影矩阵，只是创建参数不同，orthoM创建正交投影矩阵。正交投影会创建一个类似立方体的视景体。透视投影创建是一个锥形的视景体。
+setLookAtM创建视图矩阵
+投影矩阵的左、上、右、下距离都是相对于近平面中心的。近平面的坐标原点位于中心， X轴向右为正方向，Y轴向上为正方向，所以我们的 left、bottom 要为负数，而 right、top 要为正数。
+近平面和远平面的距离都是指相对于视点的距离，所以 near、far 要为正数。
+由于透视投影会产生近大远小的效果，当照相机位置不变，改变 near 的值时也会改变物体大小，near 越小，则离视点越近，相当于物体越远，那么显示的物体也就越小了。
+当然也可以 near 和 far 的距离不动，改变摄像机的位置来改变观察到的物体大小。
+由投影矩阵创建的范围，是一个封闭的空间几何体，被称为视景体。
+不管是正交投影还是透视投影，最终都是将视景体内的物体投影在近平面上，这也是 3D 坐标转换到 2D 坐标的关键一步。而近平面上的坐标接着也会转换成归一化设备坐标，再映射到屏幕视口上。
+
+要定义一个摄像机，或者说要定义一个摄像机视角为坐标原点的坐标系，需要：
+1.摄像机在世界空间中的位置
+2.摄像机观察的方向
+3.指向摄像机右测的向量
+4.指向摄像机上方的向量
+当用视图矩阵确定了照相机的位置时，要确保物体距离视点的位置在 near 和 far 的区间范围内，否则就会看不到物体。
+
+模型矩阵：可能包含了缩放(scaling)、旋转(rotation)、平移(translation)这三种变换。
+Matrix.setIdentityM(mTransMatrix, 0)		创建一个单位矩阵
+Matrix.scaleM(mTransMatrix,0,2f,0.5f,1f)
+Matrix.rotateM(mTransMatrix, 0, mAngle, 0f, 0f, 1.0f)
+Matrix.translateM(mTransMatrix, 0, 0.5f, 0.5f, 0f)
+
+修饰符：
+attribute数据类型只能用在vertexShader中
+uniform用于定义全局变量
+varying用于vertexShader向fragmentShader传递数据
+数据类型：
+mat4矩阵
+vec4向量
+sampler2D纹理图片
+samplerExternalOES纹理图片
+内置变量gl_Position和gl_FragColor都是vec4类型的向量，可通过 x.y.z.w和r.g.b.a来访问各个分量。
+
+opengles纹理操作:
+1.激活纹理层级GL_TEXTURE0.即纹理容器
+2.生成纹理ID.或生成帧缓冲ID.即显存地址
+3.绑定纹理类型.或绑定帧缓冲类型(GLES30.GL_TEXTURE_2D、GLES11Ext.GL_TEXTURE_EXTERNAL_OES)：将纹理id和相应的纹理类型进行绑定
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, mFrameBuffers[0]);
+4.设置纹理类型参数：
+纹理环绕方式：
+可以使用glTexParameter()对单独的一个坐标轴设置（s轴、t轴、r轴）
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+纹理过滤：
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//放大(Magnify)过滤
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//缩小(Minify)过滤
+纹理过滤有很多个选项，这边讨论最重要的两种：GL_NEAREST和GL_LINEAR。
+GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）是OpenGL ES默认的纹理过滤方式。当设置为GL_NEAREST的时候，OpenGL ES会选择中心点最接近纹理坐标的那个像素。
+GL_LINEAR（也叫线性过滤，(Bi)linear Filtering）它会基于纹理坐标附近的纹理像素，计算出一个插值，近似出这些纹理像素之间的颜色。
+https://www.jianshu.com/p/609d6856b5cf
+
+onDrawFrame()方法中对shager中的变量进行赋值：启用顶点属性数组.设置顶点属性指针(即顶点坐标.纹理坐标)，设置glUniformMatrix4fv矩阵
+6.显示纹理glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_drawOrder.length, GLES20.GL_UNSIGNED_SHORT, m_drawListBuffer);
+eglSwapBuffers(display, winSurface); //窗口显示，交换双缓冲区
+Android OpenGL绘制纹理图片：GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+纹理坐标相当于：srcRect
+顶点坐标相当于：dstRect
+https://blog.csdn.net/yu540135101/article/details/100782542
+
+VBO：
+glGenBuffers(...)
+glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferId)
+glBufferData(GLES20.GL_ARRAY_BUFFER, buffer.capacity() * elementSize, buffer, GLES20.GL_STATIC_DRAW)
+指定了希望显卡如何管理给定的数据，它有三种形式：
+① GL_STATIC_DRAW ：数据不会或几乎不会改变。
+② GL_DYNAMIC_DRAW：数据会被改变很多。
+③ GL_STREAM_DRAW：数据每次绘制时都会改变。
+这边三角形的位置数据不会改变，每次渲染调用时都保持原样，所以它的使用类型最好是GL_STATIC_DRAW。
+如果，一个缓冲中的数据将频繁被改变，那么使用的类型就是GL_DYNAMIC_DRAW或GL_STREAM_DRAW，这样就能确保显卡把数据放在能够高速写入的内存部分。
+
+
+

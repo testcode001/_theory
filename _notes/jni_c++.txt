@@ -15,7 +15,9 @@ https://blog.csdn.net/buding_code/article/details/53117220?utm_source=blogxgwz1
 https://www.jianshu.com/p/b428a55815cd
 JNI 支持3中不透明的引用：局部引用、全局引用和弱全局引用。
 https://blog.csdn.net/huguohu2006/article/details/7397055
-c和java字符串互转
+c和java字符串互转：
+jstring str = env->NewStringUTF("eascs"); 		c++转java字符串
+const char *s = env->GetStringUTFChars(str, 0); java转c++字符串
 https://blog.csdn.net/zhoudailiang/article/details/50471483
 jni和c/c++多线程的处理
 https://blog.csdn.net/popop123/article/details/1511180

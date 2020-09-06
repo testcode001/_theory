@@ -155,7 +155,7 @@ java注解：
 java中byte[ ]和各种数据类型的相互转换：
 https://www.jianshu.com/p/6b93b684ff60
 java线程池复用原理？
-List泛型擦除  java泛型，协变和逆变
+List泛型擦除??  java泛型，协变和逆变
 
 JNI函数注册的两种方式：
 静态注册：

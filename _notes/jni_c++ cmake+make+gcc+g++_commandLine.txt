@@ -21,7 +21,7 @@ message(STATUS "C_COMPILER: ${CMAKE_C_COMPILER}")
 message(STATUS "CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C_FLAGS: ${CMAKE_C_FLAGS}")
 message(STATUS "CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-ADD_SUBDIRECTORY(params)  #include sub CMakeLists.txt 
+add_subdirectory(params)  #include sub CMakeLists.txt 
 aux_source_directory(./src SRC_LIST) #可有多个
 aux_source_directory(./src SRC_LIST02) 
 include_directories(./include ./include02)  	#可有多个
@@ -30,10 +30,17 @@ add_executable(projectName ${SRC_LIST} ${SRC_LIST02})
 #dependence:
 add_library(params)分为源文件导入和库文件导入，库文件导入还需要调用set_target_properties(params)命令指定库文件的具体位置。
 find_library(params)
-在target_link_libraries(params)链接命令中，find_library(params)中的库变量需要用${libName}取值，而add_library(params)中的库变量不需要用${}取值，直接用libName。
+在target_link_libraries(params)链接命令中，find_library(params)中的库变量需要用${libName}取变量值，而add_library(params)中的库变量不需要用${}取值，直接用libName。
+即：
+add_library(yuv SHARED xx.cpp)
+add_library(templete SHARED IMPORTED)
+set_target_properties(templete PROPERTIES IMPORTED_LOCATION    ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libOMAFPlayer.so)
+find_library(log-lib log)
+target_link_libraries(yuvutil ${log-lib} yuv templete)
 
 cmake内置变量.内置函数：
-PROJECT_SOURCE_DIR
+${PROJECT_SOURCE_DIR}
+${CMAKE_CURRENT_SOURCE_DIR}表示CMakeLists.txt文件的绝对路径
 使用$ENV{NAME}指令就可以调用系统的环境变量了,比如MESSAGE(STATUS “HOME dir: $ENV{HOME}”)。设置环境变量的方式是: SET(ENV{varName} value)
 三,FIND_指令
 FIND_系列指令主要包含一下指令:
