@@ -1,6 +1,7 @@
 数据源.player--surface--surfaceTexture--(Glsurfaceview旋转90度?.opengles.egl: Display.Surface.Context)--textureView：每一层都有回调函数设置,回调传递上层运行所需的所有变量和数据。
 (视频数据源可获取sps,pps.GOP.宽.高.帧率, I.B.P帧 IDR帧即强制刷新帧，强制刷新宽)
-RAWrgb--yuv420.yuv420sp(x264编码-->h264.h265裸流解码-->yuv420p.yuv420sp--)--rgba--jpg.png
+RAWrgb--yuv420(x264编码-->h264.h265裸流-->解码成yuv420p.yuv420sp--)--rgba--jpg.png
+yuv420分为yuv420p和yuv420sp
 YUV Planar(p)：Y\U\V数据是分开存放的，在三个不同的平面（数组）
 YUV Semi-Planar(sp)：Y是单独一个平面（数组），而U、V是交叉存放的，在另一个平面（数组）
 I420: YYYYYYYY UU VV      =>YUV420P

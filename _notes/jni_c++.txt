@@ -3,8 +3,41 @@ jni：
 字符串，数组，对象的创建.释放.读.写操作需调用jni的api
 基础数据类型与字符串，数组，对象的嵌套
 集合等复杂数据类型用数组+对象替代
+
 JNI内存泄露处理方法：基础数据类型指针.c类型执行用ReleaseXX方法释放。java数据类型用DeleteLocalRef方法释放
-https://www.iteye.com/blog/amazontzy-1962367
+在c++中new的对象，如果不返回java层，必须用release掉，否则内存泄露。包括NewStringUTF，NewObject。如果返回java层不必release，java会自己回收。
+JNI 支持3中不透明的引用：局部引用、全局引用和弱全局引用。
+https://blog.csdn.net/huguohu2006/article/details/7397055
+总体原则：释放所有对object的引用
+1.FindClass例如，
+jclass ref= (env)->FindClass("java/lang/String");
+env->DeleteLocalRef(ref);
+2.NewString/ NewStringUTF/NewObject/NewByteArray例如，
+jstring     (*NewString)(JNIEnv*, const jchar*, jsize);   
+const jchar* (*GetStringChars)(JNIEnv*, jstring, jboolean*);     void        (*ReleaseStringChars)(JNIEnv*, jstring, const jchar*);
+jstring     (*NewStringUTF)(JNIEnv*, const char*);   
+const char* (*GetStringUTFChars)(JNIEnv*, jstring, jboolean*);     void        (*ReleaseStringUTFChars)(JNIEnv*, jstring, const char*);
+env->DeleteLocalRef(ref);
+3.GetObjectField/GetObjectClass/GetObjectArrayElement
+jclass ref = env->GetObjectClass(robj);
+env->DeleteLocalRef(ref); 
+4.GetByteArrayElements和GetStringUTFChars
+jbyte* array= (*env)->GetByteArrayElements(env,jarray,&isCopy);
+(*env)->ReleaseByteArrayElements(env,jarray,array,0);
+const char* input =(*env)->GetStringUTFChars(env,jinput, &isCopy);
+(*env)->ReleaseStringUTFChars(env,jinput,input);
+5.NewGlobalRef/DeleteGlobalRef
+jobject     (*NewGlobalRef)(JNIEnv*, jobject);
+void        (*DeleteGlobalRef)(JNIEnv*, jobject);
+例如，
+jobject ref= env->NewGlobalRef(customObj);
+env->DeleteGlobalRef(customObj);
+https://www.iteye.com/blog/amazontzy-1962367有必要分析一下 ReleaseStringUTF 这个函数了，先看一下该函数的解释：
+在调用 GetStringUTFChars 函数从 JVM 内部获取一个字符串之后，JVM 内部会分配一块新的内存，用于存储源字符串的拷贝，以便本地代码访问和修改。
+即然有内存分配，用完之后马上释放是一个编程的好习惯。通过调用ReleaseStringUTFChars 函数通知 JVM 这块内存已经不使用了，你可以清除了。
+注意：这两个函数是配对使用的，用了 GetXXX 就必须调用 ReleaseXXX，而且这两个函数的命名也有规律，除了前面的 Get 和 Release 之外，后面的都一样。
+一般都是在最后的return之前调用 ReleaseStringUTF 方法。
+
 local reference table overflow (max=512)
 https://blog.csdn.net/xpz445094213/article/details/46633889
 https://blog.csdn.net/win2k3net/article/details/6613440
@@ -13,8 +46,6 @@ GetMethodID中sig参数对函数的签名(jdk命令javap)：
 https://blog.csdn.net/u010126792/article/details/82348438
 https://blog.csdn.net/buding_code/article/details/53117220?utm_source=blogxgwz1
 https://www.jianshu.com/p/b428a55815cd
-JNI 支持3中不透明的引用：局部引用、全局引用和弱全局引用。
-https://blog.csdn.net/huguohu2006/article/details/7397055
 c和java字符串互转：
 jstring str = env->NewStringUTF("eascs"); 		c++转java字符串
 const char *s = env->GetStringUTFChars(str, 0); java转c++字符串
@@ -27,6 +58,13 @@ java基础数据类型和byte相互转换：即左移<<，右移>>的位运算
 https://www.cnblogs.com/wbcqz/p/9236570.html
 java的byte和Bit之间的转换：即左移<<，右移>>的位运算
 http://www.javacui.com/Theory/268.html
+
+so库崩溃分析：
+libc    : Fatal signal 11 (SIGSEGV), code 1, fault addr 0x0 in tid 5909 (NativeApp), pid 5884 (ayback.handheld)
+ndk-stack加入系统环境变量
+进入工程目录下：adb logcat | ndk-stack -sym obj/local/armeabi
+arm-Linux-gnueabi-addr2line 0002e180 -e camera.meson6.so
+objdump
 
 android jni用vscode或者vimide编写
 -------------------------------------------------------------------------------------------------------------
@@ -118,7 +156,7 @@ http://c.biancheng.net/view/2280.html
 C++三种权限继承public/protected/private：举例protected说明：
 1.三种属性能力的强弱：public<protected<private
 2.保护继承相当于先将从父类继承的所用成员都放在子类的protected部分：
-3.然后和公有继承一样，根据三种属性能力的强弱决定成员的属性在子类中究竟是public、protected还是private
+3.然后和公有继承一样，再根据父类修饰符三种属性能力的强弱决定成员的属性在子类中究竟是public、protected还是private
 
 函数指针：
 正向调用：解耦，实现调用者和实现者的分离
@@ -171,9 +209,10 @@ c++宏定义即纯字符串替换，最好用小括号()确定运算顺序 #defi
 在类体中声明（定义）需要重载的操作符，声明方式跟普通的成员函数一样，只不过操作符重载函数的名字是“operator +紧跟其后的一个C++的操作符”。
 << >> 这两个运算符只能用友元函数实现运算符重载，其他运算符重载用类的成员函数实现。
 https://blog.csdn.net/liitdar/article/details/80654324
-c++用new与不用new创建对象的区别：https://www.cnblogs.com/zhousong918/p/10489366.html
-不用new，从栈上创建：函数内局部变量，自动分配与回收，效率高，但是分配的内存量有限。此种创建方式，使用完后不需要手动释放，该类析构函数会自动执行
+c++创建对象的两种方式及区别：new与不用new(即直接类名 变量名)
+不用new(即直接类名 变量名)，从栈上创建：函数内局部变量，自动分配与回收，效率高，但是分配的内存量有限。此种创建方式，使用完后不需要手动释放，该类析构函数会自动执行
 用new，从堆上创建：由程序员控制，malloc、new，free、delete。而new申请的对象，则只有调用到delete时再会执行析构函数。
+https://www.cnblogs.com/zhousong918/p/10489366.html
 C++构造函数初始化列表：A(int x,int y) : propertyNameA(x),propertyNameB(y){...}  //充当部分函数体，对属性成员进行初始化
 https://www.cnblogs.com/wkfvawl/p/10902220.html
 https://www.runoob.com/w3cnote/cpp-construct-function-initial-list.html
@@ -213,7 +252,7 @@ typedef void (*p)(void); 	//把p声明为一种函数指针的类型别名
 比如原函数是   void   func(void); 那么定义的函数指针类型就是typedef   void   (*Fun)(void); 
 然后用此类型生成一个指向函数的指针：Fun  func1; 当func1获取函数地址之后，那么你就可以向调用原函数那样来使用这个函数指针：   func1(void);
 
-std::shared_ptr和std::mutex都是C++11的标准函数.类, auto、nullptr是c++11中的关键字
+std::shared_ptr和std::mutex都是C++11的标准函数.类。auto、nullptr是c++11中的关键字
 C++11提供了两种智能指针：shared_ptr允许多个指针指向同一个对象；unique_ptr则独占所指向的对象。智能指针的使用方式与普通指针类似。
 基于shared_ptr智能指针, 当shared_ptr析构的时候，new出来的对象也会被delete掉，以此避免内存泄漏。
 标准库还定义了一个weak_ptr的伴随类，他是一种弱引用，指向shared_ptr所管理的对象。这三种类型都定义在memory头文件中
@@ -228,6 +267,21 @@ auto pau = make_shared<string>("auto");    //!更简单，更常用的方式。
 #include <mutex>  // mutex
 #include <pthread.h>
 using namespace std;
+c++多线程同步(容器)：
+#include <thread>
+#include <mutex>
+const std::lock_guard<std::mutex> lock(mutex1);
+C++中，通过构造std::mutex的实例来创建互斥元，可通过调用其成员函数lock()和unlock()来实现加锁和解锁，然后这是不推荐的做法，因为这要求程序员在离开函数的每条代码路径上都调用unlock()，包括由于异常所导致的在内。
+作为替代，标准库提供了std::lock_guard类模板，实现了互斥元的RAII惯用语法（资源获取即初始化）。该对象在构造时锁定所给的互斥元，析构时解锁该互斥元，从而保证被锁定的互斥元始终被正确解锁。
+https://www.cnblogs.com/jzincnblogs/p/5188051.html
+在WIN32中，同步机制主要有以下几种：
+（1）事件(Event);
+（2）信号量(semaphore);
+（3）互斥量(mutex);
+（4）临界区(Critical section)。
+linux c++线程同步的常见方法：互斥锁，条件变量，读写锁，信号量
+一.互斥锁
+本质就是一个特殊的全局变量，拥有lock和unlock两种状态，unlock的互斥锁可以由某个线程获得，一旦获得，这个互斥锁会锁上变成lock状态，此后只有该线程由权力打开该锁，其他线程想要获得互斥锁，必须得到互斥锁再次被打开之后
 
 .cpp:
 #include <iostream> 
@@ -545,7 +599,8 @@ tdm64-gcc-5.1.0-2W(GCC的Windows-64移植版)
 vscode插件：c++、Code Runner、Cmake、Cmake Tools、Remote-SSH(两端都要打开vscode)、Bracket Pair Colorizer(括号匹配)
 vs code远程开发：teamviewer
 代码编写：代码自动补全
-文件搜索查找(vim)Ctrl-p
+代码阅读：
+全局文件搜索查找(vim)Ctrl-p
 全局字符串查找	
 查看定义-右键go define
 查看所有的引用-右键find all references
