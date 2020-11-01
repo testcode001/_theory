@@ -1,5 +1,10 @@
 数据源.player--surface--surfaceTexture--(Glsurfaceview旋转90度?.opengles.egl: Display.Surface.Context)--textureView：每一层都有回调函数设置,回调传递上层运行所需的所有变量和数据。
 (视频数据源可获取sps,pps.GOP.宽.高.帧率, I.B.P帧 IDR帧即强制刷新帧，强制刷新宽)
+音视频：采集-->x264编码-->网络传输或保存成文件-->解码-->展示
+其中音视频解码-->展示又分为一下几种：
+1.USB Device外设：MedicCodec硬解码
+2.camera sensor：系统camera类解码
+3.本地文件、网络文件：ijkplayer解码
 RAWrgb--yuv420(x264编码-->h264.h265裸流-->解码成yuv420p.yuv420sp--)--rgba--jpg.png
 yuv420分为yuv420p和yuv420sp
 YUV Planar(p)：Y\U\V数据是分开存放的，在三个不同的平面（数组）

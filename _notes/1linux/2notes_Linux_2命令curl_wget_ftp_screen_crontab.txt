@@ -133,7 +133,7 @@ env			查看系统属性
 set列出所有变量		
 unset删除变量
 
-screen/tmux命令执行耗时操作:
+screen/tmux命令执行耗时操作: 1.会话的CRUD，创建，查看，切换，删除  2.window的CRUD，创建，查看，切换，删除，且都是以C-a开头
 一个screen session中可以有多个windows多窗口，日志，会话分离及恢复
 screen命令替代远程终端
 使用screen时不要开启大写
@@ -150,10 +150,10 @@ screen -wipe #清除因异常而退出的screen session。
 Ctrl+a”“c” #新建window
 "Ctrl+a""w" #查看所有windows及当前所处windows，*号表示当前window，-号表示上一次切换时的window。 检查当前是否处于screen session中
 C-a 1..9 -> 切换到第 1..9 个window
-“Ctrl+a”“n” #切换到下一个window
-"Ctrl+a""p" #切换到上一个window
 C-a C-a -> 在两个最近使用的 window 间切换 
 C-a a #来为当前窗口重命名，回车确认。
+“Ctrl+a”“n” #切换到下一个window
+"Ctrl+a""p" #切换到上一个window
 exit #关闭当前窗口	所有窗口都关闭后，当前screen session就关闭了。
 C-a k #强行关闭当前window
 

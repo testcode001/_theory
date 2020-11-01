@@ -265,6 +265,9 @@ Package->Framework->JNI->Camera(cpp)--(binder)-->CameraService->Camera HAL->Came
 PAL，NTSC，还有SECAM，这是全球现行的三种模拟技术彩色电视的制式
 
 android事件传递及分发：是ActionDown的事件传递(ActionUp是选最短路径传递)
+https://www.jianshu.com/p/7673bc4b5575
+在没有OninterceptTouchEvent()情况下，哪个view消耗了Down事件，其余事件(Up.Move)、(Cancel也交给其处理。
+默认所有的onInterceptTouchEvent都不拦截事件的情况下，down事件在最上层的ViewGroup的onTouchEvent函数中进行消费。
 https://blog.csdn.net/hymking/article/details/84729128
 https://www.jianshu.com/p/31c4c14c34a2
 ScrollView滑动冲突: ActionDown、ActionMove、ActionUp

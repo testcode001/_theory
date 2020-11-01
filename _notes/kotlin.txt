@@ -1,6 +1,66 @@
 面向过程.面向对象+OC+shell+c++
 继承类似于c++，形参类似于OC，定义变量函数类似于js和python，变量取值类似于shell
 
+kotlin：定义，及调用
+变量：静态变量即companion object代码块、常量const val 变量名:数据类型、普通变量var 变量名:数据类型、集合(可变的和不可变的) 变量取值用${varName}类似于shell
+方法(fun +名字.形参 : 返回值)：普通方法fun 、静态方法即companion object代码块、构造方法(主构造函数、次级构造函数constructor)+init{...}代码块，方法的重写override
+普通类class.接口interface：访问权限(public.internal.protected.private)、继承(open.abstract、final)，接口实现
+data class数据类即model类
+abstract class抽象类，open class开放类
+enum class枚举类
+inner class内部类
+sealed class密封类.类似于枚举
+object用来定义单例类(用object替换class即可)或者定义匿名内部类的变量名.设置匿名内部类方法
+private var mThread = object : Thread() {
+     override fun run() { 
+         println("running from Thread:${Thread.currentThread()}")
+     }
+}
+Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent()
+companion object{...}相当于静态代码块用来定义静态变量或者静态方法
+
+Kotlin之数组和集合：基础数据类型数组、复杂数据类型数组
+https://www.jianshu.com/p/6d95db6e9f87
+https://www.jianshu.com/p/e75795be48c8
+https://www.cnblogs.com/Jetictors/p/9237108.html
+https://www.cnblogs.com/Jetictors/p/9241867.html
+https://github.com/Jetictors
+private var mTexId = arrayOfNulls<Int>(1)
+private var mTextureMatrix = FloatArray(16)
+private var mVertexCoordArray: FloatArray = floatArrayOf(-1f,1f)
+private var mVideoBeanList:MutableList<VideoDataBean> = mutableListOf<VideoDataBean>()
+setOf();该函数返回不可变的Set集合，该集合可以接收0个或过个参数，这些参数将作为集合的元素。
+mutableSet0f()：该函数返回可变的MutableSet集合，
+hashSetOf()：该函数返回可变的HashSet集合，
+linkedSetOf():该函数返回可变的LinkedHashSet集合。
+sortedSetOf()：该函数返回可变的TreeSet集合, 用法同下。
+
+mapOf(); 该函数返回不可变的Map集合。
+mutableMapOf(); 该函数返回可变的MutableMap集合。
+其实mapOf() 返回的是LinkedHashMap()。
+hashMapOf(); 返回可变的HashMap()集合。
+linkedMapOf(); 返回可变的LinkedHashMap集合。
+对于map的添加删除和java一样 put， remove。我就不举例子了。
+遍历map、数组、集合等
+for(en in map.entries) {}
+for(key in map.keys) {}
+for(value in map.values) {}
+map还可以用map[key] = value,来代替map.put("key", value)
+
+开启新线程、多线程同步
+
+kotlin用as?实现强制类型转换类似于python。如下：
+val person: Person = Person()
+val student:Student? =person as? Student
+println(student) // null
+
+kotlin的is就是java的instanceof。如下：
+if(zhansan is Student){...} 
+
+kotlin的when其实就是对java的switch的一个升级。
+https://www.jianshu.com/p/01eaac5f8767
+--------------------------------------------------------------------------------------------
+
 kotlin视频教程 
 https://www.jianshu.com/p/c69d63b70650
 闭包(closure)
@@ -12,78 +72,203 @@ https://www.jianshu.com/p/e8752c880088
 https://www.kotlincn.net/docs/reference/object-declarations.html
 变量取值类似于shell用${varName}
 https://blog.csdn.net/qq_30219217/article/details/73381503
+定义变量时，可在类型后面加一个问号?，表示该变量是Nullable，不加或者加个!表示该变量不可为null。如下：
+var s:String? = null
+var s2:String = "xxx" //如果该变量被赋值为null，则编译不通过
+对于可以为null的变量，在调用该变量方法的时候，必须用变量名+?(如上面的s?)的形式进行调用，表示如果该变量为null，则不执行该变量调用的方法。如：
+var l= s?.length//如果s为null，则不执行length方法，从而避免了java中频繁的空指针异常。
+对于不可以为null的变量，在调用该变量方法的时候，必须用变量名+!!的形式进行调用。如var l= s!!.length
+所有成员变量(包括定义在类中，以及直接定义在kt文件中的)在定义时必须进行初始化，局部变量（定义在方法内）可以不进行初始化。
 
-Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent() 
 变量名在前，数据类型在后
-private lateinit var name: String 		//lateinit 是用来告诉编译器，name 这个变量后续会妥善处置的。
+private lateinit var name: String 		//lateinit是用来告诉编译器，name这个变量后续会妥善处置的。lateinit只能用于对象，且该对象不可为Nullable，不能用于基础数据类型
 private var name: String = "zhangsan"  
 类属性或者局部变量定义必须用var或者val修饰，局部变量可不写变量类型:DataTpye，因为有自动类型推到？如果局部变量没有初始化 则需要明确表明 变量类型
-形参可选用var或者val修饰,但必须有变量名:变量类型？类的主构造函数最好有val或var修饰，这样形参可在整个类中访问。类的次构造函数形参一定不能有val或var修饰。
-定义方法必须以fun开头，函数的返回值用:分隔。Unit表示无返回值，可省略
-函数的变长参数可以用 vararg 关键字进行标识：fun update(vararg v:Int){...}
-
-constructor主构造函数（在类体外部声明.直接放在类名后面，通常为主要而简洁的初始化类的方法）和次构造函数声明必须有前缀constructor（在类体内部声明）
-如果类有一个主构造函数，每个次构造函数可以使用this关键字，直接委托或者通过别的次构造函数间接委托给主构造函数。次构造函数最终都是调用主构造函数来创建对象的。
-创建对象的调用顺序：先调用主构造函数->直接代理主函数的构造函数->间接代理主函数的构造函数->我们调用的构造函数。
-Koltin中的类可以有一个 主构造器，以及一个或多个次构造器，主构造器是类头部的一部分，直接放在类名后面:
-class Person constructor(firstName: String) {...}
-如果主构造器没有任何注解，也没有任何可见度修饰符，那么constructor关键字可以省略。
-class Person(firstName: String) {...}
-主构函数不能包含任何代码，初始化代码放在以init关键字作为前缀的初始化块中；可以有多个init，也可以没有init，init的执行顺序是根据写的顺序来的
+类的主构造函数最好有val或var修饰，这样形参可在整个类中访问。形参可选用var或者val修饰,但必须有变量名:变量类型？。但类的次构造函数形参一定不能有val或var修饰。
+注意：主构函数不能包含任何代码，初始化代码放在以init关键字作为前缀的初始化块中；可以没有init，也可以有多个init，init的执行顺序是根据写的顺序来的
 //初始化语句块
  init {
      mName=_name
 }
+定义方法必须以fun开头，函数的返回值用:分隔。Unit表示无返回值，可省略
+函数的变长参数可以用 vararg 关键字进行标识：fun update(vararg v:Int){...}
+
+constructor主构造函数（在类体外部声明.直接放在类名后面，通常为主要而简洁的初始化类的方法）和次构造函数声明必须有前缀constructor（在类体内部声明）
+如果类有一个主构造函数，每个次构造函数必须使用this关键字通过直接或间接委托别的次构造函数委托给主构造函数。次构造函数最终都是调用主构造函数来创建对象的。
+创建对象的调用顺序：先调用主构造函数->直接代理主函数的构造函数->间接代理主函数的构造函数->我们调用的构造函数。
+Koltin中的类可以有一个主构造器，以及一个或多个次构造器，主构造器是类头部的一部分，直接放在类名后面:
+class Person(var firstName: String) {...} //private可见度修饰符是可选的
+当我们定义一个类时，我们如果没有为其显式提供主构造函数，Kotlin编译器会默认为其生成一个无参主构造，这点和Java是一样的。
+测试代码如下：
+class Person(var from: String) {
+    /*属性from*/
+    //已经在主构造函数中声明 private var from: String = ""
+    /*次构造方法*/
+    constructor(from1: String, name: String) : this(from1) {
+        println("constructor, from:$from1\n")
+    }
+ 
+    companion object {
+        val instance = Person("companion")
+ 
+        /*伴生对象中的初始化代码*/
+        init {
+            println("companion init 1\n")
+        }
+ 
+        init {
+            println("companion init 2\n")
+        }
+ 
+        /* 伴生对象中不允许有构造函数
+        constructor() {
+            println("companion constructor\n")
+        } */
+    }
+ 
+    /*初始化代码块*/
+    init {
+        println("init 2, from:${from}\n")
+    }
+ 
+    /*初始化代码块*/
+    init {
+        println("init 1, from:${from}\n")
+    }
+ 
+}
+ 
+fun main(args: Array<String>) {
+    println("调用次构造方法:\n")
+    Person("main1", "name1")
+ 
+    println("\n\n调用主构造方法:\n")
+    Person("main2")
+}
+fun main(args: Array<String>) {
+    println("\n\n调用主构造方法:\n")
+    Person("main2")
+ 
+    println("\n\n调用次构造方法:\n")
+    Person("main1", "name1")
+}
  
 super<父类名.接口名>.method()表明你想调用哪个父类.接口的方法
-父类open或者abstract的class和method，才可以被子类继承:和强制显式override。继承方式类似于c++用:。kotlin继承类和实现接口都用:
+父类中open或者abstract的class和method，才可以被子类继承和强制显式override。继承方式类似于c++用: 且kotlin继承类和实现接口都共用:
 Kotlin的类声明默认是final和public的
 使用fun声明的函数默认为final修饰，不能被子类重写。如果允许子类重写该函数，那么就要手动添加 open 修饰它, 子类重写方法使用 override 关键词
 Kotlin中的类和接口跟Java中对应的概念有些不同，比如接口可以包含属性声明。嵌套类并不是默认在内部的。它们不包含外部类的隐式引用。
 重写属性和重写方法其实大致是相同的，但是属性不能被重载。
 companion object {}中用来修饰 静态常量，或者静态方法，单例等等
-kotlin单例模式：用object替换class即可。
-kotlin 开启新线程，多线程同步：
-在kotlin中使用@Synchronized注解和@Volatile注解，这些注解和Java中的synchronized有同样的效果。
-在kotlin中，每一个类都是从Any继承过来的，但是Any并没有声明wait(),notify()和notifyAll()方法。但是你仍然能够使用java.lang.Object的实例作为lock，并且调用相关的方法。
 
 kotlin面向对象-委托和代理关键字by
 data class数据类即model类，其构造函数中必须存在至少一个参数，并且所有参数必须使用val或var修饰。数据类不能继承其他类 (但是可以实现接口)。
 data class必须满足以下要求:
 1.主构造函数至少有一个参数，且主构造函数的所有参数需标记为val 或 var;
-2.数据类不能是抽象、开放、密封或者内部的;
+2.数据类不能是抽象abstract、开放open、密封sealed或者内部inner的;
 如果data class需要无参构造函数,则所有属性必须有默认值:
 data class User(val name: String = "", val age: Int = 0)
-inner class A		内部类
-sealed class密封类有点类似于枚举
+数据类不能继承其他类 (但是可以实现接口)
 https://www.runoob.com/kotlin/kotlin-data-sealed-classes.html
 https://www.cnblogs.com/Jetictors/p/8647968.html
 https://www.jianshu.com/p/163ed3618788
 
 class Hello
-val clazz = Hello::class.java  // 拿到的是 Kotlin 的 KClass。如果想要拿到 Java 的 Class 实例，那么就需要类名.class ,对象.getClass();Class.forName("");。
+val clazz = Hello::class.java  // 拿到的是 Kotlin 的 KClass。如果想要拿到 Java 的 Class 实例，那么就需要 类名.class ,对象.getClass();Class.forName("");。
+启动页面如下：
+var intent: Intent = Intent(this, UserListActivity::class.java)
+startActivity(intent)
 kotlin语法跟java的不同
 https://www.cnblogs.com/dubo-/p/6880599.html
 闭包即.匿名函数.花括号代码块，格式如下
 ([Type param01...]) {
   codeBlock;
 };
-Kotlin中，所有的类都是继承于Any类，这是这个没有父类型的类。即当我们定义各类时，它默认是继承于Any这个超类的
 运算符重载关键字operator
-
-kotlin自定义回调函数：
-
-Kotlin调用c/c++代码：
-java用关键字native声明jni方法，kotlin用关键字external声明jni方法。如 external fun stringFromJNI():String 声明一个无参返回值为String的jni方法。
-
-kotlin集合：
-private var mVideoBeanList:MutableList<VideoDataBean> = mutableListOf<VideoDataBean>()
-https://www.cnblogs.com/Jetictors/p/9237108.html
-https://www.cnblogs.com/Jetictors/p/9241867.html
-https://github.com/Jetictors
 
 kotlin - Coroutine协程：
 协程就像非常轻量级的线程。线程是由系统调度的，线程切换或线程阻塞的开销都比较大。而协程依赖于线程，但是协程挂起时不需要阻塞线程，几乎是无代价的，协程是由开发者控制的。所以协程也像用户态的线程，非常轻量级，一个线程中可以创建任意个协程。
 https://www.jianshu.com/p/76d2f47b900d
+
+
+kotlin开启新线程：
+https://www.jianshu.com/p/3963e64e7fe7
+private var mThread = object : Thread() {
+     override fun run() { 
+         println("running from Thread:${Thread.currentThread()}")
+     }
+}.start()
+private var mThread = Thread({
+     println("running from lambda:${Thread.currentThread()}")
+}).start()
+private var mThread = thread(start=true) {
+    println("running from thread():${Thread.currentThread()}")
+}
+我们正在使用thread()方法，它会神奇地隐藏所有的样板代码。事实上，下面将展示完成的thread()方法：
+public fun thread(start: Boolean = true, isDaemon: Boolean = false, 
+                  contextClassLoader: ClassLoader? = null, name: String? = null, 
+                  priority:Int = -1, block: () -> Unit) : Thread {
+    val thread = object: Thread() {
+        public override fun run() {
+            block()
+        }
+     }
+     if (isDaemon) 
+        thread.isDaemon = true
+     if (priority > 0)
+        thread.priority = priority
+     if (name != null)
+        thread.name = name
+     if(contextClassLoader != null)
+        thread.contextClassLoader = contextClassLoader
+     if(start)
+        thread.start()
+      return thread
+}
+多线程同步：
+https://www.jianshu.com/p/3963e64e7fe7
+在kotlin中使用@Synchronized注解和@Volatile注解，这些注解和Java中的synchronized、volatile有同样的效果。
+在kotlin中一个synchronized方法的声明看起来如下所示：
+@Synchronized fun synchronizedMethod() {
+    println("inside a synchronized method:${Thread.currentThread()}")
+}
+同步代码块声明如下所示：代码的外观和行为与Java变量非常相似。
+fun methodWithSynchronizedBlock() {
+    println("outside of a synchronized block:${Thread.currentThread()}")
+    synchronized(this) {
+         println("inside a synchronized block:${Thread.currentThread()}")
+    }
+}
+kotlin中的Any类和java中的Object相似，但Any并没有wait(), notify() 和 notifyAll() 三个方法。但是你仍然能够使用java.lang.Object的实例作为lock，并且调用相关的方法。
+private val lock = java.lang.Object()
+fun produce() = synchronized(lock) {
+    while(items>=maxItems) { 
+        lock.wait()
+    }
+    Thread.sleep(rand.nextInt(100).toLong())
+    items++
+    println("Produced, count is$items:${Thread.currentThread()}")
+    lock.notifyAll()
+}
+fun consume() = synchronized(lock) {
+    while(items<=0) {
+        lock.wait()
+    }
+    Thread.sleep(rand.nextInt(100).toLong())
+    items--
+    println("Consumed, count is$items:${Thread.currentThread()}")
+    lock.notifyAll()
+}
+
+kotlin自定义回调函数interface：
+https://www.jianshu.com/p/d31c7cd60ddc
+
+Kotlin调用c/c++代码：
+java用关键字native声明jni方法，kotlin用关键字external声明jni方法。如 external fun stringFromJNI():String 声明一个无参返回值为String的jni方法。
+
+https://kotlinlang.org/docs/reference/object-declarations.html
+
+
+
 
 

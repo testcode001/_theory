@@ -7,6 +7,10 @@ readlink
 echo "" cat | grep | sed | awk、cut 
 head tail  more less
 sort wc uniq diff 
+sort -rn排序
+sort的-t指定分隔符 -k指定提取域
+sort -u或者uniq去除重复
+wc 统计行数、单词数、字节数
 
 awk读，sed写.流文本编辑器(echo输入输出重定向),grep -1rn 全文查找
 cut字符串分割：section=$(echo $1 | cut -d '.' -f 1)  

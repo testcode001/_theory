@@ -9,7 +9,8 @@ svn命令：
 
 下载分支上指定版本的代码：svn co -r version repoUrl .
 指定分支上代码回滚：
-1.下载最新代码并进入相应目录下 2.svn merge -r rHEAD:[要回滚到的版本] repoUrl (会产生冲突，解决冲突后，提交) 3.svn ci -m "log"
+1.下载最新代码并进入相应目录下 
+2.svn merge -r rHEAD:[要回滚到的版本] repoUrl (会产生冲突，解决冲突后，提交) 3.svn ci -m "log"
 
 svn revert	回滚代码：本地已修改但未提交到服务器
 svn cat -r version [filename] 显示指定版本的文件内容
@@ -23,13 +24,17 @@ svn：
 http://blog.csdn.net/q199109106q/article/details/8655204
 http://blog.csdn.net/ithomer/article/details/6187464
 -----------------------------------------------------------------------
+用”git init –bare”方法创建一个所谓的裸仓库，之所以叫裸仓库是因为这个仓库只保存git历史提交的版本信息，而不允许用户在上面进行各种git操作。
+如果你硬要操作的话，只会得到下面的错误（”This operation must be run in a work tree”），这个就是最好把远端仓库初始化成bare仓库的原因。
+用"git init"初始化的版本库用户也可以在该目录下执行所有git方面的操作。但别的用户在将更新push上来的时候容易出现冲突。
+
 
 常用git命令:
 git分布式操作
 工作区、暂存区、本地库、远程库，本地分支，远程分支
-git clone repoUrl 创建本地仓库 (git init)
+git clone repoUrl 创建本地仓库 (git init --bare)
 git branch -r 查看远程分支
-git checkout -b localBranchName origin/远程分支名|tag_name/ 检出远程分支
+git checkout -b localBranchName origin/远程分支名|tag_name/ #检出远程分支
 git submodule init
 git submodule update
 git commit --amend 
@@ -42,11 +47,11 @@ git pull origin <远程branch>:<本地branch>
 git checkout -b 本地分支名 origin/远程分支名   		#检出远程指定分支   
 git push origin :远程branch							:左边的本地分支为空，表示删除远程分支。这等同于推送一个空的本地分支到远程分支，等同于 git push origin --delete master
 创建.切换.合并merge.删除本地分支
+git branch newBranch 	创建本地分支
+git checkout localBranchName 		切换分支，以上两个命令可合并成下面一个命令
 git checkout –b newBranch  	创建分支newBranch并切换到该分支
 git pull
-git branch --set-upstream-to=origin/<远程branch> localBranchName  把本地分支和远程分支进行关联
-git branch newBranch 	创建本地分支
-git checkout localBranchName 			切换分支
+git branch --set-upstream-to=origin/<远程branch> localBranchName  创建新分支后，把本地分支和远程分支进行关联
 git branch -a 							查看所有本地和远程分支
 git merge dev v-m "log"  或者git cherry-pick commitId  把dev分支合并到当前master分支(当前在master分支下)。merge即merge from
 git cherry-pick commitId01^..commitId05  注意中间的两个点和^，表示把两个commit区间的所有commit都复制过去。去掉^表示不包含第一个commitid

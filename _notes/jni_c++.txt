@@ -59,12 +59,44 @@ https://www.cnblogs.com/wbcqz/p/9236570.html
 java的byte和Bit之间的转换：即左移<<，右移>>的位运算
 http://www.javacui.com/Theory/268.html
 
+
+jni层崩溃并捕获：
+jthrowable ex = env->ExceptionOccurred();
+if(ex){
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+}
+jni层向java层抛异常：
+env->ThrowNew(jclass, "exception msg");
+
 so库崩溃分析：
 libc    : Fatal signal 11 (SIGSEGV), code 1, fault addr 0x0 in tid 5909 (NativeApp), pid 5884 (ayback.handheld)
 ndk-stack加入系统环境变量
 进入工程目录下：adb logcat | ndk-stack -sym obj/local/armeabi
 arm-Linux-gnueabi-addr2line 0002e180 -e camera.meson6.so
 objdump
+
+ndk-stack有两个选项：
+选项	说明
+-sym	指定debug版本库的位置
+-dump	指定含有crash信息的文件
+1.根据logcat信息“翻译”jni的crash信息，适合发布之前的调试使用
+$adb logcat | $NDK/ndk-stack -sym $PROJECT_PATH/obj/local/armeabi
+2.根据crash文件“翻译”jni的crash信息
+$ NDK/ndk-stack -sym $PROJECT_PATH/obj/local/armeabi -dump foo.txt
+为了方便使用，可以写两个shell函数：默认arch为【armeabi-v7a】：
+ndk_stack_logcat()
+{
+    projeck=./
+    if [ $# -eq 1 -a -d "$1" ]; then
+        projeck=$1/
+    fi
+    adb logcat | $NDK/ndk-stack -sym $projeck/obj/local/armeabi-v7a
+}
+ndk_stack_file()
+{
+    $NDK/ndk-stack -sym $1/obj/local/armeabi-v7a -dump $2
+}
 
 android jni用vscode或者vimide编写
 -------------------------------------------------------------------------------------------------------------
@@ -600,11 +632,12 @@ vscode插件：c++、Code Runner、Cmake、Cmake Tools、Remote-SSH(两端都要
 vs code远程开发：teamviewer
 代码编写：代码自动补全
 代码阅读：
-全局文件搜索查找(vim)Ctrl-p
-全局字符串查找	
-查看定义-右键go define
-查看所有的引用-右键find all references
-头文件和源文件相互跳转-右键
+a.打断点+改背景色、打log、弹toast、断点调试可查看父类引用指向子类对象时的具体的实现子类，或大log打印父类引用的类名
+1.全局文件搜索查找(vim)Ctrl-p
+2.全局字符串查找	
+3.查看定义-右键go define
+4.查看所有的引用-右键find all references
+5.头文件和源文件相互跳转-右键
 
 VS-Image Watch插件
 https://blog.csdn.net/iracer/article/details/83413877
