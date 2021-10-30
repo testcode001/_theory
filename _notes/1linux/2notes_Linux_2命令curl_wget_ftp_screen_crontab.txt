@@ -1,10 +1,34 @@
 命令行下的浏览器
 curl的配置文件：~/.curlrc
+下载文件到指定的目录，并指定下载文件名
+curl -L url -o <filePath>
+curl -L -O --limit-rate 80M http://cgi2.tky.3web.ne.jp/~zzh/up_file.mp3
+-o page.html #将html源码保存在page.html文件中
+-O #保存为原有url连接中的文件名
+curl –u name:passwd ftp://www.quany.info/size.zip -o size.zip 
+wget url
+wget url -P <aimPath> -O fileName
+
+上传文件到ftp server
+-T localfile #PUT method上传一个文件
+curl –u username:password -T /home/neo/size.mp3 ftp://www.quany.info/mp3/
+
 curl参数：
 curl url #访问http页面内容，输出到标准输出
--o page.html #将html源码保存在page.html文件中
--u name:passwd #用户名.密码
+-v 详细的请求信息
+-X POST/GET 指定请求凡是为POST/GET请求，默认是get请求
+-H "header01" -H "header02" 指定请求头部
 -L 表示如果在response header中如果有location的话就直接转向到location的地址（redirect地址）
+
+-d 指定请求参数，也可以是json 如: -d "parameterName1=parameterValue1&parameterName2=parameterValue2" -d '{"parameterName1":"parameterValue1","parameterName2":"parameterValue2"}'
+-u name:passwd #用户名.密码  用于FTP文件下载
+
+-o page.html #将html源码保存在page.html文件中
+-O #保存为原有url连接中的文件名
+--limit-rate 80M  #限制url的传输速度最大80MB
+–max-filesize 1024  #限制下载文件大小，超过1M将不执行操作，并且返回出错
+-F "upload=@localfile" #上传文件
+
 --noproxy 
 -x ip:port #proxy服务器ip及其端口
 --retry 10 #表示重试次数
@@ -15,10 +39,13 @@ curl url #访问http页面内容，输出到标准输出
 -e "mail.linuxidc.com" #指定http的referer请求头，盗链
 -A "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" #指定浏览器版本 而"Mozilla/4.73 [en] (X11; U; Linux 2.2; 15 i686"则可以告诉对方你是一台 PC上跑着的Linux，用的是Netscape 4.73
 -E localcert.pem #访问https的时候使用本地证书
-curl –limit-rate http://www.xxx.com/action #限制url的传输速度
-curl –max-filesize 1024 http://www.xxx.com/action #限制下载文件大小，超过1M将不执行操作，并且返回出错
-POST方式传递过去的数据中若有特殊字符，需将特殊字符转义后发送给服务器端。如value值中包含有空格，则需要先将空格转换成%20：
-curl -d "value%201" http://hostname.com #模拟post请求,没-d参数时默认是get请求
+
+curl -d "leaderboard_id=7778a8143f111272&score=19&app_key=8d49f16fe034b98b&_test_user=test01" "http://172.16.102.208:8089/wiapi/score"
+通过脚本发送post请求，顺便附带文本数据，比如通过"浏览"选择本地的card.txt并上传发送post请求
+答案： curl  -F "blob=@card.txt;type=text/plain"  "http://172.16.102.208:8089/wiapi/score?leaderboard_id=7778a8143f111272&score=40&app_key=8d49f16fe034b98b&_test_user=test01"   
+其中-F 为带文件的形式发送post请求，   blob为文本框中的name元素对应的属性值。<type="text" name="blob">
+POST方式传递过去的数据中若有特殊字符，需将特殊字符转义后发送给服务器端。如value值中包含有空格，则需要先手动将空格转换成%20：
+curl -d "value%201" http://hostname.com #模拟post请求, 没-d参数时默认是get请求
 在新版本的CURL中，--data-urlencode参数会自动转义特殊字符。
 curl --data-urlencode "value 1" http://hostname.com
 curl –data-urlencode http://www.xxx.com/action?name=张三&sex=男  #正确的给url编码
@@ -28,10 +55,8 @@ curl –data-urlencode http://www.xxx.com/action?name=张三&sex=男  #正确的
 <input type=submit name=nick value="go">
 </form>
 这样一个HTTP表单，我们要用curl进行模拟，就该是这样的语法：
-curl -F upload=@localfile -F nick=go http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi    #post方式上传文件
+curl -F "upload=@localfile" -F nick=go http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi    #post方式上传文件
 curl --form "fileupload=@filename.txt" http://hostname/resource #上传文件
--T localfile #PUT method上传一个文件  
-curl -T /home/neo/demo.jpg -u username:password ftp://www.leweiup.com
 
 curl多线程下载：
 $ curl -r 0-10240 -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3 &\
@@ -69,15 +94,10 @@ wget -e "http_proxy=http://10.0.0.172:9201" "www.wo.com.cn" #-Y是否使用代�
 --header 
 --limit-rate=200k 
 ------------------------------------------------------------------------------------------------------------------------------------
-上传文件到ftp server
-curl –u name:passwd -T size.mp3 ftp://www.quany.info/mp3/
-
 下载ftp目录：
 wget -m -np ftp://cilab-nas0.bj.intel.com/Public/Build/artifactory/Android-build-scripts/ --ftp-user=user --ftp-password=intel123
 -m mirror
 -np --no-parent不越过父目录
-下载单个文件：
-curl –u name:passwd ftp://www.quany.info/size.zip -o size.zip 
 
 创建ftp目录
 curl -u name:passwd --ftp-create-dirs ftp://www.quany.info/newDirName/
@@ -212,6 +232,8 @@ crontab -e编辑某个用户的任务 编辑的是/var/spool/cron下对应用户
 -r删除某个用户的任务
 -u指定一个用户 
 
+crontab有自己的PATH环境变量，而不使用系统的PATH环境变量
+crontab中不能使用$等变量，只能使用绝对路径
 cron表达式
 分     小时    日       月       星期     命令
 0-59   0-23   1-31   	1-12     0-6     linuxCommand/shell脚本路径     (取值范围,0表示周日,一般一行对应一个任务)

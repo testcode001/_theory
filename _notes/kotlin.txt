@@ -1,10 +1,13 @@
 面向过程.面向对象+OC+shell+c++
-继承类似于c++，形参类似于OC，定义变量函数类似于js和python，变量取值类似于shell
+继承类似于c++用: ，形参类似于OC和python.(方法定义的形参可以有默认值，调用时可不传值)，定义变量函数类似于js用var.val(变量名在前，数据类型在后，用:分割)，变量取值类似于shell用${}
+
 
 kotlin：定义，及调用
+访问权限修饰符(public.internal.protected.private)、override继承重写修饰符(open.abstract、final)：分别修饰类，方法，属性
 变量：静态变量即companion object代码块、常量const val 变量名:数据类型、普通变量var 变量名:数据类型、集合(可变的和不可变的) 变量取值用${varName}类似于shell
-方法(fun +名字.形参 : 返回值)：普通方法fun 、静态方法即companion object代码块、构造方法(主构造函数、次级构造函数constructor)+init{...}代码块，方法的重写override
-普通类class.接口interface：访问权限(public.internal.protected.private)、继承(open.abstract、final)，接口实现
+方法(fun +名字.形参 : 返回值)：普通方法fun 、静态方法即companion object代码块、默认final方法、构造方法(主构造函数、次级构造函数constructor)+init{...}代码块，方法的重写override
+inline内联函数与lamada表达式：在使用函数作为另一个函数的参数（所谓的高阶函数）比在Java中更自然
+普通类class.接口interface：，接口实现
 data class数据类即model类
 abstract class抽象类，open class开放类
 enum class枚举类
@@ -16,8 +19,6 @@ private var mThread = object : Thread() {
          println("running from Thread:${Thread.currentThread()}")
      }
 }
-Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent()
-companion object{...}相当于静态代码块用来定义静态变量或者静态方法
 
 Kotlin之数组和集合：基础数据类型数组、复杂数据类型数组
 https://www.jianshu.com/p/6d95db6e9f87
@@ -49,7 +50,10 @@ map还可以用map[key] = value,来代替map.put("key", value)
 
 开启新线程、多线程同步
 
-kotlin用as?实现强制类型转换类似于python。如下：
+Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent()
+companion object{...}相当于静态代码块用来定义静态变量或者静态方法，在类中只能存在一个
+
+kotlin用as?实现强制类型转换，类似于python。如下：
 val person: Person = Person()
 val student:Student? =person as? Student
 println(student) // null
@@ -57,8 +61,49 @@ println(student) // null
 kotlin的is就是java的instanceof。如下：
 if(zhansan is Student){...} 
 
-kotlin的when其实就是对java的switch的一个升级。
+在Kotlin中用when来代替switch操作符。else同switch的default。如果是多行语句，记得加花括号{}
 https://www.jianshu.com/p/01eaac5f8767
+val i = 5
+when (i) {
+    5 -> print("5")
+    4 -> print("4")
+    3 -> print("3")
+    2 -> print("2")
+    1 -> print("1")
+	else -> toast("gone")
+	
+}
+val res = when {
+    x in 1..10 -> "cheap"
+    s.contains("hello") -> "it's a welcome!"
+    v is ViewGroup -> "child count: ${v.getChildCount()}"
+    else -> ""
+}
+
+kotlin中的return、break、continue、标签
+Kotlin中的任意表达式都可以标记为一个label。Label 由一个标记符跟上 @ 符号构成。
+例如 abc@，fooBar@，为了标记一个表达式，我们只需要在它前面加一个 label 即可。
+loop@ for (i in 1..100) {
+  // ...
+}
+我们可以使用 label 来限制一个 break 或者一个 continue 语句：
+loop@ for (i in 1..100) {
+  for (j in 1..100) {
+    if (...) break @loop
+  }
+}
+
+inline内联函数与lamaba表达式
+inline fun consume(f: () -> Unit): Boolean {
+    f()
+    return true
+}
+override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+    R.id.home -> consume { navigateToHome() }
+    R.id.search -> consume { MenuItemCompat.expandActionView(item) }
+    R.id.settings -> consume { navigateToSettings() }
+    else -> super.onOptionsItemSelected(item)
+}
 --------------------------------------------------------------------------------------------
 
 kotlin视频教程 
@@ -80,11 +125,14 @@ var l= s?.length//如果s为null，则不执行length方法，从而避免了jav
 对于不可以为null的变量，在调用该变量方法的时候，必须用变量名+!!的形式进行调用。如var l= s!!.length
 所有成员变量(包括定义在类中，以及直接定义在kt文件中的)在定义时必须进行初始化，局部变量（定义在方法内）可以不进行初始化。
 
+lateinit与by lazy{...}代码块：
+lateinit只用于变量var且只能用于复杂数据类型，而by lazy{...}代码块只用于常量val。
+by lazy{...}代码块只在第一次调用的时候执行代码，并记录结果，再次调用只返回记录的结果
 变量名在前，数据类型在后
 private lateinit var name: String 		//lateinit是用来告诉编译器，name这个变量后续会妥善处置的。lateinit只能用于对象，且该对象不可为Nullable，不能用于基础数据类型
 private var name: String = "zhangsan"  
 类属性或者局部变量定义必须用var或者val修饰，局部变量可不写变量类型:DataTpye，因为有自动类型推到？如果局部变量没有初始化 则需要明确表明 变量类型
-类的主构造函数最好有val或var修饰，这样形参可在整个类中访问。形参可选用var或者val修饰,但必须有变量名:变量类型？。但类的次构造函数形参一定不能有val或var修饰。
+类的主构造函数最好有val或var修饰，这样形参可在整个类中访问(即属于类的属性成员)。但类的次构造函数形参一定不能有val或var修饰。形参可选用var或者val修饰,但必须有变量名:变量类型？。
 注意：主构函数不能包含任何代码，初始化代码放在以init关键字作为前缀的初始化块中；可以没有init，也可以有多个init，init的执行顺序是根据写的顺序来的
 //初始化语句块
  init {

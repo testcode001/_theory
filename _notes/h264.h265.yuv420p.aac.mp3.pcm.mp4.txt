@@ -1,4 +1,4 @@
-数据源.player--surface--surfaceTexture--(Glsurfaceview旋转90度?.opengles.egl: Display.Surface.Context)--textureView：每一层都有回调函数设置,回调传递上层运行所需的所有变量和数据。
+数据源.player--surface--surfaceTexture--(Glsurfaceview旋转90度?.opengles.egl: Display.Surface.Context)--textureView：每一层都有回调函数设置,回调传递给下一级(即上层)运行所需的所有变量和数据。
 (视频数据源可获取sps,pps.GOP.宽.高.帧率, I.B.P帧 IDR帧即强制刷新帧，强制刷新宽)
 音视频：采集-->x264编码-->网络传输或保存成文件-->解码-->展示
 其中音视频解码-->展示又分为一下几种：

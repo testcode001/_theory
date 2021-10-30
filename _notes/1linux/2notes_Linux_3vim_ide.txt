@@ -1,52 +1,5 @@
 多用命令行模式，而不是哑巴编辑模式
 
-
-vim配置文件、语法文件、插件文件中使用的都是vim专用的脚本语言VimScript。
-以行为执行单位
-使用:source命令来执行外部VimScript文件
-let age=29 #定义变量
-unlet age #删除变量
-if 语句使用方法与C大致相同：
-if(a > b)  
-    echo "a大于b"  
-else  
-    echo "a不大于b"  
-endif  
-while i>0  
-    let sum +=  i  
-    let i -= 1  
-endwhile  
-for i in range(1,100)  
-    let sum += i  
-endfor 
-都可以使用continue和break来改变循环，这与C完全一样
-function Min(num1, num2)  
-    if a:num1 < a:num2  
-        let smaller = a:num1  
-    else  
-        let smaller = a:num2  
-    endif  
-    return smaller  
-endfunction  
-    函数的名字首字母必须大写。Vim为了避免用户自定义函数与内置函数命名冲突，强制要求用户自定义函数名的首字母必须是大写字母。
-    函数的参数在函数体内使用的时候前面加上了a:，这表示是一个函数参数，否则运行时会报错，并提示num1是没有定义的变量。这就引出了一个很重要的话题：变量的作用域。
-    函数名称属于全局命名空间，在所有脚本中可用
-函数调用：
-let line = getline(".")  
-let repl = substitute(line, '\a', "*", "g")  
-call setline(".", repl) #使用关键字call 来显式调用函数。
-    s:name 脚本文件作用域，此时s:name这个变量只在当前脚本文件中有效，其他的脚本文件中如果也定义了同名的s:name也没关系，因为这两者彼此独立。这一点与C中的static关键字类似。
-    b:name 缓冲区作用域，b:name只在指定的缓冲区中有效
-    w:name 窗口作用域，w:name只在指定的窗口中有效
-    g:name 全局作用域，函数外定义的变量的默认值
-    v:name vim预定义的变量，注意预定义变量不同于vim的选项(option)变量。
-    l:name 函数内部的局部变量，函数内部定义的变量的默认值
-
-注意这些作用域只针对变量名，而不能作用于函数名。
-如果变量的名字以$开头，那么这个变量被认为是环境变量， 如echo $HOME  
-
-	
-	
 vim插件目录：
 ~/.vim/plugin/
 ~/.vim/doc/
@@ -56,6 +9,228 @@ http://blog.csdn.net/smstong/article/details/20724191
 http://blog.csdn.net/smstong/article/details/20791329
 http://name5566.com/4065.html
 http://name5566.com/4002.html
+1.supertab插件(Ctrl+p)：当前文件代码自动补全
+http://www.vim.org/scripts/script.php?script_id=1643
+2.acp.vim插件：AutoComplPop
+https://www.vim.org/scripts/script.php?script_id=1879
+3.A插件：.h/.c.cpp文件之间跳转	:A  :AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
+http://www.vim.org/scripts/script.php?script_id=31
+4.Grep插件：全文搜索
+http://www.vim.org/scripts/script.php?script_id=311
+https://github.com/yegappan/grep
+5.NERDTree插件：文件浏览器 :NERDTreeToggle   Ctrl+ww(两个w)，在各个视图之间切换.  :q 在指定视图内后，q可关闭该视图
+https://www.vim.org/scripts/script.php?script_id=1658 
+6.MiniBufExplorer插件：tab页编辑文件缓冲区 :b"num"打开指定的buffer。
+http://www.vim.org/scripts/script.php?script_id=159
+7.Winmanager插件：将文件浏览器NERDTree、缓冲区MiniBufExplorer、Taglist等窗口界面整合起来，使Vim更像VS！:WMToggle 
+wm管理所有视图，各个视图也可以单独管理。
+http://www.vim.org/scripts/script.php?script_id=95
+8.trinity.vim插件：The Trinity plugin manages Source Explorer, Taglist and NERD Tree, and build them as a great IDE.
+http://www.vim.org/scripts/script.php?script_id=2347
+
+ctags，cscope是命令， 其余都是插件，其中cscope命令、OmniCppComplete插件、TagList插件、srcexpl插件需要依赖ctags命令，其他插件可独立运行。
+9.ctags命令：变量.函数定义 				ctrl+]查看定义，ctrl+]]查看光标所在.h文件的.cpp文件，ctrl+o返回原文件，ctrl+i光标依次前进
+10.cscope命令：变量.函数调用 			:cs help :cs find {querytype} {string}
+11.OmniCppComplete插件(Neocomplete插件)： 变量.函数代码自动补全 YouCompleteMe使用的是C/S结构，部分使用vim脚本编写
+12.TagList插件：结构化视图 				:Tlist Ctrl+ww在编辑区域和各个视图之间切换
+http://www.vim.org/scripts/script.php?script_id=273
+13.srcexpl插件：查看变量.函数的定义声明
+https://www.vim.org/scripts/script.php?script_id=2179
+SrcExpl (Source Explorer) is a source code explorer that provides context for the currently selected keyword by displaying the function or type definition
+or declaration in a separate window. 
+实现类似于 Source Insight 的 context window 的功能，即进行函数，变量、宏等定义的跟踪。它与著名的 Taglist， NERD_Tree 集成在一起，并由 Trinity 进行管理，可实现 Source Insight 的大部分功能，
+
+
+1.
+ctags命令：变量.函数定义跳转
+./configure --prefix= make make install (./configure --help)
+大多数unix系统都有ctags软件， which ctags
+1. 代码根目录运行命令 ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . #多了一个tags文件，这个就是索引文件
+--c++-kinds=+p : 为标签添加函数原型(prototype)信息  
+--fields=+iaS : 为标签添加继承信息(inheritance)，访问控制(access)信息，函数特征(function Signature,如参数表或原型等)  
+--extra=+q : 为类成员标签添加类标识 
+2. ~/.vimrc中增加以下这行：
+map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+set tags=tags;/  "若当前目录找不到tags文件，则到上层目录查找
+set autochdir
+ctags：
+Ctrl-]：跳转到光标所在的变量名或函数处。"Ctrl-o"或“Ctrl-t”退回原来的地方。
+ 
+2.
+cscope命令：查找变量.函数的调用
+./configure --prefix= make make install (./configure --help)
+大多数unix系统都有cscope软件，whihc cscope
+:cs show  显示cscope的链接
+1. 代码根目录运行命令：cscope -Rbq -f path/xxx.out #这个命令会生成三个文件cscope.out, cscope.in.out, cscope.po.out
+2. ~/.vimrc: 
+cs add xxx.out #增加一个新的cscope数据库
+cs add path/xxx.out [pre-path] #增加一个新的cscope数据库
+#nmap <F2> :cs find s <C-R>=expand("<cword>")<CR><CR>
+#nmap <F3> :cs find c <C-R>=expand("<cword>")<CR><CR>
+http://blog.csdn.net/zhengkarl/article/details/6118796
+    "Switch to current dir  
+    function! My_ChangeToFilePath()  
+      try  
+        if exists("g:last_work_path")  
+          let g:last_last_work_path = g:last_work_path  
+        endif  
+      catch  
+        echo v:errmsg  
+      endtry  
+      let g:last_work_path = escape(getcwd(), " ")  
+      let str = expand("%:p:h")  
+      let str = s:Escape(str)  
+      "let str = escape(str, " ")  
+      execute "cd ".str  
+    endfunction  
+    function! My_ChangeToLastPath()  
+      execute "cd ".g:last_work_path  
+    endfunction  
+    "nmap <silent> <leader>cd :cd %:p:h<cr>  
+    "nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
+    nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
+    nmap <silent> <leader>cl :call My_ChangeToLastPath()<cr>  
+http://www.cnblogs.com/NeilHappy/archive/2013/05/29/3106358.html
+http://www.ibm.com/developerworks/cn/linux/l-vim-script-1/
+#set cscopequickfix=s-,c-,d-,i-,t-,e-
+http://blog.csdn.net/mci2004/article/details/7944074
+生成的cscope.files中保存的是相对路径，而不是绝对路径。这样的话，在cscope 中查找tags的时候，是没法打开相应的包含查找结果的文件的。怎么避免这个问题呢？有如下两个方法：
+1，在:cs find命令后的查找路径是当前项目的根目录，这个时候cscope.files中保存的就是所有项目文件的绝对路径了。
+2，在:cs add的时候，接一个prepend path
+:cs add [cscope.out] [pre-path] 
+3. vim中运行命令：
+:cs help
+:cs find {querytype} {string}
+搜索结束后再输入:cw 显示QuickFix窗口
+querytype：
+c	//查找调用本函数的函数	
+d	//查找本函数调用的函数
+e	//查找egrep模式，相当于egrep功能，但查找速度快多了
+f	//查找并打开文件，类似vim的find功能
+g	//查找函数、宏、枚举等定义的位置，类似ctags的功能
+i	//查找包含本文件的文件
+s	//查找C语言符号，即查找函数名、宏、枚举值等出现的地方
+t	//查找指定的字符串
+0或者s   —— 查找这个C符号
+1或者g  —— 查找这个定义
+2或者d  —— 查找被这个函数调用的函数（们）
+3或者c  —— 查找调用这个函数的函数（们）
+4或者t   —— 查找这个字符串
+6或者e  —— 查找这个egrep匹配模式
+7或者f   —— 查找这个文件
+8或者i   —— 查找#include这个文件的文件（们）
+例如：
+:cs find s work 查找所有当前光标所在符号出现过位置。 
+:cs find c work 查找所有调用当前光标所在函数的函数。
+
+3.
+TagList插件： 提供变量.函数的结构化视图
+解压后copy到vim的插件目录
+:Tlist #打开。关闭视图
+Ctrl+ww # 切换窗口
+~/.vimrc: 
+filetype plugin indent on 
+let Tlist_Show_One_File = 1            "只显示当前文件的，而不同时显示多个文件的tag。
+let Tlist_Exit_OnlyWindow = 1          "如果taglist窗口是最后一个窗口，则退出vim
+
+let Tlist_File_Fold_Auto_Close=1 "同时显示多个文件中的tag时，taglist只显示当前文件tag，其他文件的函数列表折叠隐藏  
+let Tlist_Use_SingleClick= 1    " 缺省情况下，在双击一个tag时，才会跳到该tag定义的位置
+Tlist_Close_On_Select=1 		"选择了tag后自动关闭taglist窗口
+let Tlist_Process_File_Always=1  "taglist始终解析文件中的tag，不管taglist窗口有没有打开 
+let Tlist_Use_Right_Window=0 		   "1为让窗口显示在右边，0为显示在左边  
+let Tlist_WinWidth=40			#taglist窗口宽度
+let Tlist_Inc_Winwidth=1
+将光标移到变量处， 按下空格键
+
+http://blog.csdn.net/bokee/article/details/6633193
+http://blog.csdn.net/taoshengyang/article/details/6331217
+http://blog.csdn.net/longerzone/article/details/7789581
+搜索 ctags更新
+
+4.
+OmniCppComplete插件：
+在~/.vimrc中加入以下几行：
+set nocp  
+filetype plugin on
+
+
+5.
+supertab:
+安装步骤： 
+1、下载 supertab.vmb		http://www.vim.org/scripts/script.php?script_id=1643
+2、 vim supertab.vmb        ***vimball*** Source this file to extract it! (:so %)
+3、 :so %       			插件安装完成
+~/.vimrc文件中加上
+let g:SuperTabRetainCompletionType=2
+let g:SuperTabDefaultCompletionType="<C-X><C-O>" 或者 let g:SuperTabDefaultCompletionType="context"
+" 0 - 不记录上次的补全方式
+" 1 - 记住上次的补全方式,直到用其他的补全命令改变它
+" 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
+" 设置按下<Tab>后的补全方式为<C-X><C-O>. 后默认的补全方式是<C-P>
+
+a.vim插件: c/h文件间相互切换
+:A，打开.cpp和.h对应的文件，
+:AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
+map av : AV<cr>  （最常用）
+
+acp.vim：AutoComplPop
+https://www.vim.org/scripts/script.php?script_id=1879 
+"vim启动时启用auto-popup（默认启动时候就已经启动了auto-popup了
+let g:acp_enableAtStartUp = 1
+
+6.
+MiniBufExplorer插件：
+在~/.vimrc文件中加入以下几行：
+let g:miniBufExplMapWindowNavVim = 1   
+let g:miniBufExplMapWindowNavArrows = 1   
+let g:miniBufExplMapCTabSwitchBufs = 1   
+let g:miniBufExplModSelTarget = 1  
+let g:miniBufExplMoreThanOne=0  
+<Tab>   向前循环切换到每个buffer名上
+<S-Tab> 向后循环切换到每个buffer名上
+<Enter> 在打开光标所在的buffer
+d       删除光标所在的buffer
+在命令模式下：
+:b"num"   打开指定的buffer，"num"指的是buffer开始的那个数字，比如上图，我想打开list_audit.erb，输入:b7就ok了
+:bn   打开当前buffer的下一个buffer
+:bp   打开当前buffer的前一个buffer
+以下的两个功能需要在~/.vimrc中增加:
+let g:miniBufExplMapCTabSwitchBufs = 1
+<C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开
+<C-S-Tab> 向后循环切换到每个buffer上,并在但前窗口打开
+
+7.
+紧靠MiniBufExplorer下方左边的矩形区域就是NERDTree。在这个窗口，我们可以用鼠标或键盘方便的浏览整个文件系统，在某个文件上点击或回车，就可以在右边编辑区域打开该文件。
+
+8.
+Winmanager插件：
+在~/.vimrc文件中加入以下几行：
+let g:NERDTree_title="[NERDTree]"  
+let g:winManagerWindowLayout = "FileExplorer|BufExplorer|TagList"
+nmap wm :WMToggle<cr>
+   
+在~/.vim/plugin目录下的winmanager.vim文件中找到以下函数定义并添加内容：exe 'q'
+function! <SID>ToggleWindowsManager()  
+   if IsWinManagerVisible()  
+      call s:CloseWindowsManager()  
+   else  
+      call s:StartWindowsManager()  
+      exe 'q'  
+   end  
+endfunction
+
+9.
+Grep插件：
+~/.vimrc中增加了下面这句:
+nnoremap <silent> <F3> :Grep<CR>
+比如你想在/home/wooin/vim71/src/main.c中查找"FEAT_QUICKFIX", 则将光标移到"FEAT_QUICKFIX"上, 然后按下F3键, 如下图:  
+
+10.
+Visual Mark书签插件：
+用"mm"设置书签，如果你设置了多个书签, 你可以用F2键正向在期间切换, 用Shift+F2反向在期间切换.
+1 这个书签不能自动保存, 关闭vim就没了. 
+2 切换书签时不能在不同文件间切换, 只能在同一个文件中切换
+----------------------------------------------------------------------------------
 
 ~/.vimrc: 立即生效 :so ~/.vimrc  #so即source
 filetype plugin indent on
@@ -67,13 +242,21 @@ set mouse=a
 注释符"
 map是否起作用的一个关键因数是当前 vim打开文件后处于哪种模式之下。共6种模式 :help vim-modes
 vmap 和map类似，二者的区别在于前者用于所谓的Visual模式，后者用于通常的命令模式。
+在vim配置文件中经常会看到map、nmap、imap、vmap、vnoremap、nunmap、nmapclear等，都是什么意思呢？map前的n、v、nore、un等表示下列含义：
+1、nore—— 表示非递归，map默认是递归映射的
+2、n ——表示在普通模式下生效
+3、v ——表示在可视模式下生效
+4、i ——表示在插入模式下生效
+5、c——表示在命令行模式下生效
+6、un——后面跟按键组合，表示删除这个映射
+7、clear——表示清除快捷键映射
 map <F3> :Tlist<CR>  "按下F3就可以打开.关闭视图
 map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
 :!cmd  			#vim中执行linux命令
 C表示ctrl: 如<C-LeftMouse>表示Ctrl＋鼠标左键点击
 A表示Alt
 S表示Shift
-<CR>表示回车
+<CR>				表示回车
 <F1>				功能键F1
 <Space>  			插入空格
 <Tab>  				插入Tab
@@ -81,6 +264,14 @@ S表示Shift
 <Up>                光标上移键
 <LeftMouse>			鼠标左键
 <Leader>			,键
+<k0> - <k9> 		小键盘 0 到 9
+有些特殊参数必须在map映射命令的后边，在其他任何参数的前面， 比如：<buffer> <silent>
+如果这些映射命令的第一个参数是<buffer>，映射将只局限于当前缓冲区（也就是你此时正编辑的文件）内。比如： 
+:map <buffer> ,w /a<CR>
+<silent>是指执行键绑定时不在命令行上回显，比如： 
+:map <silent> ,w /abcd<CR> 
+还有很多具体的映射相关的内容可以参见:help map
+
 set autoindent  
 set tabstop=4  
 set shiftwidth=4 
@@ -92,31 +283,29 @@ set expandtab
 set cursorline
 set background=dark
 set t_Co=256   vim在终端下的配色亮起来
+set list  	vim显示不可见字符，现在 TAB 键显示为 ^I，而 $显示在每行的结尾，以便你能找到可能会被你忽略的空白字符在哪里。 
+set nolist  隐藏不可见字符
+
+中文支持
+let &termencoding=&encoding
+set encoding=utf-8
+set fileencoding=utf-8
+set fileencodings=ucs-bom,utf-8,chinese
+编辑 ~/.profile，加入：export LC_ALL=zh_CN.GB18030
+termencoding----默认空值，也就是输出到终端不进行编码转换。
+encoding----与系统当前locale相同，所以编辑文件的时候要考虑当前locale，否则要设置的东西就比较多了。
+fileencoding----vim打开文件时自动辨认其编码，fileencoding就为辨认的值。为空则保存文件时采用encoding的编码，如果没有修改encoding，那值就是系统当前locale了。
 http://blog.csdn.net/wooin/article/details/1887737
 http://www.cnblogs.com/ma6174/archive/2011/12/10/2283393.html
 http://blog.csdn.net/fjb2080/article/details/7715636
 http://www.cnblogs.com/ggjucheng/archive/2011/12/15/2288795.html
 vim ide 吴垠
 
-1.supertab插件(Ctrl+p)：当前文件代码自动补全
-2.A插件：.h/.c.cpp文件之间跳转	:A  :AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
-3.Grep插件：全文搜索
-4.NERDTree插件：树形浏览文件系统的界面 :NERDTree   Ctrl+ww(两个w)，在各个视图之间切换.  :q 在指定视图内后，q可关闭该视图 
-5.MiniBufExplorer插件：tab页编辑文件 :b"num"打开指定的buffer
-6.Winmanager插件：将NERDTree界面和Taglist界面整合起来，使Vim更像VS！:WMToggle 
-wm管理所有视图，各个视图也可以单独管理。
-
-7.ctags命令：变量.函数定义 		ctrl+]查看定义，ctrl+]]查看光标所在.h文件的.cpp文件，ctrl+o返回原文件，ctrl+i光标依次前进
-8.cscope命令：变量.函数调用 		:cs help :cs find {querytype} {string}
-9.OmniCppComplete插件： 变量.函数代码自动补全 YouCompleteMe使用的是C/S结构，部分使用vim脚本编写
-10.TagList插件：结构化视图 		:Tlist Ctrl+ww在编辑区域和各个视图之间切换
-其中cscope命令、OmniCppComplete插件、TagList插件需要依赖ctags命令，其他插件可独立运行。
-
 代码阅读：
 vim单个文件搜索.替换.代码提示
 字符串搜索：
 #或者* 当前文件中搜索光标所在的单词	(变量.函数跳转)
-/string，回车，按n或N向后或向前查找 (/从开头搜索, ?从结尾处搜索)
+/string，回车，按n或N向后或向前查找 
 n #重复上一次搜索命令
 查看变量定义gD(go define)、光标依次返回ctrl+o 、`` #光标在当前和上一次的位置之间切换
 A "jump" is one of the following commands: 
@@ -205,12 +394,10 @@ set cindent shiftwidth=4
 1.按v进入可视模式，选中指定行，按一次> < 然后再按"."重复上一个命令， 多行缩进及返回
 单行的话可多次按> < 来缩进及返回
 2.按v进入可视模式，选中指定行，按"=" 格式化代码
-全选(G到文档尾->v进入可视模式->gg到文档头)后使用"="即可完成整个文档的自动排版
+全选GVgg(G到文档尾->v进入可视模式->gg到文档头)后使用"="即可完成整个文档的自动排版
 3.在命令状态下对当前行用==, 或对多行用n==（n是自然数）表示自动缩进从当前行起的下面n行。 
 
 按v进入visual状态，选择多行，用>或<缩进或缩出 
-
-vim显示不可见字符	:set list ，现在 TAB 键显示为 ^I，而 $显示在每行的结尾，以便你能找到可能会被你忽略的空白字符在哪里。 
 ----------------------------------------------------------------------------------
 vim查看c++源代码: 
 find . -type f -print | xargs grep -10 -i **** --color
@@ -375,217 +562,51 @@ sudo apt-get install clang libclang1 libclang-dev
 clang_complete
 vim实用技巧：
 http://easwy.com/blog/archives/tag/vim/
-
-1.
-vim+Tlist
-TagList插件： 提供变量.函数的结构化视图
-解压后copy到vim的插件目录
-:Tlist #打开。关闭视图
-Ctrl+w # 切换窗口
-~/.vimrc: 
-filetype plugin indent on 
-let Tlist_Show_One_File = 0            "同时显示多个文件的tag，而不只显示当前文件的
-let Tlist_Exit_OnlyWindow = 1          "如果taglist窗口是最后一个窗口，则退出vim
-
-let Tlist_File_Fold_Auto_Close=1 "同时显示多个文件中的tag时，taglist只显示当前文件tag，其他文件的函数列表折叠隐藏  
-let Tlist_Use_SingleClick= 1    " 缺省情况下，在双击一个tag时，才会跳到该tag定义的位置
-Tlist_Close_On_Select=1 		"选择了tag后自动关闭taglist窗口
-let Tlist_Process_File_Always=1  "taglist始终解析文件中的tag，不管taglist窗口有没有打开 
-let Tlist_Use_Right_Window=0 		   "1为让窗口显示在右边，0为显示在左边  
-let Tlist_WinWidth=40			#taglist窗口宽度
-let Tlist_Inc_Winwidth=1
-将光标移到变量处， 按下空格键
-
-http://blog.csdn.net/bokee/article/details/6633193
-http://blog.csdn.net/taoshengyang/article/details/6331217
-http://blog.csdn.net/longerzone/article/details/7789581
-搜索 ctags更新
-
-2.
-ctags命令：变量.函数定义跳转
-./configure --prefix= make make install (./configure --help)
-大多数unix系统都有ctags软件， which ctags
-1. 代码根目录运行命令 ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . #多了一个tags文件，这个就是索引文件
---c++-kinds=+p : 为标签添加函数原型(prototype)信息  
---fields=+iaS : 为标签添加继承信息(inheritance)，访问控制(access)信息，函数特征(function Signature,如参数表或原型等)  
---extra=+q : 为类成员标签添加类标识 
-2. ~/.vimrc中增加以下这行：
-map <C-F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
-set tags=tags;/  "若当前目录找不到tags文件，则到上层目录查找
-set autochdir
-ctags：
-Ctrl-]：跳转到光标所在的变量名或函数处。"Ctrl-o"或“Ctrl-t”退回原来的地方。
- 
-
-3.
-cscope命令：查找变量.函数的调用
-./configure --prefix= make make install (./configure --help)
-大多数unix系统都有cscope软件，whihc cscope
-1. 代码根目录运行命令：cscope -Rbq -f path/xxx.out #这个命令会生成三个文件cscope.out, cscope.in.out, cscope.po.out
-2. ~/.vimrc: 
-cs add xxx.out #增加一个新的cscope数据库
-cs add path/xxx.out [pre-path] #增加一个新的cscope数据库
-#nmap <F2> :cs find s <C-R>=expand("<cword>")<CR><CR>
-#nmap <F3> :cs find c <C-R>=expand("<cword>")<CR><CR>
-http://blog.csdn.net/zhengkarl/article/details/6118796
-    "Switch to current dir  
-    function! My_ChangeToFilePath()  
-      try  
-        if exists("g:last_work_path")  
-          let g:last_last_work_path = g:last_work_path  
-        endif  
-      catch  
-        echo v:errmsg  
-      endtry  
-      let g:last_work_path = escape(getcwd(), " ")  
-      let str = expand("%:p:h")  
-      let str = s:Escape(str)  
-      "let str = escape(str, " ")  
-      execute "cd ".str  
-    endfunction  
-    function! My_ChangeToLastPath()  
-      execute "cd ".g:last_work_path  
-    endfunction  
-    "nmap <silent> <leader>cd :cd %:p:h<cr>  
-    "nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
-    nmap <silent> <leader>cd :call My_ChangeToFilePath()<cr>  
-    nmap <silent> <leader>cl :call My_ChangeToLastPath()<cr>  
-http://www.cnblogs.com/NeilHappy/archive/2013/05/29/3106358.html
-http://www.ibm.com/developerworks/cn/linux/l-vim-script-1/
-#set cscopequickfix=s-,c-,d-,i-,t-,e-
-http://blog.csdn.net/mci2004/article/details/7944074
-生成的cscope.files中保存的是相对路径，而不是绝对路径。这样的话，在cscope 中查找tags的时候，是没法打开相应的包含查找结果的文件的。怎么避免这个问题呢？有如下两个方法：
-1，在:cs find命令后的查找路径是当前项目的根目录，这个时候cscope.files中保存的就是所有项目文件的绝对路径了。
-2，在:cs add的时候，接一个prepend path
-:cs add [cscope.out] [pre-path] 
-3. vim中运行命令：
-:cs help
-:cs find {querytype} {string}
-搜索结束后再输入:cw 显示QuickFix窗口
-querytype：
-c	//查找调用本函数的函数	
-d	//查找本函数调用的函数
-e	//查找egrep模式，相当于egrep功能，但查找速度快多了
-f	//查找并打开文件，类似vim的find功能
-g	//查找函数、宏、枚举等定义的位置，类似ctags的功能
-i	//查找包含本文件的文件
-s	//查找C语言符号，即查找函数名、宏、枚举值等出现的地方
-t	//查找指定的字符串
-0或者s   —— 查找这个C符号
-1或者g  —— 查找这个定义
-2或者d  —— 查找被这个函数调用的函数（们）
-3或者c  —— 查找调用这个函数的函数（们）
-4或者t   —— 查找这个字符串
-6或者e  —— 查找这个egrep匹配模式
-7或者f   —— 查找这个文件
-8或者i   —— 查找#include这个文件的文件（们）
-例如：
-:cs find s work 查找所有当前光标所在符号出现过位置。 
-:cs find c work 查找所有调用当前光标所在函数的函数。
-
-4.
-supertab:
-http://www.vim.org/scripts/script.php?script_id=1643
-~/.vimrc文件中加上
-let g:SuperTabRetainCompletionType=2
-let g:SuperTabDefaultCompletionType="<C-X><C-O>" 或者 let g:SuperTabDefaultCompletionType="context"
-" 0 - 不记录上次的补全方式
-" 1 - 记住上次的补全方式,直到用其他的补全命令改变它
-" 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
-" 设置按下<Tab>后的补全方式为<C-X><C-O>. 后默认的补全方式是<C-P>
-
-a.vim插件: c/h文件间相互切换
-:A，打开.cpp和.h对应的文件，
-:AV，打开.cpp和.h对应的文件，并且分屏显示。或者快捷键映射
-map av : AV<cr>  （最常用）
-
-
-5.
-OmniCppComplete插件：
-在~/.vimrc中加入以下几行：
-set nocp  
-filetype plugin on
-
-6.
-MiniBufExplorer插件：
-在~/.vimrc文件中加入以下几行：
-let g:miniBufExplMapWindowNavVim = 1   
-let g:miniBufExplMapWindowNavArrows = 1   
-let g:miniBufExplMapCTabSwitchBufs = 1   
-let g:miniBufExplModSelTarget = 1  
-let g:miniBufExplMoreThanOne=0  
-<Tab>   向前循环切换到每个buffer名上
-<S-Tab> 向后循环切换到每个buffer名上
-<Enter> 在打开光标所在的buffer
-d       删除光标所在的buffer
-在命令模式下：
-:b"num"   打开指定的buffer，"num"指的是buffer开始的那个数字，比如上图，我想打开list_audit.erb，输入:b7就ok了
-:bn   打开当前buffer的下一个buffer
-:bp   打开当前buffer的前一个buffer
-以下的两个功能需要在~/.vimrc中增加:
-let g:miniBufExplMapCTabSwitchBufs = 1
-<C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开
-<C-S-Tab> 向后循环切换到每个buffer上,并在但前窗口打开
-
-7.
-紧靠MiniBufExplorer下方左边的矩形区域就是NERDTree。在这个窗口，我们可以用鼠标或键盘方便的浏览整个文件系统，在某个文件上点击或回车，就可以在右边编辑区域打开该文件。
-
-8.
-Winmanager插件：
-在~/.vimrc文件中加入以下几行：
-let g:NERDTree_title="[NERDTree]"  
-let g:winManagerWindowLayout="NERDTree|TagList"  
-  
-function! NERDTree_Start()  
-    exec 'NERDTree'  
+----------------------------------------------------------------------------------
+vim配置文件、语法文件、插件文件中使用的都是vim专用的脚本语言VimScript。
+以行为执行单位
+使用:source命令来执行外部VimScript文件
+let age=29 #定义变量
+unlet age #删除变量
+if 语句使用方法与C大致相同：
+if(a > b)  
+    echo "a大于b"  
+else  
+    echo "a不大于b"  
+endif  
+while i>0  
+    let sum +=  i  
+    let i -= 1  
+endwhile  
+for i in range(1,100)  
+    let sum += i  
+endfor 
+都可以使用continue和break来改变循环，这与C完全一样
+function Min(num1, num2)  
+    if a:num1 < a:num2  
+        let smaller = a:num1  
+    else  
+        let smaller = a:num2  
+    endif  
+    return smaller  
 endfunction  
-  
-function! NERDTree_IsValid()  
-    return 1  
-endfunction  
-  
-nmap wm :WMToggle<CR>
-打开Vim，按下组合快捷键w-m就可以我们的崭新的Vim了！再次按下w-m就可关闭界面 
+    函数的名字首字母必须大写。Vim为了避免用户自定义函数与内置函数命名冲突，强制要求用户自定义函数名的首字母必须是大写字母。
+    函数的参数在函数体内使用的时候前面加上了a:，这表示是一个函数参数，否则运行时会报错，并提示num1是没有定义的变量。这就引出了一个很重要的话题：变量的作用域。
+    函数名称属于全局命名空间，在所有脚本中可用
+函数调用：
+let line = getline(".")  
+let repl = substitute(line, '\a', "*", "g")  
+call setline(".", repl) #使用关键字call 来显式调用函数。
+    s:name 脚本文件作用域，此时s:name这个变量只在当前脚本文件中有效，其他的脚本文件中如果也定义了同名的s:name也没关系，因为这两者彼此独立。这一点与C中的static关键字类似。
+    b:name 缓冲区作用域，b:name只在指定的缓冲区中有效
+    w:name 窗口作用域，w:name只在指定的窗口中有效
+    g:name 全局作用域，函数外定义的变量的默认值
+    v:name vim预定义的变量，注意预定义变量不同于vim的选项(option)变量。
+    l:name 函数内部的局部变量，函数内部定义的变量的默认值
 
-在~/.vim/plugin目录下的winmanager.vim文件中找到以下函数定义并添加内容：exe 'q'
-function! <SID>ToggleWindowsManager()  
-   if IsWinManagerVisible()  
-      call s:CloseWindowsManager()  
-   else  
-      call s:StartWindowsManager()  
-      exe 'q'  
-   end  
-endfunction
+注意这些作用域只针对变量名，而不能作用于函数名。
+如果变量的名字以$开头，那么这个变量被认为是环境变量， 如echo $HOME  
 
-9.
-Grep插件：
-~/.vimrc中增加了下面这句:
-nnoremap <silent> <F3> :Grep<CR>
-比如你想在/home/wooin/vim71/src/main.c中查找"FEAT_QUICKFIX", 则将光标移到"FEAT_QUICKFIX"上, 然后按下F3键, 如下图:  
-
-10.
-Visual Mark书签插件：
-用"mm"设置书签，如果你设置了多个书签, 你可以用F2键正向在期间切换, 用Shift+F2反向在期间切换.
-1 这个书签不能自动保存, 关闭vim就没了. 
-2 切换书签时不能在不同文件间切换, 只能在同一个文件中切换
-
-10.
-~/.vimrc中文支持
-let &termencoding = &encoding
-set encoding=utf-8
-set fileencoding=utf-8
-set fileencodings=ucs-bom,utf-8,chinese
----------------------------------------------
-总结一下，我的vimrc里面的配置是：
-let &termencoding=&encoding
-set encoding=prc
-set fileencoding=gb18030
-set fileencodings=utf-8-bom,ucs-bom,utf-8,cp936,gb18030,ucs,big5
-编辑 ~/.profile，加入：export LC_ALL=zh_CN.GB18030
-
-termencoding----默认空值，也就是输出到终端不进行编码转换。
-encoding----与系统当前locale相同，所以编辑文件的时候要考虑当前locale，否则要设置的东西就比较多了。
-fileencoding----vim打开文件时自动辨认其编码，fileencoding就为辨认的值。为空则保存文件时采用encoding的编码，如果没有修改encoding，那值就是系统当前locale了。
 ----------------------------------------------------------------------------------
 vi：
 命令模式下移动光标、删除字符等, 插入模式：只能输入字符，enter进入下一行

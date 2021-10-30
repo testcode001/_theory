@@ -9,7 +9,7 @@
 1.OpenGL 
 2.EGL环境搭建(EGLDisplay.EGLConfig.EGLSurface.EGLContext) EGL版本
 3.GLSL数据类型，修饰符，内置变量，内置函数texture2D().mix()
-	顶点坐标，顶点变换矩阵(MVP模型.视图.投影矩阵坐标系变换)
+	顶点坐标，顶点变换矩阵(MVP即模型.视图.投影矩阵坐标系变换)
 	纹理坐标，纹理变换矩阵
 
 shader脚本：
@@ -141,12 +141,17 @@ shader脚本中main函数外定义的变量(即uniform和attribute变量)，赋�
 
 GLES20.glDelete...(...)释放GL资源
 
-shader数据类型及修饰符：
+shader脚本熟练
+顶点坐标和纹理坐标的顺序一定要保持一致
+滤镜shader的坐标顺序一定要和顶点坐标和纹理坐标保持一致
+shader脚本注释符是//而不是#
+shader脚本注释加了英文注释能运行，但是加了中文注释就不能运行。
+【shader数据类型及修饰符】
 矩阵加减乘除、向量加减乘除、矩阵与向量加减乘除
 矩阵相乘即左行乘右列, 结果左列右行。矩阵与向量相乘，结果为向量。
 矩阵乘法的本质是什么？
 https://www.zhihu.com/question/21351965?sort=created
-数据类型：
+【数据类型】
 int
 float
 bool
@@ -158,8 +163,8 @@ sampler3D：3D纹理图片
 sampleCube：立方贴图纹理
 使用struct关键字声明类C的结构体
 在 GLSL 中，可以声明任何类型的数组：vec3 position[20];
-修饰符：
-attribute数据类型只能用在vertexShader中，且只能用来修饰float标量、float向量以及矩阵变量，不能用来修饰其他类型的变量。用来定义如顶点位置、纹理坐标、法向量、颜色等等。
+【修饰符】
+attribute数据类型只能用在vertexShader中，且只能用来修饰float标量(只有大小没有方向)、float向量以及矩阵变量，不能用来修饰其他类型的变量。用来定义如顶点位置、纹理坐标、法向量、颜色等等。
 uniform用于定义全局变量，在一个像素绘制过程中是一个常量。用来定义如光源位置、统一变换矩阵、颜色等。
 varying用于vertexShader向fragmentShader传递数据
 const	用于声明常量
@@ -170,8 +175,9 @@ gl_FragCoord是一个vec4类型，其含有当前片元相对于窗口位置的�
 通过该内建变量可以实现与窗口位置相关的操作，例如，仅绘制窗口中指定区域内容等。
 gl_FrontFacing 是一个布尔类型的内建变量，通过读取该内建变量的值可以判断正在处理的片元是否属于在光栅化阶段生成此片元的对应图元的正面。
 如果属于正面，gl_FrontFacing的值为true，反之为false 。
-search：GLSL内置函数及变量
+【search：GLSL内置函数及变量】
 https://www.jianshu.com/p/9f5b8ffe7771
+变量名不能以数字开头，还有变量名不能以gl_作为前缀，这个是GLSL保留的前缀，用于GLSL的内部变量。
 all：在所有为真的时候，返回为真；
 any：在任一变量为真的时候，返回为真；
 dot：向量点乘
@@ -432,7 +438,12 @@ mEGLContext = EGL14.eglGetCurrentContext();
 mEGLSurface = EGL14.eglGetCurrentSurface();
 mEGLDisplay = EGL14.eglGetCurrentDisplay();
 
-【1】
+https://www.jianshu.com/p/81220d61d1bc
+https://github.com/bluesky466/CameraDemo.git  feature_record分支
+【EGLDisplay】
+EGLDisplay指的是物理的显示设备比如我们的手机屏幕,我们可以通过传入屏幕设备的id去获取到设备句柄,绝大多数情况下我们传入EGL14.EGL_DEFAULT_DISPLAY获取默认的屏幕就好,而且一般情况下我们的手机也只有一个屏幕。
+如果拿不到设备就会返回EGL_NO_DISPLAY。
+拿到EGLDisplay之后就可以调用EGL14.eglInitialize去初始化EGL环境。第一个参数是EGLDisplay,然后可以通过后面的参数获取系统中EGL的实现版本号,做一些兼容处理,这里我们没有使用什么高级特性,不需要获取,传null和0就好。如果需要获取的话可以传入一个数组,并且指定major版本和minor想要存放到数组的哪个位置去获取。
 创建与本地窗口系统的连接：调用 eglGetDisplay 方法得到 EGLDisplay。 mEGLDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
 初始化 EGL 方法：调用 eglInitialize 方法初始化
 // EGL 的主版本号
@@ -441,6 +452,9 @@ private int[] mMajorVersion = new int[1];
 private int[] mMinorVersion = new int[1];
 boolean result = EGL14.eglInitialize(mEGLDisplay, mMajorVersion, 0, mMajorVersion, 0);
 
+【EGLConfig】
+在使用OpenGL的时候，EGLDisplay支持的配置有很多种,例如颜色可能支持ARGB888、RGB888、RGB444、RGB565等,我们可以通过eglGetConfigs拿到EGLDisplay支持的所有配置,然后选择我们需要的。
+不过如果直接去遍历所有的配置找我们需要的那个,代码写起来比较麻烦。所以EGL提供了一个eglChooseConfig方法,我们输入关心的属性,其他的属性让EGL自己匹配就好。可能会匹配出多个EGLConfig,这个时候随便选一个都可以:
 确定渲染表面的配置信息：调用 eglChooseConfig 方法得到 EGLConfig
  // 所有符合配置的 EGLConfig 个数
 int[] numConfigs = new int[1];
@@ -468,7 +482,11 @@ if (num != 0) {
     // 去第一个
     mEGLConfig = configs[0];
 }
-【2.1】
+【EGLContext】
+搜索：EGLContext share_context
+一般来讲OpenGL的操作都在同一个线程中进行,但是有些复杂的业务场景可能需要多线程,于是可以在eglCreateContext的第三个参数里面传入share_context做到多线程共享。如果不需要多线程共享的话传入EGL14.EGL_NO_CONTEXT就好
+http://www.javashuo.com/article/p-yxnwrung-kp.html
+
 创建渲染上下文：通过 EGLDisplay 和 EGLConfig ，调用 eglCreateContext 方法创建渲染上下文，得到 EGLContext
 private static final int[] EGL_ATTRIBUTE = {
     EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
@@ -477,7 +495,8 @@ private static final int[] EGL_ATTRIBUTE = {
 private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
 // 创建上下文
 mEGLContext = EGL14.eglCreateContext(mEGLDisplay, mEGLConfig, EGL14.EGL_NO_CONTEXT, EGL_ATTRIBUTE, 0);
-【2.2】
+
+【2.2创建EGLSurface】
 创建渲染表面：通过 EGLDisplay 和 EGLConfig ，调用 eglCreateWindowSurface 方法创建渲染表面，得到 EGLSurface
 【2.2.a】对于渲染到屏幕上的创建，配置信息可以不添加什么，但还是要以 EGL14.EGL_NONE 结尾。
 // 创建渲染表面的配置信息
@@ -486,6 +505,7 @@ private static final int[] EGL_SURFACE = {
 };
 private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
 // surface 参数是有 SurfaceView.getHolder 传递过来的
+//创建EGLSurface告诉OpenGL应该往哪里画东西
 mEGLSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mEGLConfig, surface, EGL_SURFACE, 0);
 【2.2.b】
 而对于离屏的渲染表面创建，就还需要提供宽、高等信息，但是却不需要提供 surface 的参数了。
@@ -496,8 +516,9 @@ int[] EGL_SURFACE = {
     EGL10.EGL_NONE,
 };
 mEGLSurface = mEGL.eglCreatePbufferSurface(mEGLDisplay, mEGLConfig, EGL_SURFACE,0);
-【3】
+【3指定EGLSurface】
 绑定上下文：通过 eglMakeCurrent 方法将 EGLSurface、EGLContext、EGLDisplay 三者绑定，接下来就可以使用 OpenGL 进行绘制了。
+//eglMakeCurrent指定OpenGL绘制的结果最后输出到这个EGLSurface上。
 EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext);
 交换缓冲：当用 OpenGL 绘制结束后，使用 eglSwapBuffers 方法交换前后缓冲，将绘制内容显示到屏幕上
 EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurface);
@@ -525,5 +546,27 @@ EGL14.eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContex
 EGL14.eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
 https://blog.csdn.net/helldevil/article/details/7513946
 
+-----------------------------------------------------------------------------------------------------------------------------
+我们熟悉的GLSurfaceView已经帮我们封装好了EGL环境,我们只需要在Render.onDrawFrame里面直接使用OpenGL的接口绘图就好了,绘制的图形就好显示在GLSurfaceViews上
+(计算机领域有一句话:"计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决"。EGL就是安卓上的这个中间层,OpenGL通过这个EGL来和安卓系统的交互)
+GLSurfaceView可以通过自己搭建EGL环境(EGLDisplay.EGLConfig.EGLContext.EGLSurface)+TextureView来替换
 
+但把每一帧数据传递给openGL，则只能通过SurfaceTexture绑定openGL生成的纹理id TextureId来实现
+
+绘制时,每一帧的数据可用的回调有两个地方：
+(通用性更强) 
+mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+         @Override
+         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+             
+         }
+     });
+(依赖于camera2的api)
+private CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+     @Override
+     public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+        
+     }
+ };
+ 
 

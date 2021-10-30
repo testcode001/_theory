@@ -24,10 +24,9 @@ svn：
 http://blog.csdn.net/q199109106q/article/details/8655204
 http://blog.csdn.net/ithomer/article/details/6187464
 -----------------------------------------------------------------------
-用”git init –bare”方法创建一个所谓的裸仓库，之所以叫裸仓库是因为这个仓库只保存git历史提交的版本信息，而不允许用户在上面进行各种git操作。
+用”git init --bare”方法创建一个所谓的裸仓库，之所以叫裸仓库是因为这个仓库只保存git历史提交的版本信息，而不允许用户在上面进行各种git操作。
 如果你硬要操作的话，只会得到下面的错误（”This operation must be run in a work tree”），这个就是最好把远端仓库初始化成bare仓库的原因。
-用"git init"初始化的版本库用户也可以在该目录下执行所有git方面的操作。但别的用户在将更新push上来的时候容易出现冲突。
-
+最好不要用git init这种方式创建仓库：用"git init"初始化的版本库用户也可以在该目录下执行所有git方面的操作。但别的用户在将更新push上来的时候容易出现冲突。
 
 常用git命令:
 git分布式操作
@@ -52,7 +51,7 @@ git checkout localBranchName 		切换分支，以上两个命令可合并成下面一个命令
 git checkout –b newBranch  	创建分支newBranch并切换到该分支
 git pull
 git branch --set-upstream-to=origin/<远程branch> localBranchName  创建新分支后，把本地分支和远程分支进行关联
-git branch -a 							查看所有本地和远程分支
+git branch -a 							查看所有本地和远程分支  (git remote -v /  git remote show `git remote`)
 git merge dev v-m "log"  或者git cherry-pick commitId  把dev分支合并到当前master分支(当前在master分支下)。merge即merge from
 git cherry-pick commitId01^..commitId05  注意中间的两个点和^，表示把两个commit区间的所有commit都复制过去。去掉^表示不包含第一个commitid
 git branch –D/-d localBranchName  删除本地分支
@@ -82,6 +81,7 @@ git reset --hard sha-1值前6位 		代码回滚到指定版本
 git merge commitID					代码回滚后，merge到指定版本
 git checkout <commitID> <filename>	git检出指定版本的某个文件(还原某个文件到指定版本)
 git checkout HEAD <filename>		git检出版本回退后的某个文件
+git revert commitID                 撤销某次提交
 
 对本地库的多次提交，在push到远程仓库之前把这几个本地的commit合并为一个：
 git reset --hard d1dff09fd56
@@ -137,6 +137,8 @@ git remote -h
 git remote add <name> <url> 	创建别名
 git remote remove <name>		删除别名
 git remote 						查看别名
+git remote -v 
+git remote -v pull/push  远程主机名 工程名 
 git remote show `git remote`	查看别名及分支详情
 git remote rename <old> <new>	别名重命名
 

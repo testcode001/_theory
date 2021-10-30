@@ -1,25 +1,96 @@
-文件：find
+可以用别名配置一些比较难记的参数，如：
+echo alias mygrep="/usr/bin/grep -E2rnI --exclude-dir 'build'" >> ~/.bashrc
+source ~/.bashrc
+ubuntu下指定使用的Python版本：
+echo alias python=/usr/bin/python3.4 >> ~/.bashrc
+source ~/.bashrc
+
+文件查找：find .-name fileName -type f/d
+-path <ignorePath> -prune -o参数忽略某些目录不查找，但必须要注意要忽略的路径参数必须紧跟着搜索的路径之后，否则该参数无法起作用。注意：后面的-print不能少。
+find <src-path> -path '<ignor-path1>' -prune -o -path '<ignor-path2>' -prune -o -print
+find <src-path> ! -path '<ignor-path1>*' ! -path '<ignor-path2>*' -print		#不忽略某些目录
+find ./cache ! -name '*.html' -type f		#排除html的文件
+-maxdepth 1 		#查找的最大目录层级
+https://www.runoob.com/linux/linux-comm-find.html
+比如要在/usr/sam目录下查找不在dir1子目录之内的所有文件
+find /usr/sam -path "/usr/sam/dir1" -prune -o -print
+-path "/usr/sam" -prune -o -print 是 -path "/usr/sam" -a -prune -o -print 的简写表达式按顺序求值, -a 和 -o 都是短路求值，与 shell 的 && 和 || 类似。
+如果 -path "/usr/sam" 为真，则求值-prune , 否则不求值-prune。 	-prune返回真，与逻辑表达式为真，否则与逻辑表达式为假。
+如果 -path "/usr/sam" -a -prune 为假，则求值 -print。-print返回真，或逻辑表达式为真；否则不求值 -print，或逻辑表达式为真。
+这个表达式组合特例可以用伪码写为：
+if -path "/usr/sam" then
+           -prune
+else
+           -print
+
+
+字符串查找：grep -E1rnqI
+grep命令支持多种排除方法，包括grep排除目录，grep排除文件，grep排除二进制文件以及grep排除关键字：
+grep -v选项														#grep命令排除关键字
+grep -I选项(大写i)												#grep排除二进制文件，它可以在搜索时忽略二进制文件。小写i忽略大小写，大写I忽略二进制文件。
+grep --exclude 'file1' --exclude 'file1' "keyword" .  			#grep排除多个文件(注意：文件只能填写文件名，不能包含任何路径) 
+grep --exclude-dir 'dir1' --exclude-dir 'dir2' -R "keyword" .   #grep排除多个目录(注意：目录只能填写目录名，不能包含任何路径)。––exclude-dir选项需要与-r选项一起使用。
+grep -rIa --include="*.txt" --include="*.java" .				#遍历当前目录及所有子目录，查找所有.txt类型的文件中包含a的字符
+https://www.runoob.com/linux/linux-comm-grep.html
+-E支持正则、
+-2显示匹配字符串的上下2行、
+r递归查找目录、
+n显示行号、
+q静默输出即不输出、
+-v去除指定字符
+-a：将二进制文档以文本方式处理
+-c：显示匹配次数
+-i：忽略大小写差异
+-l	#(小写L) 或 --file-with-matches : 列出文件内容符合指定的样式的文件名称。
+--color：以特定颜色高亮显示匹配关键字
+--include　　指定匹配的文件类型
+--exinclude 过滤掉不需要匹配的文件类型
+
+
 basename
 dirname
-readlink	
+readlink
+
+https://www.runoob.com/linux/linux-comm-cat.html
+文件打印命令：cat、head.tail.more.less、tee(将结果输出在屏幕上的同时还保存到文件中)：
+tail -n20 info.log | head -n1
+我们让 tail 选择了文件的最后 20 行，然后将结果通过管道传送给head。然后 head 命令将数据中第一行打印到屏幕上。
+如果想要将上例中的结果在屏幕上显示的同时还保存到文件 results.txt。
+tail -n20 info.log | head -n1 |  tee -a results.txt
+ls -la 文件名		#若不写文件名, 默认为当前目录"."。可用来查看文件存不存在。 
+ls -ld 目录名		#若不写文件名, 默认为当前目录"." 
 
 对字符串.文件的读.写操作：
 echo "" cat | grep | sed | awk、cut 
 head tail  more less
-sort wc uniq diff 
+
+统计.排序
+sort uniq diff 
 sort -rn排序
-sort的-t指定分隔符 -k指定提取域
+sort -t指定分隔符 -k指定提取域
 sort -u或者uniq去除重复
 wc 统计行数、单词数、字节数
 
+https://www.runoob.com/linux/linux-comm-sed.html
+https://www.runoob.com/linux/linux-comm-awk.html
 awk读，sed写.流文本编辑器(echo输入输出重定向),grep -1rn 全文查找
 cut字符串分割：section=$(echo $1 | cut -d '.' -f 1)  
+
 基本上grep和sed能干的活awk全部都能干，而且干得更好。
 -------------------------------------------------------------------------
-sed -i "s/oldstring/newstring/g" `grep -rl oldstring dirName` #替换指定目录下所有文件的内容 -l是查询多文件时只输出包含匹配字符的文件名
-sed -i "s/garden/mirGarden/g" `ls` #替换当前目录下所有文件的内容
-sed -i "s/garden/mirGarden/g" 1.txt   #替换指定文件中的所有内容
-cat text.file | sed ‘s/linuxfocus/LinuxFocus/’ > newtext.file
+sed -i "s/oldstring/newstring/g" `grep -rl 'oldstring' dirName` #替换指定dirName目录下所有文件的内容。 -l是查询多文件时只输出包含匹配字符的文件名
+sed -i "s/oldstring/newstring/g" `ls` #替换当前目录下所有文件的内容
+sed -i "s/oldstring/newstring/g" 1.txt   #替换指定文件中的所有内容
+cat text.file | sed ‘s/oldstring/newstring/’ > newtext.file
+
+sed删除文件中含特定字符串的行: 注意：删除指定行后的结果无法保存到源文件中，只能保存到另一个新文件中。
+sed -e '/abc/d'  a.txt   				// 删除a.txt中含"abc"的行，操作之后的结果在终端显示，但不改变a.txt文件本身
+sed -e '/abc/d'  a.txt  > a.log   		// 删除a.txt中含"abc"的行，将操作之后的结果保存到a.log
+sed '/abc/d;/efg/d' a.txt > a.log    	// 删除含字符串"abc"或“efg"的行，将结果保存到a.log
+其中，"abc"也可以用正则表达式来代替。
+
+从超大文件中截取指定范围的内容到新文件中
+sed -n '10245056,10789000p' big.log >>small.log
 
 sed -n 7p test.log 获取指定行的内容
 sed -n 7,20p a.log  #获取指定行之间的内容
