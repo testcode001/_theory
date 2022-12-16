@@ -1,0 +1,92 @@
+g++ 常用命令选项：
+-ansi			只支持 ANSI 标准的 C 语法。这一选项将禁止 GNU C 的某些特色， 例如 asm 或 typeof 关键词。
+-c				只编译并生成目标文件。
+-DMACRO			以字符串"1"定义 MACRO 宏。
+-DMACRO=DEFN	以字符串"DEFN"定义 MACRO 宏。
+-UMACRO			取消对 MACRO 宏的定义。
+-E				只运行 C 预编译器。
+-g				生成调试信息。GNU 调试器可利用该信息。
+-IDIRECTORY		指定额外的头文件搜索路径DIRECTORY。大写的i(include)
+-LDIRECTORY		指定额外的函数库搜索路径DIRECTORY。大写的L(library)
+-lLIBRARY		连接时搜索指定的函数库LIBRARY，去掉前缀lib和后缀.so。小写的L(library)
+-m486			针对 486 进行代码优化。
+-o				FILE 生成指定的输出文件。用在生成可执行文件时。
+-O0				不进行优化处理。
+-O				或 -O1 优化生成代码。
+-O2				进一步优化。
+-O3				比 -O2 更进一步优化，包括 inline 函数。
+-shared			生成共享目标文件。通常用在建立共享库时。
+-static			禁止使用共享连接。
+-w				不生成任何警告信息。
+-Wall			生成所有警告信息。
+
+g++ commandLine：
+-std=c++11 -frtti -fexceptions
+-I表示头文件目录，-L表示库文件目录，-l表示库文件(去掉前缀lib和后缀.so)
+-Wall 警告
+-O1.2.3 编译优化
+-l参数就是用来指定程序要链接的库，-l参数紧接着就是库名，加上-ltest参数，我们就能用上libtest.so库了（当然要用libtest.so库里 的函数，我们还需要与libtest.so配套的头文件）
+链接程序ld在那3个目录里找不到libxxx.so，这时另外一个参数-L就派上用场了，比如常用的X11的库，它在/usr /X11R6/lib目录下，我们编译时就要用-L/usr/X11R6/lib -lX11参数，-L参数跟着的是库文件所在的目录名
+-I参数是用来指定头文件目录，如编译命令行就要加上-I /myinclude参数了。-I参数可以用相对路径，比如头文件在当前目录，可以用-I.来指定。
+gcc的基本格式就是：
+    gcc [-option] objectname sourcename
+    其中-option是参数，用来控制gcc的编译方式，常见的参数有如下几个：
+    -o 表示我们要求输出的可执行文件名：-o binaryname
+    -c 表示我们只要求编译器进行编译，输出目标代码,而不进行连接: -c objectivename.o
+    -g 表示我们要求编译器在编译的时候提供我们以后对程序进行调试的信息: -g
+    -O2 表示我们希望编译器在编译的时候对我们的程序进行一定程度的优化.2表示我们优化的级别.范围是1-3.不过习惯上我们都使用2的优化级别.
+    -Wall是警告选项,表示我们希望gcc在编译的时候,让gcc输出她认为的一些程序中可能会出问题的一些警告信息,比如指针没有初始化就进行赋值等等一些警告信息.
+    -l 与之紧紧相连的是表示连接时所要的链接库，比如多线程，如果你使用了pthread_create函数，那么你就应该在编译语句的最后加上"-lpthread"，"-l"表示连接，"pthread"表示要连接的库，
+		注意他们在这里要连在一起写.如：gcc -o test test1.o test2.o -lpthread
+    -I 表示将系统缺省的头文件路径扩展到当前路径，默认的路径保存在/etc/ld.conf文件中。
+gcc中的优化选项-O：-O1.2.3(少优化->多优化)  -Os -Ofast -Og
+-Os和-O3有异曲同工之妙，当然两者的目标不一样，-O3的目标是宁愿增加目标代码的大小，也要拼命的提高运行速度。
+但是-Os这个选项是在-O2的基础之上，尽量的降低目标代码的大小，这对于存储容量很小的设备来说非常重要。
+https://www.jianshu.com/p/8268b6220f12
+gcc的例子：
+    gcc -c test.c，表示只编译test.c文件，成功时输出目标文件test.o
+    gcc -o test test.o，将test.o连接成可执行的二进制文件test
+    gcc -o test test.c，将test.c编译并连接成可执行的二进制文件test
+    gcc -c test.c -o test.o ，与上一条命令完全相同
+    gcc test.c -o test，与上一条命令相同
+    gcc -o test test1.o test2.o，将test1.o和test2.o连接为可执行的二进制文件test
+    gcc -c test test1.c test2.c，将test1.c和test2.c编译并连接为可执行的二进制文件test
+编译只能用gcc，链接可以用g++或者gcc -lstdc++
+gcc g++ 对于后缀为.c 和.cpp文件的区别
+.h声明、.c/.cpp实现、系统头文件的查找路径及顺序、系统函数库的查找路径及顺序
+编译要.h头文件声明、链接要.so实现
+gdb调试命令
+clang
+llvm
+Linux中gcc，g++常用编译选项
+https://www.cnblogs.com/qiangxia/p/4293756.html
+
+
+Android.mk
+https://www.cnblogs.com/rocomp/p/4892866.html
+https://blog.csdn.net/xiangzilv1987/article/details/16805983
+https://blog.csdn.net/langresser_king/article/details/8275291
+http://www.cnblogs.com/likwo/archive/2012/05/09/2492614.html
+https://blog.csdn.net/nwpushuai/article/details/79380683
+https://blog.csdn.net/earbao/article/details/38702245
+https://movies.ds.9wuli.com/movies/20190104/a150e1493a545c7a6160dd698958c20b?sign=2deffe6d417e9c1267afa7241ec30223&t=5c354791
+https://segmentfault.com/q/1010000000605907
+https://www.cnblogs.com/soniclq/archive/2013/02/25/2932391.html
+android NDK下载
+https://www.cnblogs.com/hzl6255/p/6088678.html
+
+
+http://c.biancheng.net/
+
+Makefile：
+所有自定义的变量必须先用 := (覆盖)初始化后，才能使用 += 追加内容
+变量赋值：
+=
+:= (覆盖)
++= 追加
+?=
+https://blog.csdn.net/yym6789/article/details/105183625/
+https://wenku.baidu.com/view/78483b76f31dc281e53a580216fc700abb6852e9.html
+
+
+

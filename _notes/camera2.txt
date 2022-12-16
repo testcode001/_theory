@@ -1,0 +1,175 @@
+多线程环境下，寻找并确定单次流程taskID的全局唯一标识符(文件名+时间戳)，注意分析不同流程taskID log在多线程中的交叉打印。
+
+ZSL HDR
+https://www.zhihu.com/question/264307309/answer/284940491
+
+ZSL (zero shutter lag) 中文名称为零延时拍照，是为了减少拍照延时,让拍照&回显瞬间完成的一种技术。
+Single Shot
+当开始预览后，sensor 和 VFE 会产生 preview 和 snapshot帧, 而最新的snapshot 帧数据会被存储在buffer 中。
+当拍照被触发,系统计算实际的拍照时间,找出在buffer中的相应帧,然后返回帧到用户，这就是所谓的"ZERO"。
+系统计算出shutter lag的时间,然后把某个帧认作是拍照实时的那帧数据。
+ZSL的实现机制
+因为ZSL实现需要实现一下几点：
+1. 一个surfaceView用于预览
+2. 一个队列缓存snapshot的数据
+3. 拍照动作获取队列某桢数据作为拍照数据输出
+4. 输出的照片需要YUV->JPEG数据的转码
+https://www.cnblogs.com/bluestorm/p/11051253.html
+
+Camera2 HighSpeedCaptureSession
+https://www.jianshu.com/p/0d2f200ab374
+
+
+github： camera2
+搜索：
+MFNR（多帧降噪）+ZSL（零延时拍照）
+camera gain值
+camera sensor cmos ccd isp
+imageSensor: cmos ccd
+isp
+dsp
+https://blog.csdn.net/wangliang888888/article/details/103695002
+https://blog.csdn.net/qian520ao/article/details/78156214
+
+https://www.cnblogs.com/-9-8/p/4692298.html
+3A即AF自动对焦（测距）、AE自动曝光(测光)及AWB自动白平衡：
+https://source.android.com/devices/camera/camera3_3Amodes
+
+
+
+
+
+Exif信息(ExifTools)即3A信息及其子配置项：https://github.com/exiftool/exiftool https://exiftool.org/
+Auto Exposure自动曝光：光圈.快门.iso.测光模式(平均测光、中央重点测光、点测光).曝光补偿
+Auto Focus自动对焦：焦距
+Auto White Balance自动白平衡
+Auto Flash打开闪光灯
+
+
+1.硬件：1.闪光灯flash，2.lens镜头(光圈aperture、AF、FOCUS_DISTANCE)，3.sensor传感器.光电转换-->模数转换.(快门exposureTime.曝光补偿COMPENSATION_RANGE、ISO感光度sensitivity、AE测光、AWB), 4.ISP图像信号处理器
+2.软件算法：3A算法（AWB、AE、AF）、ISP中的算法(Gamma、Color Calibration、Noise Calibration、镜头阴影矫正LSC(Lens Shading Correction)、坏点校正（Defect Pixel Correction）、黑电平校正BLC(Black Level Correction) )
+3.画质Tuning调整：修改算法的参数，让画质达到最优
+Every combination of is unique and needs to be calibrated and tuned for best performance.
+https://blog.csdn.net/sdf5874/article/details/72943548
+https://www.zhihu.com/question/24406900/answer/42875785
+https://zhuanlan.zhihu.com/p/107264620
+https://blog.csdn.net/m0_37631324/article/details/104345056
+
+android AE AF 执行频率
+https://www.cnblogs.com/kingwild/articles/5422329.html
+
+自动曝光AE标准及原理：18%灰度
+曝光三要素：光圈、快门、ISO感光度（这三个因素决定了曝光量，或者说，已知任意两个参数，可以唯一确定另外一个）
+测光模式：平均测光、中央重点测光、点测光
+曝光补偿COMPENSATION_RANGE：拍摄环境暗部较多，则需要减少曝光补偿。如果环境亮部较多，则需要增加曝光补偿。
+https://zhuanlan.zhihu.com/p/33462189
+自动对焦原理：对比度检测算法，通过既得图像对比度移动镜头使图像对比度达到最大.
+CAF ：Contrast AF
+PDAF：Phase Difference Auto Focus
+laser AF
+每一种AF都有不同的算法，Contrast AF用的爬山算法，PDAF用的PD algo，这个你要认真了解下。不论哪一种AF，都需要移动lens，就需要VCM那么lens相关知识,VCM相关知识你需要学习
+https://www.zhihu.com/question/62567460/answer/290562200
+https://my.oschina.net/zhangyujian/blog/3036230
+AE AF
+https://my.oschina.net/u/4579694/blog/4437548
+自动曝光：
+1.曝光铁三角：光圈、快门、ISO感光度
+2.测光模式：平均测光、中央重点测光、点测光
+3.EV曝光模式(MODE_OFF、MODE_ON、MODE_ON_AUTO_FLASH、MODE_ON_ALWAYS_FLASH、)-->状态(STATE_FLASH_REQUIRED、STATE_CONVERGED、STATE_SEARCHING、STATE_LOCKED、STATE_PRECAPTURE)、区域Region(...)
+AE_ANTIBANDING_MODE抗条带：由于灯光频率(50HZ或者60HZ)影响的数字相机曝光，进而产生的条纹。
+CMOS的曝光方式是一行一行的方式进行的，同一行上的每个pixel的曝光开始点和曝光的时间都是一样的，而在不同行之间虽然曝光时间都是一样的，但是曝光的开始点是不同的。
+交流电光源会有光强的波动，在中国交流电频率是50Hz，如果camera曝光时间不是10ms的整数倍，图像上就会有明暗条纹。在交流电频率60Hz的国家，曝光时间就要是8.33ms的整数倍。
+
+自动对焦AF：
+模式(MODE_OFF、MODE_AUTO、MODE_ON_CONTINOUS_PICTURE、MODE_ON_CONTINOUS_VIDEO、MODE_MACRO、)-->状态(STATE_PASSIVE_SCAN、STATE_PASSIVE_FOCUSED、STATE_ACTIVE_SCAN、STATE_FOCUSED_LOCKED、)、区域Region
+
+自动白平衡：
+根据光源条件调整图片颜色的保真程度。
+
+flash闪光灯：
+模式(MODE_OFF、MODE_SINGLE、MODE_TORCH)-->状态(FLASH_STATE_UNAVAILABLE、STATE_CHARGING、STATE_READY、STATE_FIRED、STATE_PARTIAL)
+闪光灯打闪由AE、FLASH两个参数的mode模式决定：
+关闭闪光灯： 			AE_MODE_ON					FLASH_MODE_OFF
+拍照时闪光灯auto：		AE_MODE_ON_AUTO_FLASH		FLASH_MODE_SINGLE
+拍照时闪光灯一定打闪：	AE_MODE_ON_ALWAYS_FLASH		FLASH_MODE_SINGLE
+手电筒：				AE_MODE_ON					FLASH_MODE_TORCH
+
+CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START预闪(AE_STATE_PRECAPTURE) + 主闪(拍照时闪光灯一定打闪)AE_MODE_ON_ALWAYS_FLASH、FLASH_MODE_SINGLE
+AE_STATE_SEARCHING	测光
+
+camera2：
+打开不同的摄像头id(前后置摄像头)代表不同的CameraDevice
+CameraDevice创建请求类型、添加surface类型、创建连接，创建请求和创建连接之间通过surface关联起来。其中preview和capture可以共用一个会话连接(传递surfaceList)。preview.capture.record三者中只有预览和拍照可以共用同一个CameraCaptureSession，其他的都不能共用，必须关闭一个才能打开另一个。preview和record不能共用CameraCaptureSession是因为request里包含的surface不同。
+preview，拍照，录像：只有surfaceList是相同的，就可以共用一个CameraCaptureSession连接，若不同，则不能共用一个CameraCaptureSession连接，必须关闭一个才能打开另一个。
+1.CameraDevice创建请求类型preview.capture.video.manual，添加surface类型preview.image.video(SurfaceUtils)、1.创建连接.添加surfaceList-->2.CameraCaptureSession执行响应capture()单帧.captureBurst()多帧(HighSpeedSession慢动作).setRepeatingRequest()连拍、及其每一步的回调函数
+1.创建请求类型.添加surface
+1.创建连接.添加surfaceList(创建会话)
+2.session执行响应
+CameraCharacteristics参数设定.configMap数据校验：分辨率，帧率，通道数、位深、数据格式
+图片处理：ImageReader.setOnImageAvailableListener()
+拍照和预览可以共用一个CameraDevice和CameraCaptureSession
+拍照和录像可以共用一个CameraDevice
+前后置则不可共用同一个CameraDevice，必须关掉CameraDevice和CameraCaptureSession后再打开
+
+cameraID的静态信息(硬件特性)通过CameraCharacteritics获取
+判断是否支持raw图拍摄：
+int[] avaliableArray = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+for (int i : avaliableArray) {
+     if (i == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) {
+         return true;
+     }
+}
+
+运行时(capturePreview、videoPreview、capture、video)3A及flash的模式.状态.Region参数设置
+3A及flash的模式.状态.Region参数在运行时(capturePreview、videoPreview、capture、video)的设置CaptureRequest.CaptureResult。
+模式分为打开auto.on，关闭off，以及打开的各种状态。
+3A的状态变化分为手动触发TRIGGER_START和hal层自动触发。3A也可以对状态进行锁定。
+https://source.android.com/devices/camera/camera3_3Amodes
+adb shell dumpsys media.camera | less
+zoom：
+CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE
+CaptureRequest.SCALER_CROP_REGION
+支持AF？：mCameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0
+支持AE？：mCameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0
+int[] ints = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+mCameraCharacteristics.getAvailableCaptureRequestKeys()；
+
+https://blog.csdn.net/sadamoo/article/details/50370702
+打印拍照时的exif信息：Log.dumpRequest()+ImageSaver
+preview过程中的3A信息打印： MiCamera2.CameraCaptureSession.CaptureCallback.onCaptureProgressed(CaptureResult partialResult)
+3A信息从CaptureResult中获取，onCaptureProgressed(...CaptureResult result)回调会先于拍照完成onCaptureCompleted(...CaptureResult result)回调返回。
+RAW.DNG数据会先于jpeg数据返回。
+raw图的onImageAvailable(ImageReader reader)回调会先于onCaptureCompleted(...CaptureResult result)回调。
+jpg图的onCaptureCompleted(...CaptureResult result)回调会先于onImageAvailable(ImageReader reader)回调。
+RAW图像就是CMOS或者CCD图像感应器将捕捉到的光源信号转化为数字信号的原始数据。RAW文件是一种记录了数码相机传感器的原始信息，同时记录了由相机拍摄所产生的一些元数据（Metadata，如ISO的设置、快门速度、光圈值、白平衡等）的文件。
+由于相机各厂商记录原始数据文件格式不统一，RAW只能用各厂商的软件编辑浏览，所以Adobe开发出DNG，改变了这一各自为王的局面。
+
+camera 点击 af ae 区域 矩阵转换
+http://www.javashuo.com/article/p-psjnsnnp-a.html
+https://wenku.baidu.com/view/f3c3fb61ddccda38376bafe7.html
+
+ EIS(Electric Image Stabilization)指的是电子防抖技术,是一种通过软件算法实现的防抖能力。
+ EIS电子防抖技术的原理是利用手机加速度传感器和陀螺仪模块侦测手机抖动的幅度，通过动态调节整ISO、快门和成像算法来修正模糊。
+ 电子防抖实际上是一种通过降低画质来补偿抖动的技术，此技术试图在画质和画面抖动之间取得一个平衡点。
+
+测试：
+线程异步Image.closed
+https://blog.csdn.net/a260724032/article/details/103228875
+
+https://developer.android.com/reference/android/hardware/camera2/CaptureRequest
+
+
+1.MediaInfo
+https://github.com/MediaArea/MediaInfo
+https://MediaArea.net/MediaInfo
+2.exiftool
+https://github.com/exiftool/exiftool
+https://exiftool.org/
+3.potplayer
+http://potplayer.tv/
+https://potplayer.daum.net
+4.ffmpeg
+
+
+

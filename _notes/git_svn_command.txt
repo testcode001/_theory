@@ -41,25 +41,38 @@ git push origin feature-v4:refs/for/feature-v4
 
 git分支管理命令CRUD：
 创建.检出.删除远程分支：from..to..
-git push origin 本地branch:远程branch [--force]		推送本地更改到远程分支。如果该远程分支不存在，则会创建远程分支
-git pull origin <远程branch>:<本地branch> 
+git push origin 本地branch:远程branch [--force]		#from...to... 推送本地更改到远程分支。如果该远程分支不存在，则会创建远程分支
+git pull origin <远程branch>:[本地branch][--rebase]	#from...to... 只拉取当前远程分支到本地分支，git pull会拉取所有。git remote -v查看主机别名
 git checkout -b 本地分支名 origin/远程分支名   		#检出远程指定分支   
-git push origin :远程branch							:左边的本地分支为空，表示删除远程分支。这等同于推送一个空的本地分支到远程分支，等同于 git push origin --delete master
+git push origin :远程branch							#from...to... :左边的本地分支为空，表示删除远程分支。这等同于推送一个空的本地分支到远程分支，等同于 git push origin --delete master
 创建.切换.合并merge.删除本地分支
 git branch newBranch 	创建本地分支
 git checkout localBranchName 		切换分支，以上两个命令可合并成下面一个命令
 git checkout –b newBranch  	创建分支newBranch并切换到该分支
 git pull
 git branch --set-upstream-to=origin/<远程branch> localBranchName  创建新分支后，把本地分支和远程分支进行关联
-git branch -a 							查看所有本地和远程分支  (git remote -v /  git remote show `git remote`)
+git branch -a 							查看所有本地和远程分支
+git remote -v
+git remote show `git remote`
 git merge dev v-m "log"  或者git cherry-pick commitId  把dev分支合并到当前master分支(当前在master分支下)。merge即merge from
 git cherry-pick commitId01^..commitId05  注意中间的两个点和^，表示把两个commit区间的所有commit都复制过去。去掉^表示不包含第一个commitid
 git branch –D/-d localBranchName  删除本地分支
+commit合并：
+git merge
+同一仓库里边不同分支合并提交用cherry-pick
+跨仓库合并提交用format-patch(以自己仓为标准，往另一个仓打format-patch) 
 
 git status查看已修改的文件
-git diff 查看本地已修改的文件?
+git diff .			#查看本地(工作区与暂存区)已修改的文件?
+git diff --cached .	#查看暂存区与本地库的修改文件?
 gitk 查看提交日志
+git show <commitID>				#查看单次commit的内容修改
+git blame [-L n1,n2] filename  	#git blame用来显示文件中每行最后一次修改的提交记录。
+git log -p [fileName]			#查看某个文件的所有历史提交
+git log --oneline > log.txt     #将所有提交日志写入到本地文件log.txt中
+git log --oneline --graph
 git log --pretty=oneline --graph
+
 git cherry-pick commitId 将某次提交commit应用到当前分支 (该命令可通过git merge或git rebase代替)（倒数第二个需要修改的提交）
 git pull origin master --rebase#从服务器更新本地代码库和工作拷贝. (git pull == git fetch+merge)
 git fetch从服务器更新本地库(但不更新工作拷贝)
@@ -74,14 +87,15 @@ git commit --amend 修改上次的提交
 git push origin localBranchName:remoteBranchName #提交远端库
 先更新，后提交。解决冲突：git mergetool执行用预先配置的Beyond Compare解决冲突; git commit
 下载分支上指定版本的代码
-git reset --hard HEAD^         		回退到上个版本
-git reset --hard HEAD~3        		回退到前3次提交之前，以此类推，回退到n次提交之前
-git reset --hard commitID    		退到/进到 指定commit的sha码
-git reset --hard sha-1值前6位 		代码回滚到指定版本
+git reset --soft HEAD~10        	回退到前10次提交之前，以此类推，回退到n次提交之前，本地包含这n次的修改，且已添加到暂存区
+git reset  HEAD~10        			回退到前10次提交之前，以此类推，回退到n次提交之前，本地包含这n次的修改，且没有添加到暂存区
+git reset --hard HEAD^^^         	回退到前3个版本
+git reset --hard HEAD~10        	回退到前10次提交之前，以此类推，回退到n次提交之前
+git reset --hard commitID/sha1前6位 退到/进到 指定commit的sha码
 git merge commitID					代码回滚后，merge到指定版本
 git checkout <commitID> <filename>	git检出指定版本的某个文件(还原某个文件到指定版本)
 git checkout HEAD <filename>		git检出版本回退后的某个文件
-git revert commitID                 撤销某次提交
+git revert commitID                 还原一个错误提交/撤销某次提交
 
 对本地库的多次提交，在push到远程仓库之前把这几个本地的commit合并为一个：
 git reset --hard d1dff09fd56
@@ -143,20 +157,75 @@ git remote show `git remote`	查看别名及分支详情
 git remote rename <old> <new>	别名重命名
 
 git rebase 阮一峰  廖雪峰
+git pull --rebase
 rebase操作可以把本地未push的分叉提交历史整理成直线；即对本地未push的commit的CRUD操作
-git diff
+单工程
+git status #工作区与版本库的差别、查看冲突情况 vim手动编辑后提交
+git log --oneline --abbrev-commit --all --graph --decorate --color
+查看文件内容的更改：
+已提交：
+git log -p [fileName] 查看某文件所有提交的更改
+git log --oneline fileName 查看修改文件的提交
+git show [SHA-1] [fileName] 查看某次提交的所有更改
+gitk
+未提交：
+git diff  #查看暂存区与工作区之间的差别
+git diff --cached 查看暂存区与版本库之间的差别
+git diff master origin/master #看本地分支和远程分支的差异
 git log、git reflog
 git tag
-查看配置：
-git config [–local|–global|–system] -l
+
+查看配置：(默认是添加在--local .git/config文件配置中)
+git config <--local|--global|--system> -l 
 修改配置：
 $ git config --global user.name "yourname"
 $ git config --global user.email "yourname@gmail.com"
-添加配置：
-git –add section.key value(默认是添加在local配置中)
-.git/config仓库级配置文件local
-~/.gitconfig 全局级配置文件global
-./etc/gitconfig 系统级配置文件system
+git –add section.key value(默认是添加在--local .git/config文件配置中)
+git配置文件读取，就近原则：
+.git/config			#仓库级配置文件--local
+~/.gitconfig 	  	#全局级配置文件--global
+./etc/gitconfig   	#系统级配置文件--system		
+http://blog.chinaunix.net/uid-7295895-id-2971859.html
+http://www.cnblogs.com/wang_yb/p/3867221.html
+在~/.gitconfig中的username和email配置与gerrit的setting中的配置一致
+----------------------------------------------------------------------------------------
+git+gerrit:
+create a new patch set for the same Change-Id：
+1.cherry-pick <commitID> your patch (from gerrit UI) to your machine.
+2.Change what you want and do a git add on the files you want.
+3.Amend the last commit using 【git commit --amend】 and 【keep the same Change-Id】
+4.Push your changes: git push origin HEAD:refs/for/branch_name
+It will create a new patch set.
+
+git push ssh://username@gerrit.com:29418/platform/packages/apps  HEAD:refs/for/devBranch
+gitdir=$(git rev-parse --git-dir); scp -p -P 29418 username@gerrit.com:hooks/commit-msg ${gitdir}/hooks/  #用于在commit时生成change-ID
+
+cherry-pick：fatal: bad object: chery-pick是本地操作：
+需要先抓取最新的代码：git fetch --all
+git fetch "ssh://username@git.com:29418/platform/packages/app" ac0e663dd195f8686d7cfee68228 && git cherry-pick FETCH_HEAD
+git fetch "ssh://username@git.com:29418/platform/packages/apps" refs/changes/67/1234567/5 && git cherry-pick FETCH_HEAD
+https://blog.csdn.net/kv110/article/details/48252235
+
+普通文本文件冲突：手动修改解决冲突后，再git add .
+二进制文件冲突：
+git checkout --ours . [-- file]
+git checkout --theirs . [-- file]
+再git add .
+git reset HEAD fileName.txt
+----------------------------------------------------------------------------------------
+git log --oneline二分找锅法完全依赖本地记录：
+git log --oneline > log.txt
+cat -n log.txt | more
+
+git bisect 查找哪一次代码提交引入了错误：默认最新代码是bad
+https://www.php.cn/python-tutorials-344569.html
+git bisect start命令启动查错，它的格式如下:
+git bisect start [终点] [起点]		#例如 git bisect start HEAD 4d83cf
+git bisect good						#标识本次提交（第51次）没有问题。执行该命令后，Git就自动切换到后半段的中点（第76次提交）。
+git bisect bad						#标识本次提交（第76）有问题。执行上面的命令以后，Git 就自动切换到第51次到第76次的中点
+接下来，不断重复这个过程，直到成功找到出问题的那一次提交为止。
+最后使用git bisect reset命令，退出查错，回到最近一次的代码提交。
+
 
 
 

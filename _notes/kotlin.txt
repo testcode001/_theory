@@ -1,5 +1,5 @@
 面向过程.面向对象+OC+shell+c++
-继承类似于c++用: ，形参类似于OC和python.(方法定义的形参可以有默认值，调用时可不传值)，定义变量函数类似于js用var.val(变量名在前，数据类型在后，用:分割)，变量取值类似于shell用${}
+继承类似于c++用: ，形参类似于OC和python(方法定义的形参可以有默认值，调用时可不传值)，定义变量函数类似于js用var.val(变量名在前，数据类型在后，用:分割)，变量取值类似于shell用${}
 
 
 kotlin：定义，及调用
@@ -19,6 +19,32 @@ private var mThread = object : Thread() {
          println("running from Thread:${Thread.currentThread()}")
      }
 }
+
+kotlin基本教程：
+https://www.runoob.com/kotlin/kotlin-loop-control.html
+https://www.runoob.com/linux/linux-shell-func.html
+Kotlin在匿名内部类中，引用外部类的this当前对象：写法是this@OuterClass，OuterClass.this是java的写法。
+Kotlin和java可以相互调用，但同一个文件内只能使用java或kotlin语法
+kt：
+类定义倒数第一个:之后的是继承的父类
+方法定义花括号{}后的第一个:之前的是返回值类型
+OtherService::class.java
+函数返回值是函数里面最后一行，或者用return指定
+如果函数只有一句话的话，可以简化为赋值的方式，并且可以简化掉函数定义的返回值。例如：
+fun getOtherService() = HttpConfig.service(OtherService::class.java)
+kotlin用形参默认值来实现函数重载
+
+kotlin接口创建实例对象： object : BottomDialogUtil.OnClickListener(){
+  override fun onClick(dialog: DialogInterface): Boolean{
+                     return false;
+                }
+	}
+kotlin object类和compian object方法的区别？
+object 关键字可以表达两种含义：一种是对象表达式，用来创建interface的匿名实例对象,
+另一种是类声明， 用object 修饰的类为静态单利类，里面的方法和变量都为静态的。？
+object 修饰的类是单例类，里面的方法和变量看怎么定义了（普通还是普通），静态方法可应用@JvmStatic表示。？
+companion object 修饰为伴生对象,伴生对象在类中只能存在一个，类似于java中的静态方法 Java 中使用类访问静态成员，静态方法。
+
 
 Kotlin之数组和集合：基础数据类型数组、复杂数据类型数组
 https://www.jianshu.com/p/6d95db6e9f87
@@ -51,7 +77,7 @@ map还可以用map[key] = value,来代替map.put("key", value)
 开启新线程、多线程同步
 
 Kotlin中没有new关键字: 我们可以像使用普通函数那样使用构造函数创建类实例：val site = Strdent()
-companion object{...}相当于静态代码块用来定义静态变量或者静态方法，在类中只能存在一个
+companion object{...}伴生对象相当于静态代码块用来定义静态变量或者静态方法，在类中只能存在一个
 
 kotlin用as?实现强制类型转换，类似于python。如下：
 val person: Person = Person()
@@ -104,6 +130,48 @@ override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
     R.id.settings -> consume { navigateToSettings() }
     else -> super.onOptionsItemSelected(item)
 }
+
+Kotlin之let,apply,with,run函数区别
+let()的定义是这样的，默认当前这个对象作为闭包的it参数，返回值是函数里面最后一行，或者指定return
+fun testLet(): Int {
+    // fun <T, R> T.let(f: (T) -> R): R { f(this)}
+    "testLet".let {
+        println(it)
+        println(it)
+        println(it)
+        return 1
+    }
+}
+//运行结果
+//testLet
+//testLet
+//testLet
+apply函数是这样的，调用某对象的apply函数，在函数范围内，可以任意调用该对象的任意方法，并返回该对象。
+apply用起来和java里的构造者模式很像，比如我们自定义个View，采用构造者模式来初始化View的各个属性，用apply很简单就可以实现：
+fun createMyTextView(context: Context) = MyTextView(context).apply {
+    text = "my text view"
+    textSize = 20.0
+    setPadding(10,10,10,10)
+}
+run函数和apply函数很像，只不过run函数是使用最后一行的返回，apply返回当前自己的对象。
+with和apply是kotlin标准库中的函数，用来对一个对象进行多次操作。
+with函数是一个单独的函数，并不是Kotlin中的extension，所以调用方式有点不一样，返回是最后一行，然后可以直接调用对象的方法，感觉像是let和apply的结合。
+with把StringBuild委托给后边lambda，lambda里可以直接用this指代StringBuild或者直接调用StringBuild的方法：
+fun alphabetWith() = with(StringBuilder()) {
+        append("alphabet:\n")
+        for (letter in 'A'..'Z') {
+            this.append(letter)
+        }
+        append("\nI know the alphabet")
+        this.toString()
+    }
+with的返回值是lambda的值，即最后lambda的一行，而apply返回的是整个对象
+https://www.jianshu.com/p/605a382bff0c
+https://www.jianshu.com/p/e7abbfb109ac
+https://www.jianshu.com/p/5c4a954d2b2c
+android权限相关：
+https://blog.csdn.net/wangpf2011/article/details/80589648
+https://blog.csdn.net/qq_36523667/article/details/78917460
 --------------------------------------------------------------------------------------------
 
 kotlin视频教程 
@@ -222,7 +290,7 @@ https://www.cnblogs.com/Jetictors/p/8647968.html
 https://www.jianshu.com/p/163ed3618788
 
 class Hello
-val clazz = Hello::class.java  // 拿到的是 Kotlin 的 KClass。如果想要拿到 Java 的 Class 实例，那么就需要 类名.class ,对象.getClass();Class.forName("");。
+val clazz = Hello::class.java  // 拿到的是 Kotlin 的 KClass。如果想要拿到 Java 的 Class 实例，那么就需要 类名.class/对象.getClass();/Class.forName("");。
 启动页面如下：
 var intent: Intent = Intent(this, UserListActivity::class.java)
 startActivity(intent)
@@ -315,6 +383,128 @@ Kotlin调用c/c++代码：
 java用关键字native声明jni方法，kotlin用关键字external声明jni方法。如 external fun stringFromJNI():String 声明一个无参返回值为String的jni方法。
 
 https://kotlinlang.org/docs/reference/object-declarations.html
+
+-----------------------------------------------------------------------------------------------
+lambda表达式作为形参，调用时传递花括号代码块{}作为参数
+函数四要素： 1.名字 2.形参.小括号() 3.返回值 4.函数体.花括号代码块{}
+lambda表达式即匿名函数: (参数)->花括号代码块{...}。代码块的最后一行作为函数返回值
+lambda表达式的定义、传递(函数可以当参数)、调用
+搜索：kotlin lambda 作为形参：
+/**
+ * (1)传递参数为lambda表达式；
+ * (2)泛型的写法；
+ */
+fun <T1, T2> ifNotNull(value1: T1?, value2: T2?, lambdaParams: (T1, T2) -> (Unit)) {
+    if (value1 != null && value2 != null) {
+        lambdaParams(value1, value2)
+        //lambdaParams(value1, value2).invoke()
+    }
+}
+fun <T1, T2> ifNotNull(value1: T1?, value2: T2?, lambdaParams: () -> (Unit)) {
+    if (value1 != null && value2 != null) {
+        lambdaParams()
+        //lambdaParams().invoke()
+    }
+}
+Kotlin和Groovy等语言一样，支持闭包(block)，如果函数中最后一个参数为闭包，那么最后一个参可以不写在括号中，而写在括号后面，如果只有一个参数，括号也可以去掉。
+如下所示：
+fun toast() {
+    button.setOnClickListener({
+       Toast.makeText(context, "test", Toast.LENGTH_SHORT).show()
+    })
+}
+
+fun toast() {
+    button.setOnClickListener {
+        Toast.makeText(context, "test", Toast.LENGTH_SHORT).show()
+    }
+}
+用lambda表达式来替换匿名内部类
+
+在lambda中我们遵循如下的表达式来编写：expression = (variable) -> action
+variable: 这是一个变量,一个占位符。像x,y,z,可以是多个变量；
+action: 这里我称它为action, 这是我们实现的代码逻辑部分,它可以是一行代码也可以是一个代码片段。
+可以看到Java中lambda表达式的格式：参数、箭头、以及动作实现，当一个动作实现无法用一行代码完成，可以编写 一段代码用{}包裹起来。
+lambda表达式可以包含多个参数,例如：
+int sum = (x, y) -> x + y;
+
+面向函数的编程（Functional Programming）是指对于只有一个方法的接口可以使用 Lambda 表达式实现。
+为接口引入了一个新的注解：@FunctionalInterface，表示该接口为函数式接口，只允许有一个方法。否则编译器报错。
+// 只允许有一个方法。否则编译器报错。  
+@FunctionalInterface    
+public interface Runnable {  
+    public abstract void run();  
+}  		
+只有一个方法的接口很好的一个例子就是： java.lang.Comparable 接口。
+它只有一个方法： compareTo(Object obj)
+
+Lambda Expression ( -> 斜着看 ）
+Lambda Expression VS. Anonymous inner class
+对于只有一个方法的接口的实现类，写实现类时，只需提供（ 参数 + Lambda + 方法体 ）即可。
+// old  
+        obj = new A(){  
+            public void show(){  
+                System.out.println("Hello");  
+            }  
+        }  
+// java 8  
+        obj = () -> {  
+            System.out.println("Multiple");  
+            System.out.println("Lines ... ");  
+        }  
+// or  
+        obj = () -> System.out.println("Single line.");  	
+		如果方法只有一个参数，小括号可省略。方块体本身就是一个对象，可以作为参数直接传递。
+
+
+
+
+协程的有什么作用，工作原理是怎样的？
+协程中的一些关键名称(例如：Job、Coroutine、Dispatcher、CoroutineContext与CoroutineScope、suspend)它们之间到底是怎么样的关系？
+Dispatchers.Default其实是一个CoroutineDispatcher实例
+GlobalScope.launch调用的就是CoroutineScope.launch方法，从方法定义可以看到，它返回的是一个Job对象，它可以用来启动或者取消这个协程，查看协程的状态，也可以用来协调多个协程的合作。
+GlobalScope.async调用的就是CoroutineScope.async方法，它返回一个Deferred对象，Deferred有一个await方法，这个方法被调用后会暂停调用方协程，直到await结果可用返回或者有异常从中抛出
+
+协程Coroutine：withContext suspend关键字、withContext(Dispatchers.Main){...}
+suspend方法只能在suspend方法或者在协程中Coroutine调用。是一个耗时函数的提示。
+挂起函数，它不会造成线程阻塞，但是会 挂起 协程，并且只能在协程中使用。
+挂起函数不可以在main函数中被调用，那么我们怎么调试呢？对了，就是使用runBlocking 函数！
+kotlin中GlobalScope类提供了几个创建协程的构造函数，以下为创建协程的几种方式：
+GlobalScope.launch{...}： 创建协程
+GlobalScope.async{...}： 创建带返回值的协程，返回的是 Deferred 类
+withContext(Dispatchers.Main/IO/Default){...}：不创建新的协程，在指定协程上运行代码块
+runBlocking：不是 GlobalScope 的 API，可以独立使用，区别是 runBlocking 里面的 delay 会阻塞线程，而 launch 创建的不会
+withContext这个函数主要可以切换到指定的线程，并在闭包内的逻辑执行结束之后，自动把线程切回去继续执行
+例如：
+coroutineScope.launch(Dispatchers.Main) {      //  在 UI 线程开始
+    val image = withContext(Dispatchers.IO) {  // 切换到 IO 线程，并在执行完成后切回 UI 线程
+        getImage(imageId)                      // 将会运行在 IO 线程
+    }
+    avatarIv.setImageBitmap(image)             // 回到 UI 线程更新 UI
+} 
+Kotlin协程 ——从 runBlocking 与 coroutineScope 说起：runBlocking 是常规函数，而coroutineScope是挂起函数。supervisorScope
+runBlocking是阻塞包含runBlocking的线程，阻塞着线程直到runBlocking内的所有协程执行完毕。？
+coroutineScope接口及函数
+协程与协程之间是存在父子关系的，父协程一定在其子协程结束之后才会结束。也就是说，父协程在执行完自己的代码逻辑后会检测与自己关联的子协程的状态，如果还有子协程没有执行完（这里的没执行完是指协程处于活动状态，也就是isActive返回true的情况。如果isActive返回false则算是执行完了，即使还有代码逻辑在运行。），会一直等到子协程结束才会结束自己。
+在runBlocking中直接调用launch方法创建的协程是会建立父子关系，这样runBlocking会等到launch创建的协程执行完才结束，而通过调用GlobalScope.launch方法创建的协程是没有父协程的。
+
+https://www.jianshu.com/p/9398c21b2615
+https://blog.csdn.net/xyh269/article/details/90645484
+
+理解Python的协程(Coroutine) - 简书
+但是像JS和python这种互联网中流砥柱都是过了一两年才逐渐开始支持。没有async/await，想用同步方式写异步逻辑就只能借助coroutine。
+
+同一时间发起两个甚至多个请求，再把两个结果合并
+https://blog.csdn.net/weixin_42954368/article/details/105897083
+https://blog.csdn.net/Androiddddd/article/details/109723827
+https://www.jianshu.com/p/0ec9c85fbf9b
+
+https://blog.csdn.net/xyh269/article/details/90645484
+Kotlin协程 ——从 runBlocking 与 coroutineScope 说起：runBlocking 是常规函数，而coroutineScope是挂起函数。supervisorScope
+https://blog.csdn.net/u011133887/article/details/98617852
+https://blog.csdn.net/u012503033/article/details/105767054/
+
+
 
 
 

@@ -1,0 +1,702 @@
+数据源-->Surface-->SurfaceTexture-->GlSurfaceView(textureID)、TextureView
+其中音视频解码-->展示又分为一下几种：
+1.USB Device外设(MedicCodec硬解码)
+2.camera sensor：系统camera类解码
+3.本地文件、网络文件：(ijkPlayer.setDataSource()解码)
+视频流：分辨率，帧率，比特率(CBR,VBR),通道数，位深
+显示屏：宽高比
+视频流通过纹理id(纹理类型为GLES11Ext.GL_TEXTURE_EXTERNAL_OES)和opengl关联
+1.OpenGL 
+2.EGL环境搭建(EGLDisplay.EGLConfig.EGLSurface.EGLContext) EGL版本
+3.GLSL数据类型，修饰符，内置变量，内置函数texture2D().mix()
+	顶点坐标，顶点矩阵(MVP即模型.视图.投影矩阵坐标系变换)
+	纹理坐标，纹理矩阵
+Android OpenGL渲染：GLSurfaceView只是提供一个EGL环境(EGLDisplay.EGLSurface.EGLConfig.EGLContext)和GLThread渲染线程，而视频内容是通过SurfaceTexture.onFrameAvailable()+纹理id即textureID传递给openGL的GLSurfaceView.Renderer.onDrawFrame(GL10 gl)的。
+OpenGL渲染：要么自定义view继承自系统的GLSurfaceView.requestRender()并实现GLSurfaceView.Renderer.onDrawFrame(GL10 gl)，要么自定义EGL环境(EGLDisplay.EGLSurface.EGLConfig.EGLContext)、渲染线程GLThread和GLSurfaceView.Renderer
+GLSurfaceView可以通过自己搭建EGL环境(EGLDisplay.EGLConfig.EGLContext.EGLSurface)+GLThread渲染线程+TextureView来替换。要在GL线程中初始化EGL环境。
+
+
+
+shader脚本：
+美颜：红润，磨皮，美白
+美型：大眼，瘦脸，红腮，红唇
+shader内置函数: mix texture2D
+红润：本质就是改变色调。
+磨皮：本质就是让像素点模糊，可以使用高斯模糊，但是可能导致边缘会不清晰，用双边滤波(Bilateral Filter) ，有针对性的模糊像素点，能保证边缘不被模糊。
+美白：本质就是提高亮度。
+图像画质相关的：亮度.色度.饱和度.对比度.暗角
+3A+曝光铁三角：
+【3A，Auto focus，Auto white balance，Auto flash】+【曝光铁三角，光圈、快门、iso，】：(曝光补偿？)
+http://www.fsbus.com/danfanrumen/20594.html
+
+---------------------------------------------------------------------------------------------------------
+1.顶点坐标系的左上右下要和纹理坐标系的左上右下的顺序一一对应***
+2.MVP即模型.视图.投影矩阵设置，纹理更新，纹理矩阵更新
+3.shader脚本中的变量设置正确
+4.glDrawArray(...)-->glFlush()或glFinish()-->eglSwapBuffers(m_EGLDisplay, m_EGLSurface);-->glReadPixels    FBO离屏渲染
+EGL环境搭建
+顶点坐标系决定顶点在屏幕上绘制的位置，而纹理坐标系决定纹理图像中的哪一个像素赋予该顶点。
+纹理坐标：(s,t,r,q),注意纹理分为1维，2维，3维，在纹理贴图的时候，如果顶点发生变化，相应的纹理坐标会发生相应的变化。
+顶点坐标：(x,y,z,w)，注意变换方式以及相应的利用。OpenGL先关的几个函数。
+纹理颜色：(r,g,b,a)
+但把每一帧数据传递给openGL，则只能通过SurfaceTexture绑定openGL生成的纹理id即TextureId来实现
+
+shader属性赋值：
+shader属性赋值时，只有attribute属性需要告诉opengl其解析结构及如何解析，因为attribute vec4传递可少于4个float的数组， 但必须告诉顶点属性指针如何解析。其他类型属性如Uniform等直接赋值即可。
+顶点属性赋值时Stride步长参数: 要么为0，要么=vertexPerSizeCount*4Float
+uniform修饰的和mat4类型的数据必须传递指定相等长度的数组
+//为顶点属性赋值GLES20.glVertexAttribXXX...()
+GLES20.glVertexAttribPointer(aVertPosition,2,GLES20.GL_FLOAT, false, 0, vertFloatBuffer);
+
+surfaceTexture.updateTexImage();
+surfaceTexture.getTransformMatrix(textureMatrix);
+//为uniform属性赋值GLES20.glUniformXXX...()
+参数一int location : uniform的位置。
+参数二int count : 需要加载数据的数组元素的数量或者需要修改的矩阵元素的数量。
+参数三boolean transpose : 指明矩阵是列优先(column major)矩阵（GL_FALSE）还是行优先(row major)矩阵（GL_TRUE）。
+参数四float[] value : 指向由count个元素的数组的指针。
+参数五int offset: 偏移量
+// 将最终MVP变换矩阵传入shader程序 
+//        GLES20.glUniformMatrix4fv(uMVPMatrix,1,false, projectionMatrix, 0);
+// 将最终纹理矩阵传入shader程序
+//        GLES20.glUniformMatrix4fv(uTexMatrix,1,false, textureMatrix, 0);
+
+shader脚本的注释为//
+注意：此处增加注释只是为了方便阅读和理解，实际开发的时候尽量不要在着色器代码中添加注释，防止出现编译错误。
+【顶点shader】
+varying vec2 aCoordinate;
+void main () {
+    //纹理矩阵 点乘 纹理坐标 返回相对于纹理自身的坐标aCoordinate，并传递给片段着色器
+    aCoordinate = (uTexMatrix * aTexPosition).xy;
+    //gl_Position = aVertPosition;
+    //最终的mvp投影矩阵 点乘 顶点坐标  得到最终相对于屏幕的坐标
+     gl_Position = uMVPMatrix * aVertPosition;
+}
+【片段shader】
+void main () {
+    //获取对应纹理坐标系下色颜色值
+	//vec4 color = uColorMatrix * texture2D(texture, aCoordinate).rgba;
+    vec4 color = texture2D(texture, aCoordinate).rgba;
+	//赋值给内置变量 gl_FragColor
+    gl_FragColor = color;
+}
+要使用glActiveTexture激活纹理，那么和纹理相关的工作我们都必须作好：1、在片段着色器中定义纹理采样器；2、传入纹理坐标到片段着色器中，要用纹理坐标和采样器进行采样，以确定片段颜色。
+这是两个和纹理相关最根本的目标，为了完成它们，我们就需要定义纹理坐标，并通过Opengl API赋值传递到顶点着色器，并通过varying再传递给片段着色器；我们还要解析纹理图片，并把解析好的Bitmap与申请的缓冲区绑定，设置采样方式，生成Mipmap纹理等等工作，不过这些都是流程性的东西，代码中的TextureHelper工具类已经很好的完成了这些，大家可以直接使用。
+https://blog.csdn.net/sinat_22657459/article/details/104889633
+
+OpenGL ES 定义了一个渲染图形的 API，但没有定义窗口系统。为了让 GLES 能够适合各种平台，GLES 将与知道如何通过操作系统创建和访问窗口的库结合使用。用于 Android 的库称为 EGL。如果要绘制纹理多边形，应使用 GLES 调用；如果要在屏幕上进行渲染，应使用 EGL 调用。
+我们熟悉的GLSurfaceView已经帮我们封装好了EGL环境,我们只需要在Render.onDrawFrame里面直接使用OpenGL的接口绘图就好了,绘制的图形就好显示在GLSurfaceViews上
+(计算机领域有一句话:"计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决"。EGL就是安卓上的这个中间层,OpenGL通过这个EGL来和安卓系统的交互)
+
+绘制时,每一帧的数据可用的回调有两个地方：
+(通用性更强) 
+mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+         @Override
+         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+             
+         }
+     });
+(依赖于camera2的api)
+private CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+     @Override
+     public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+        
+     }
+ };
+
+-----------------------------------------------------------------------------------------------------
+openGL五大坐标系统 
+https://www.cnblogs.com/keguniang/p/9886605.html
+
+矩阵C为矩阵A与B的乘积，记作C=AB
+注意事项
+1、当矩阵A的列数（column）等于矩阵B的行数（row）时，A与B可以相乘。
+2、矩阵C的行数等于矩阵A的行数，C的列数等于B的列数。
+3、乘积C的第m行第n列的元素等于矩阵A的第m行的元素与矩阵B的第n列对应元素乘积之和。
+矩阵乘法基本性质：
+乘法结合律： (AB)C=A(BC)． [3] 
+乘法左分配律：(A+B)C=AC+BC [3] 
+乘法右分配律：C(A+B)=CA+CB [3] 
+对数乘的结合性k(AB）=(kA)B=A(kB）．
+转置 (AB)T=BTAT．
+矩阵乘法在以下两种情况下满足交换律。
+AA*=A*A，A和伴随矩阵相乘满足交换律。
+AE=EA，A和单位矩阵或数量矩阵满足交换律。
+矩阵乘法的本质是什么？
+https://www.zhihu.com/question/21351965
+矩阵乘法满足结合律
+矩阵乘法不满足交换律，即矩阵相乘不能左右交换
+矩阵相乘：左行X右列，左边矩阵的每一行与右边矩阵的每一列位置相对应的数字相乘后再相加，放到参与计算的"行.列左边"的位置作为结果
+结果矩阵C为左行优列：即矩阵C的行数等于矩阵A的行数，C的列数等于B的列数。
+两个向量v和w，它们的数量积为：V*W = V1*W1+V2*W2+...+Vn*Wn。数量积也叫点积，它是向量与向量的乘积，其结果为一个标量（非向量）。
+向量积也叫叉积，外积，它也是向量与向量的乘积，不过需要注意的是，它的结果是个向量。向量积不满足交换律。
+vec4为矢量
+mat4为矩阵
+gl_Position和gl_FragColor都是为vec4的矢量
+
+MVP即模型.视图.投影矩阵坐标系变换
+在 OpenGL 坐标系统 文章中，根据点的坐标变换得出了如下的公式：
+Vector{clip_gl_Position}=Matrix{projection投影矩阵} * Matrix{view/eye视图矩阵} * Matrix{model模型矩阵} * Vector{local_a_Position坐标向量}
+这个公式每左乘一个矩阵，都代表了一种坐标系的变换。
+投影矩阵决定视景体。视图矩阵的相机参数要在投影矩阵的near和far参数之间，否则绘制不出图像.即看不到图像。
+模型矩阵可能包含了物体的平移(translation)、旋转(rotation)、缩放(scaling)这三种变换。
+转化为着色器脚本语言如下：
+attribute vec4 a_Position;
+uniform mat4 u_ModelMatrix;
+uniform mat4 u_ProjectionMatrix;
+uniform mat4 u_ViewMatrix;
+void main()
+{
+    gl_Position  = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;//看起来三个变换的顺序跟我们期望的相反了，但这正是矩阵左乘造成的结果。
+}
+frustumM和perspectiveM都可以创建透视投影矩阵，只是创建参数不同，orthoM创建正交投影矩阵。正交投影会创建一个类似立方体的视景体。透视投影创建是一个锥形的视景体。
+由投影矩阵创建的范围，是一个封闭的空间几何体，被称为视景体。
+不管是正交投影还是透视投影，最终都是将视景体内的物体投影在近平面上，这也是 3D 坐标转换到 2D 坐标的关键一步。而近平面上的坐标接着也会转换成归一化设备坐标，再映射到屏幕视口上。
+
+投影矩阵：投影矩阵决定视景体。只有绘制在近平面和远平面之间的内容，才能被用户看到？
+Matrix.frustumM(mProjMatrix, 0, left, right, bottom, top, near, far)创建透视投影矩阵：
+float left, //near面的left 
+float right, //near面的right 
+float bottom, //near面的bottom 
+float top, //near面的top 
+float near, //near面距离 
+float far //far面距离 
+投影矩阵的左、上、右、下距离都是相对于近平面中心的。近平面的坐标原点位于中心， X轴向右为正方向，Y轴向上为正方向，所以我们的 left、bottom 要为负数，而 right、top 要为正数。
+近平面near参数和远平面far参数的距离都是指相对于视点的距离，所以 near、far 要为正数。
+由于透视投影会产生近大远小的效果，当照相机位置不变，改变 near 的值时也会改变物体大小，near 越小，则离视点越近，相当于物体越远，那么显示的物体也就越小了。
+当然也可以 near 和 far 的距离不动，改变摄像机的位置来改变观察到的物体大小。
+设置这些参数能起到的作用：先是left，right和bottom,top，这4个参数会影响图像左右和上下缩放比，所以往往会设置的值分别-(float) width / height和(float) width / height，
+top和bottom和top会影响上下缩放比，如果left和right已经设置好缩放，则bottom只需要设置为-1，top设置为1，这样就能保持图像不变形。
+也可以将left，right 与bottom，top交换比例，即bottom和top设置为 -height/width 和 height/width, left和right设置为-1和1。 
+near和far参数稍抽象一点，就是一个立方体的前面和后面，near和far需要结合拍摄相机即观察者眼睛的位置来设置，
+例如setLookAtM中设置cx = 0, cy = 0, cz = 10，near设置的范围需要是小于10才可以看得到绘制的图像，如果大于10，图像就会处于了观察这眼睛的后面，这样绘制的图像就会消失在镜头前，
+far参数影响的是立体图形的背面，far一定比near大，一般会设置得比较大，如果比较小，一旦3D图形尺寸很大，这时由于far太小，这个投影矩阵没法容纳图形全部的背面，这样3D图形的背面会有部分隐藏掉的。
+
+视图矩阵：视图矩阵的相机参数要在投影矩阵的near和far参数之间，否则绘制不出图像.即看不到图像
+要定义一个摄像机，或者说要定义一个摄像机视角为坐标原点的坐标系，需要：
+1.摄像机在世界空间中的位置
+2.摄像机观察的方向
+3.指向摄像机右测的向量
+4.指向摄像机上方的向量
+Matrix.setLookAtM(mVMatrix, 0, cx, cy, cz, tx, ty, tz, upx, upy, upz)创建视图矩阵：
+需要填充的参数 
+float cx, //摄像机位置x 
+float cy, //摄像机位置y 
+float cz, //摄像机位置z 
+float tx, //摄像机目标点x 
+float ty, //摄像机目标点y 
+float tz, //摄像机目标点z 
+float upx, //摄像机UP向量X分量 
+float upy, //摄像机UP向量Y分量 
+float upz //摄像机UP向量Z分量 
+这个方法看起来很抽象，设几组参数对比一下效果：
+摄像机目标点，即绘制的3D图像，tx，ty, tz,为图像的中心位置设置到原点即 tx = 0,ty = 0, tz = 0; 
+摄像机的位置，即观察者眼睛的位置 我们设置在目标点的正前方（位置z轴正方向），cx = 0, cy = 0, cz = 10; 
+接着是摄像机顶部的方向了，如下图，很显然相机旋转，up的方向就会改变，这样就会会影响到绘制图像的角度。 
+当用视图矩阵确定了照相机的位置时，要确保物体距离视点的位置在 near 和 far 的区间范围内，否则就会看不到物体。
+
+模型矩阵：可能包含了缩放(scaling)、旋转(rotation)、平移(translation)这三种变换。
+Matrix.setIdentityM(mTransMatrix, 0)		创建一个单位矩阵
+Matrix.scaleM(mTransMatrix,0,2f,0.5f,1f)
+Matrix.rotateM(mTransMatrix, 0, mAngle, 0f, 0f, 1.0f)
+Matrix.translateM(mTransMatrix, 0, 0.5f, 0.5f, 0f)
+---------------------------------------------------------------------------------------------------------
+OpenGL ES						
+https://blog.csdn.net/junzia/article/category/6462864
+https://blog.csdn.net/jxt1234and2010/article/details/53440644
+glFramebufferTexture2D
+https://www.jianshu.com/p/29a7dde7d21f
+opengl EGL						
+https://blog.csdn.net/ieearth/article/details/71180457						
+https://blog.csdn.net/iEearth/article/details/78845105
+
+opengl
+https://learnopengl-cn.github.io/
+https://juejin.im/post/5e4b4fe96fb9a07c9a1955a1
+
+纹理：(shader纹理变量或者纹理层级使用前要先启用或者激活)、纹理id、纹理类型及参数设置、渲染到纹理层级、shader纹理变量、
+https://learnopengl-cn.github.io/01%20Getting%20started/06%20Textures/
+https://juejin.im/post/5e4b4fe96fb9a07c9a1955a1
+-----------------------------------------------------------------------------------------------------
+《Android 3D 游戏开发技术宝典 OpenGL ES 2.0》
+
+顶点坐标.坐标系，顶点投影.视图.模型.矩阵
+没有图片时(则不需要纹理坐标)，为使同一帧的不同顶点.不同像素有不同的颜色：须顶点坐标和颜色坐标都在顶点着色器中解析赋值，且一一对应。
+纹理坐标.坐标系。
+纹理id--(只有视频帧OES.yuv需要纹理采样矩阵，图片sampler2D.rgb不需要纹理采样矩阵)
+opengles纹理操作:
+1.激活纹理层级GL_TEXTURE0.即纹理容器
+2.生成纹理ID.或生成帧缓冲ID.即显存地址
+3.绑定纹理类型.或绑定帧缓冲类型(GLES30.GL_TEXTURE_2D、GLES11Ext.GL_TEXTURE_EXTERNAL_OES)：将纹理id和相应的纹理类型进行绑定
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, mFrameBuffers[0]);
+4.设置纹理类型参数：
+//            参数(pname)
+//            GLES20.GL_TEXTURE_MAG_FILTER
+//            值(param)
+//            GLES20.GL_NEAREST或GLES20.GL_LINEAR
+
+//            参数(pname)
+//            GLES20.GL_TEXTURE_MIN_FILTER
+//            值(param)
+//            滤镜	描述
+//            GLES20.GL_NEAREST	取最邻近像素 速度快，效果差
+//            GLES20.GL_LINEAR	线性内部插值 计算量大。效果好
+//            GLES20.GL_NEAREST_MIPMAP_NEAREST	最近多贴图等级的最邻近像素
+//            GLES20.GL_NEAREST_MIPMAP_LINEAR	在最近多贴图等级的内部线性插值
+//            GLES20.GL_LINEAR_MIPMAP_NEAREST	在最近多贴图等级的外部线性插值
+//            GLES20.GL_LINEAR_MIPMAP_LINEAR	在最近多贴图等级的外部和内部线性插值
+
+//            参数(pname)
+//            GLES20.GL_TEXTURE_WRAP_S 从左至右纹理环绕模式
+//            GLES20.GL_TEXTURE_WRAP_T 从下至上纹理环绕模式
+//            GLES20.GL_TEXTURE_WRAP_R 从里至外纹理环绕模式
+//            值(param)
+//            GLES20.GL_CLAMP：截取
+//            GLES20.GL_REPEAT：重复
+//            GLES20.GL_MIRRORED_REPEAT:镜像重复
+//            GLES20.GL_CLAMP_TO_EDGE:忽略边框截取
+//            GLES20.GL_CLAMP_TO_BORDER:代边框的截取
+纹理环绕方式：
+可以使用glTexParameter()对单独的一个坐标轴设置（s轴、t轴、r轴）
+GLES20.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+GLES20.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+纹理过滤：
+GLES20.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//放大(Magnify)过滤
+GLES20.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//缩小(Minify)过滤
+纹理过滤有很多个选项，最重要的两种即GL_NEAREST和GL_LINEAR。
+GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）是OpenGL ES默认的纹理过滤方式。当设置为GL_NEAREST的时候，OpenGL ES会选择中心点最接近纹理坐标的那个像素。
+GL_LINEAR（也叫线性过滤，(Bi)linear Filtering）它会基于纹理坐标附近的纹理像素，计算出一个插值，近似出这些纹理像素之间的颜色。
+多级纹理
+GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+https://www.jianshu.com/p/609d6856b5cf
+Android OpenGL绘制纹理图片：GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+纹理坐标相当于：srcRect
+顶点坐标相当于：dstRect
+显示区域，绘制区域，纹理坐标区域
+https://blog.csdn.net/yu540135101/article/details/100782542
+
+onDrawFrame()方法中对shager中的变量进行赋值：启用顶点属性数组.设置顶点属性指针(即顶点坐标.纹理坐标)，设置glUniformMatrix4fv矩阵
+6.显示纹理glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_drawOrder.length, GLES20.GL_UNSIGNED_SHORT, m_drawListBuffer);
+eglSwapBuffers(display, winSurface); //窗口显示，交换双缓冲区
+
+生成渲染缓冲id
+绑定渲染缓冲id
+设置渲染缓冲宽高
+解绑渲染缓冲
+glGenRenderbuffers(1, &depthStencil);
+glBindRenderbuffer(GL_RENDERBUFFER, depthStencil);
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+生成帧缓冲id
+绑定帧缓冲id
+设置帧缓冲纹理类型
+设置帧缓冲渲染buffer
+glGenFramebuffers(1, &fbo);
+glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
+glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencil);
+
+VBO：
+生成缓冲id
+绑定缓冲id
+绑定缓冲数据
+glGenBuffers(...)
+glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferId)
+glBufferData(GLES20.GL_ARRAY_BUFFER, buffer.capacity() * elementSize, buffer, GLES20.GL_STATIC_DRAW)
+指定了希望显卡如何管理给定的数据，它有三种形式：
+① GL_STATIC_DRAW ：数据不会或几乎不会改变。
+② GL_DYNAMIC_DRAW：数据会被改变很多。
+③ GL_STREAM_DRAW：数据每次绘制时都会改变。
+这边三角形的位置数据不会改变，每次渲染调用时都保持原样，所以它的使用类型最好是GL_STATIC_DRAW。
+如果，一个缓冲中的数据将频繁被改变，那么使用的类型就是GL_DYNAMIC_DRAW或GL_STREAM_DRAW，这样就能确保显卡把数据放在能够高速写入的内存部分。
+
+顶点坐标.纹理坐标内存空间申请并赋值
+创建着色器，关联源码、编译，链接着色器程序
+shader的属性location获取及赋值
+生成纹理ID
+
+顶点着色器、片段着色器   GLES20.glDrawArrays、GLES20.glDrawElements绘制，可根据顶点坐标数量，在onDrawFrame方法中调用多次***
+https://blog.csdn.net/qq_35294564/article/details/86508493
+顶点着色器决定坐标，片段着色器决定颜色，顶点着色器要把坐标传递给片段着色器
+shader脚本中main函数外定义的变量(即uniform和attribute变量)，赋值数据是需要从外部程序传入的。
+
+GLES20.glDelete...(...)释放GL资源
+-----------------------------------------------------------------------------------------------------------------------
+FBO帧缓冲对象.离屏渲染，是一个容器：
+
+在渲染时，先渲染到 FBO 上，在渲染到屏幕上。首先要切换到 FBO 进行渲染：GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId); 如果fboId参数为0，则代表切换到默认的屏幕上进行绘制。
+FBO是一个容器，自身不能用于渲染，需要与一些可渲染的缓冲区绑定在一起，像纹理或者渲染缓冲区。Render Buffer Object（RBO）即为渲染缓冲对象，分为color buffer(颜色)、depth buffer(深度)、stencil buffer(模板)。
+在使用FBO做离屏渲染时，可以只绑定纹理，也可以只绑定Render Buffer，也可以都绑定或者绑定多个，视使用场景而定。
+如只是对一个图像做变色处理等，只绑定纹理即可。如果需要往一个图像上增加3D的模型和贴纸，则一定还要绑定depth Render Buffer。
+RBO(Render Buffer Object)渲染缓冲对象
+https://mp.weixin.qq.com/s?__biz=MzA4MjU1MDk3Ng==&mid=2451526569&idx=1&sn=b3eb001db2308b469ada2ce2fae04f04&chksm=886ffa06bf187310cc2e00ed954e697dc32d8f347786c55ed3354c6ab38a544f1f194739860d&scene=21#wechat_redirect
+FBO 实际上是由颜色附件、深度附件、模板附件组成的，作为着色器各方面（一般包括颜色、深度、深度值）绘制结果存储的逻辑对象。
+渲染缓冲(Renderbuffer Object)，简称 RBO，由应用程序分配的 2D 图像缓冲区，可以用于分配和存储 深度 和 模板 值，也可以用作 FBO 的 深度 或者 模板 附件，另外，纹理也可以作为 FBO 的颜色和深度附件。
+int[] framebufferID = new int[1];
+GLES20.glGenFramebuffers(1, framebufferID, 0);
+GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, framebufferID[0]);
+int[] renderbufferID = new int[1];
+GLES20.glGenRenderbuffers(1, renderbufferID, 0);
+// 绑定到当前渲染缓冲对象
+GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, renderbufferID[0]);
+int[] textureID = new int[1];
+GLES20.glGenTextures(fTextureSize, fTexture, 0);
+// 绑定纹理
+GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+// 初始化纹理数据存储
+GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, width, height,0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, null);
+// 初始化渲染数据存储
+GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_ATTACHMENT, width, height);
+// 把渲染缓冲renderbufferId作为深度附件GL_DEPTH_ATTACHMENT添加到FBO上
+GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, renderbufferID[0]);
+// 把纹理textureId作为颜色附件绑定到FBO上
+GLES20.glFramebufferTexture2D(
+    GLES20.GL_FRAMEBUFFER, 
+    GLES20.GL_COLOR_ATTACHMENT0, // 作为颜色附件
+    GLES20.GL_TEXTURE_2D, 
+    textureId, 
+    0);
+如果是使用 OpenGL 3.x 版本，在绑定 FBO 时，还可以选择是绑定只读还是只写的 FBO。
+GL_READ_FRAMEBUFFER  #只读的 FBO
+GL_DRAW_FRAMEBUFFER  #只写的 FBO
+如果是使用 GL_FRAMEBUFFER 的话，那么读写皆可以。
+
+在渲染时，先渲染到 FBO 上，在渲染到屏幕上。
+//首先要切换到 FBO 进行渲染：
+GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId);
+// 加载纹理
+int textureId = TextureHelper.loadTexture(context, R.drawable.lgq);
+// 将纹理绘制到 FBO 上
+mTextureRect.drawSelf(textureId);
+// 切换到屏幕的缓冲区
+GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+// 使用 FBO 所绑定的纹理进行绘制
+mTextureRect.drawSelf(fboTextureId);
+
+取消绑定
+GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
+GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+
+
+https://blog.csdn.net/junzia/article/details/53861519
+https://blog.csdn.net/junzia/article/details/56008902
+glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);	//写缓冲
+glBindFramebuffer(GL_READ_FRAMEBUFFER, mRenderSurfaces[0]->fboHandle);	//读缓冲
+glBlitFramebuffer(mRenderSurfaces[0]->viewport.x,
+                  mRenderSurfaces[0]->viewport.y,
+                  mRenderSurfaces[0]->viewport.width,
+                  mRenderSurfaces[0]->viewport.height,
+                  0,
+                  0,
+                  mWindowWidth,
+                  mWindowHeight,
+                  GL_COLOR_BUFFER_BIT,
+                  GL_LINEAR);
+glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+glFinish();
+https://blog.csdn.net/huutu/article/details/53364170
+Opengl4.0中可以进行离屏渲染，即创造一个帧缓存对象（FBO），绑定一个帧缓存对象后，所有对Opengl的操作都会针对这个帧缓存对象执行。
+绑定缓冲区对象表示选择未来的操作（对数据进行初始化或者使用缓冲区对象进行渲染）将影响哪个缓冲区对象。glBindBuffer (GLenum target, GLuint buffer)
+FBO在创建后,使用前必须绑定它.glBindFramebuffer (GLenum target, GLuint framebuffer)
+GPU渲染完数据在显存，回传内存的唯一方式glReadPixels函数。glReadPixels可以“把已经绘制好的像素（它可能已经被保存到显卡的显存中）读取到内存”，即读取帧缓存中的数据并保存到内存中
+或用glCopyTexImage2D利用帧缓存中的数据建立纹理。
+
+(不需要顶点着色器和片段着色器)，纹理id(视频OES.yuv、图片sampler2D.rgb)-->FrameBufferObject(FBO)帧缓冲容器实现离屏渲染-->glFlash()、glFinish()绘制更新 ？
+Frame Buffer Object（FBO）即为帧缓冲对象，用于离屏渲染缓冲。相对于其它同类技术，如数据拷贝或交换缓冲区等，使用FBO技术会更高效并且更容易实现。而且FBO不受窗口大小限制。FBO可以包含许多颜色缓冲区，可以同时从一个片元着色器写入。
+
+glDrawArray(...)-->glFlush()或glFinish()-->eglSwapBuffers(m_EGLDisplay, m_EGLSurface);
+每次在写完绘图代码需要让其完成效果时我们需要在代码后面添加glFlush()或gLFinish()函数：
+（1）gLFlush()作用是将缓冲区中的指令(无论是否为满)立刻送给图形硬件执行，发送完立即返回；
+（2）glFinish()作用也是将缓冲区中的指令(无论是否为满)立刻送给图形硬件执行，但是要等待图形硬件执行完这些指令才返回。
+因此，在绘图命令比较冗长的情况下，可以分段调用glFlush以清空命令队列并让显卡开始先执行这些命令，最后调用glFinish来同步。
+举个例子：我的渲染器一共有9种shader，渲染时从shader0一直渲染到shader8，以前是在所有shader渲染完成后才调用glFinish
+（注意：这里如果把glFinish换成glFlush，那么调用eglSwapBuffer的时候在不同的平台上会产生不同的结果，具体结果我也不清楚，个人感觉好像没什么问题，但是游戏的时钟系统会被扰乱——最明显的就是帧速算错），那么CPU就要等GPU绘图，浪费了大把大把的时间；
+现在改成每个shader完成后调用一次glFlush，强制GPU开始执行命令队列中的GL命令，最后调用glFinish等待GPU完成当前帧渲染，然后调用eglSwapBuffer调换前后缓存。
+OpenGL 绘图的机制是: 先用 OpenGL 的绘图上下文 Rendering Context (简称为 RC )把图画好，再把所绘结果通过 SwapBuffer() 函数传给 Window 的 绘图上下文 Device Context (简记为 DC).
+要注意的是，程序运行过程中，可以有多个 DC，但只能有一个 RC。因此当一个 DC 画完图后，要立即释放 RC，以便其它的 DC 也使用。
+
+https://blog.csdn.net/weixin_34080903/article/details/88004050
+glFlush 和 glFinish
+OpenGL ES 驱动和GPU以并行/异步的机制运行。发起GL 调用时，为了得到最好的性能，驱动会尝试尽快地把调用指令发送给GPU。但GPU 并不会马上执行这些指令，这些指令只是添加到了GPU的指令队列里等待GPU 执行。如果在短时间内发送大量的GL 指令给GPU，GPU的指令队列可能满了，以至于驱动需要把这些指令保存在Context的调用缓存里(即上文里提到的Context内的调用缓存)。
+那么问题来了，这些等待中的指令何时会发送给GPU呢？通常来说，大多数OpenGL ES驱动的实现可能会在发起新的(下一个)GL 指令发起的时候发送这些指令。如果想要主动执行这个操作，那就调用glFlush。这个操作将会阻塞当前线程，直到所有的指令都发送给了GPU。glFinish这个命令更加强大，它会阻塞当前线程，直到所有的指令都发送给了GPU，并执行完毕。需要注意的是，应用程序的性能会因此下降。
+glFlush和glFinish被称为显式同步操作。某些情况下也会发生隐式同步操作。调用eglSwapBuffers时，就可能发生这种情况。由于这个操作是由驱动直接执行的，此时GPU 可能把所有待执行的glDraw*绘制指令，作用在一个不符合预期的surface 缓冲上(如果之前前端缓冲和后端缓冲已经交换过了)。为了防止这种情形，在交换缓冲前，驱动必须阻塞当前线程，等待所有的影响当前surface的glDraw*指令执行完毕。
+当然，使用双重缓冲的surfaces时，不需要主动调用glFlush或glFinish：因为eglSwapBuffers进行了隐式同步操作。但在使用单缓冲surfaces(如上文提到的第二个线程里)的情况，需要及时调用glFlush，例如：在线程退出前，必须调用glFlush，否则，GL 指令可能从未发送到GPU。
+
+IntBuffer RGBABuffer = IntBuffer.allocate(width * height);
+RGBABuffer.position(0);
+GLES20.glReadPixels(0, 0, width, height,GLES20.GL_RGBA,GLES20.GL_UNSIGNED_BYTE,RGBABuffer); //复制显存图像数据到内存got RGB colors in framebuffer 
+int[] pixls = RGBABuffer.array();
+GL_TEXTURE_2D(RGB?)  GL_TEXTURE_EXTERNAL_OES(YUV?)
+
+shareContext:
+mEglContext=mEgl.eglCreateContext(mEglDisplay,mEglConfig,shareContext,contextAttr);
+
+2d顶点坐标
+3d顶点坐标
+
+
+VAO、VBO、
+单个Surface渲染多个纹理，实现画中画
+https://blog.csdn.net/yu540135101/article/details/102950038
+https://blog.csdn.net/yu540135101/category_9364854.html
+https://www.cnblogs.com/lookof/archive/2010/02/07/1665486.html
+glCopyTexImage2D定义一个2D纹理图像或者立方体映射纹理图像，其像素来自于当前帧缓冲区（而非glTexImage2D那样来自于客户端内存）
+//设置FBO分配内存大小，绑定纹理之后glBindTexture
+GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 1000, 500, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+//解析绑定图片
+Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), bitmapRes);
+GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+       
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+对视频中的某个内容进行替换，换成自己的图片，这个怎么用 OpenGL 去实现呢？如水印的添加
+
+glEnable(GL_BLEND);//启用混合
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)//颜色混合，设置混合源因子和目标因子所占比例
+// todo绘制
+glDisable(GL_BLEND)
+混色的基本原理就是把要绘制的物体的颜色与屏幕上已经绘制好的颜色以一定比例来混合，最后的颜色看上去就像半透明一样。
+在进行混合时，绘制的顺序十分重要。因为在绘制时，正要绘制上去的是源颜色，原来存在的是目标颜色，因此先绘制的物体就成为目标颜色，后来绘制的则成为源颜色。
+绘制的顺序要考虑清楚，将目标颜色和设置的目标因子相对应，源颜色和设置的源因子相对应。
+在进行三维混合时，不仅要考虑源因子和目标因子，还应该考虑深度缓冲区。必须先绘制所有不透明的物体，再绘制半透明的物体。
+在绘制半透明物体时前，还需要将深度缓冲区设置为只读形式，否则可能出现画面错误
+
+实现三维混合，总结起来，绘制顺序就是：首先绘制所有不透明的物体。如果两个物体都是不透明的，则谁先谁后 都没有关系。然后，将深度缓冲区设置为只读。
+接下来，绘制所有半透明的物体。如果两个物体都是半透明的，则谁先谁后只需要根据自己的意愿（注意了，先绘制 的将成为“目标颜色”，后绘制的将成为“源颜色”，所以绘制的顺序将会对结果造成一些影响）。
+最后，将深度缓冲区设置为可读可写形式。
+glDepthMask(GL_FALSE);可将深度缓冲区设置为只读形式。
+glDepthMask(GL_TRUE);可将深度缓冲区设置为可读可写形式。
+glEnable(GL_DEPTH_TEST);可将深度缓冲区启用
+glDisable(GL_DEPTH_TEST);可直接将深度缓冲区禁用
+https://www.jianshu.com/p/b1544b0fc72c
+
+在进行三维场景的混合时必须注意的，那就是深度缓冲。
+深 度缓冲是这样一段数据，它记录了每一个像素距离观察者有多近。在启用深度缓冲测试的情况下，如果将要绘制的像素比原来的像素更近，则像素将被绘制。否则， 像素就会被忽略掉，不进行绘制。
+这在绘制不透明的物体时非常有用——不管是先绘制近的物体再绘制远的物体，还是先绘制远的物体再绘制近的物体，或者干脆以 混乱的顺序进行绘制，最后的显示结果总是近的物体遮住远的物体。
+--------------------------------------------------------------------------------------
+opengl glsl编程类似于C语言编程(没有类class)，用形参指针作为返回值。且好多变量都是全局变量。形参容器，offset，length
+opengl--EGL环境搭建
+https://mp.weixin.qq.com/s?__biz=MzA4MjU1MDk3Ng==&mid=2451526566&idx=1&sn=44eae0fe0d0f758789fa29fc41109018&chksm=886ffa09bf18731f8e45f98de2bcc86c407b239499c2874a11f451dd8622f57f628588b9dd66&scene=178#rd
+https://www.jianshu.com/p/9db986365cda
+EGL 的使用要遵循一些固定的步骤，按照这些步骤去配置、创建、渲染、释放。
+EGLDisplay.EGLConfig是对实际显示设备的抽象
+EGLSurface是对用来存储图像的内存区域
+EGLContext存储OpenGL ES绘图的一些状态信息
+FrameBuffer的抽象，包括 Color Buffer，Depth Buffer，Stencil Buffer
+在GLSurfaceView中可获取当前EGL环境的EGLDisplay、EGLSurface、EGLContext
+mEGLContext = EGL14.eglGetCurrentContext();
+mEGLSurface = EGL14.eglGetCurrentSurface();
+mEGLDisplay = EGL14.eglGetCurrentDisplay();
+
+https://www.jianshu.com/p/81220d61d1bc
+https://github.com/bluesky466/CameraDemo.git  feature_record分支
+【EGLDisplay】
+EGLDisplay指的是物理的显示设备比如我们的手机屏幕,我们可以通过传入屏幕设备的id去获取到设备句柄,绝大多数情况下我们传入EGL14.EGL_DEFAULT_DISPLAY获取默认的屏幕就好,而且一般情况下我们的手机也只有一个屏幕。
+如果拿不到设备就会返回EGL_NO_DISPLAY。
+拿到EGLDisplay之后就可以调用EGL14.eglInitialize去初始化EGL环境。第一个参数是EGLDisplay,然后可以通过后面的参数获取系统中EGL的实现版本号,做一些兼容处理,这里我们没有使用什么高级特性,不需要获取,传null和0就好。如果需要获取的话可以传入一个数组,并且指定major版本和minor想要存放到数组的哪个位置去获取。
+创建与本地窗口系统的连接：调用 eglGetDisplay 方法得到 EGLDisplay。 mEGLDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+初始化 EGL 方法：调用 eglInitialize 方法初始化
+// EGL 的主版本号
+private int[] mMajorVersion = new int[1];
+// EGL 的次版本号
+private int[] mMinorVersion = new int[1];
+boolean result = EGL14.eglInitialize(mEGLDisplay, mMajorVersion, 0, mMajorVersion, 0);
+
+【EGLConfig】
+在使用OpenGL的时候，EGLDisplay支持的配置有很多种,例如颜色可能支持ARGB888、RGB888、RGB444、RGB565等,我们可以通过eglGetConfigs拿到EGLDisplay支持的所有配置,然后选择我们需要的。
+不过如果直接去遍历所有的配置找我们需要的那个,代码写起来比较麻烦。所以EGL提供了一个eglChooseConfig方法,我们输入关心的属性,其他的属性让EGL自己匹配就好。可能会匹配出多个EGLConfig,这个时候随便选一个都可以:
+确定渲染表面的配置信息：调用 eglChooseConfig 方法得到 EGLConfig
+ // 所有符合配置的 EGLConfig 个数
+int[] numConfigs = new int[1];
+// 所有符合配置的 EGLConfig
+EGLConfig[] configs = new EGLConfig[1];
+//EglchooseConfig used this config设置画面的颜色、深度、模板位深
+int[] EGL_CONFIG ={
+		EGL10.EGL_SURFACE_TYPE, EGL10.EGL_PBUFFER_BIT, 
+		EGL10.EGL_RED_SIZE, 8,
+		EGL10.EGL_GREEN_SIZE, 8,
+		EGL10.EGL_BLUE_SIZE, 8,
+		EGL10.EGL_ALPHA_SIZE, 8,
+		EGL10.EGL_DEPTH_SIZE, 24, //请求深度缓冲区  
+		EGL10.EGL_STENCIL_SIZE, 8,//请求模版缓冲区 
+		EGL10.EGL_NONE //egl的所有属性config，最后要以 EGL14.EGL_NONE 结尾。
+	};
+关于EGL10.EGL_SURFACE_TYPE：如果你要创建的是PbufferSurface(后台显示)，就需要EGL10.EGL_PBUFFER_BIT，如果要创建WindowSurface(前台显示)，需要EGL10.EGL_WINDOW_BIT类型
+// configs 参数为 null,会在 numConfigs 中输出所有满足 EGL_CONFIG 条件的 config 个数
+EGL14.eglChooseConfig(mEGLDisplay, EGL_CONFIG, 0, null, 0, 0, numConfigs, 0);
+// 得到满足条件的个数
+int num = numConfigs[0];
+if (num != 0) {
+    // 会获取所有满足 EGL_CONFIG 的 config
+    EGL14.eglChooseConfig(mEGLDisplay, EGL_CONFIG, 0, configs, 0, configs.length, numConfigs, 0);
+    // 去第一个
+    mEGLConfig = configs[0];
+}
+【EGLContext】
+搜索：EGLContext share_context
+一般来讲OpenGL的操作都在同一个线程中进行,但是有些复杂的业务场景可能需要多线程,于是可以在eglCreateContext的第三个参数里面传入share_context做到多线程共享。如果不需要多线程共享context的话传入EGL14.EGL_NO_CONTEXT就好
+http://www.javashuo.com/article/p-yxnwrung-kp.html
+
+创建渲染上下文：通过 EGLDisplay 和 EGLConfig ，调用 eglCreateContext 方法创建渲染上下文，得到 EGLContext
+private static final int[] EGL_ATTRIBUTE = {
+    EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
+    EGL14.EGL_NONE,
+};
+private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
+// 创建上下文
+mEGLContext = EGL14.eglCreateContext(mEGLDisplay, mEGLConfig, EGL14.EGL_NO_CONTEXT, EGL_ATTRIBUTE, 0);
+
+【2.2创建EGLSurface】
+创建渲染表面：通过 EGLDisplay 和 EGLConfig ，调用 eglCreateWindowSurface 方法创建渲染表面，得到 EGLSurface
+【】对于渲染到屏幕上的创建，配置信息可以不添加什么，但还是要以 EGL14.EGL_NONE 结尾。
+// 创建渲染表面的配置信息
+private static final int[] EGL_SURFACE = {
+        EGL14.EGL_NONE,
+};
+private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
+// surface 参数是由 SurfaceView.getHolder 传递过来的
+//创建EGLSurface告诉OpenGL应该往哪里画东西
+mEGLSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mEGLConfig, surface, EGL_SURFACE, 0);
+【】
+而对于离屏的渲染表面创建，就还需要提供宽、高等信息，但是却不需要提供 surface 的参数了。
+// 使用 eglCreatePbufferSurface 就需要指定宽和高
+int[] EGL_SURFACE = {
+    EGL10.EGL_WIDTH, w,
+    EGL10.EGL_HEIGHT, h,
+    EGL10.EGL_NONE,
+};
+mEGLSurface = mEGL.eglCreatePbufferSurface(mEGLDisplay, mEGLConfig, EGL_SURFACE,0);
+【3指定EGLSurface】
+绑定上下文：通过 eglMakeCurrent 方法将 EGLSurface、EGLContext、EGLDisplay 三者绑定，接下来就可以使用 OpenGL 进行绘制了。
+//eglMakeCurrent指定OpenGL绘制的结果最后输出到这个EGLSurface上。
+EGL14.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext);
+交换缓冲：当用 OpenGL 绘制结束后，使用 eglSwapBuffers 方法交换前后缓冲，将绘制内容显示到屏幕上
+EGL14.eglSwapBuffers(mEGLDisplay, mEGLSurface);
+【4】
+释放 EGL 环境,必须运行在GL线程中：绘制结束，不再需要使用 EGL 时，取消 eglMakeCurrent 的绑定，销毁  EGLDisplay、EGLSurface、EGLContext。
+EGL14.eglMakeCurrent(mEGLDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+EGL14.eglDestroyContext(mEGLDisplay, mEGLContext);
+EGL14.eglDestroySurface(mEGLDisplay, mEGLSurface);
+EGL14.eglReleaseThread();
+EGL14.eglTerminate(mEGLDisplay);
+mEGLContext = EGL14.EGL_NO_CONTEXT;
+mEGLDisplay = EGL14.EGL_NO_DISPLAY;
+mEGLConfig = null;
+GLES20.glDelete...()
+GLES20.glDeleteProgram();
+GLES20.glDeleteShader();
+GLES20.glDeleteTextures();
+GLES20.glDeleteBuffers();
+GLES20.glDeleteFramebuffers(1, fbs, 0);
+GLES20.glDeleteRenderbuffers(1, fbs, 0);
+opengl中的判断：
+GLES20.glIsFramebuffer()
+GLES20.glIsRenderbuffer()
+GLES20.glIsBuffer()
+GLES20.glIsTexture()
+GLES20.glIsShader()
+GLES20.glIsProgram()
+GLES20.glIsEnabled()
+获取当前EGL环境：
+EGL14.eglGetCurrentContext(); 可用于shareContext
+EGL14.eglGetCurrentSurface();
+EGL14.eglGetCurrentDisplay();
+
+
+对于SwapBuffers，SwapBuffer命令只是把前台和后台的缓冲区指针交换一下而已，也就是把前台的内容变成后台缓冲的内容，把后台的缓冲内容换到了前台。
+这个函数它本身并不对换过来的成为了后台的buffer做清理工作，所以每帧都glClear一次，然后再绘制，而后再SwapBuffers。
+GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_STENCIL_BUFFER_BIT); //清除颜色、深度、模板缓存
+GLES20.glClearColor(0f,0f,0f, 1f);//设置背景色
+
+EGL14.eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, int[] attrib_list, int offset)
+EGL14.eglCreateWindowSurface (EGLDisplay dpy, EGLConfig config, Object win, int[] attrib_list, int offset)
+EGL14.eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
+EGL14.eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
+https://blog.csdn.net/helldevil/article/details/7513946
+-----------------------------------------------------------------------------------------------------------------------------
+OpenGL的C.R.U.D操作：创建编译链接着色器程序和顶点shader、片段shader，并获取顶点shader脚本中的attribute(赋值于定点坐标和纹理坐标)和uniform(纹理更新后的matrix矩阵等)变量属性，并在绘制时给顶点坐标系，纹理坐标系，纹理id的矩阵赋值。使用着色器程序。
+FBO.FrameBuffer离屏渲染实现在同一帧画面上多次绘制。多套着色器程序和shader脚本，各个对象的有效期.生命周期？-->决定代码架构
+
+绘制时一定要显式明确输入纹理id和输出纹理id：输入纹理id即激活.绑定.采样的纹理id，输出纹理id即屏幕或者FBO绑定的纹理id。(inputTextureID和outputTextureID不能是同一个)
+FBO离屏渲染的outputTextureId目标纹理id即创建FBO时绑定的纹理id。FBO离屏渲染的纹理id一定是GLES20.GL_TEXTURE_2D (shader脚本里是sampler2D)，而不是GLES11Ext.GL_TEXTURE_EXTERNAL_OES。最接近视频源的纹理id类型一定是GLES11Ext.GL_TEXTURE_EXTERNAL_OES (shader脚本里是samplerExternalOES)。
+一张图片由多个图层构成即由多层纹理id构成，所以绘制时也要明确采样哪一层的纹理id。
+glDrawArray()即把输入纹理id绘制到输出纹理id上。
+先绘制视频源纹理id到FBO离屏渲染id上(sourceFilter)，再绘制其他FBO的滤镜id(beautyFilterArray)，最后绘制到屏幕上(screenFilter)。
+
+opengl的操作都是对纹理id即对每一帧画面的操作.调用requestRender()绘制一帧画面
+SurfaceTexture.setOnFrameAvailableListener()
+渲染模式分为whenDirty.glView.requestRender()-->glRender.onDrawFrame(), 或者continous持续渲染。(自定义EGL环境时，如何调用requestRender()？)
+SurfaceTexture.updateTexImage()
+
+将贴纸图片绘制到opengl的预览帧上面：
+GLES20.glEnable(GLES20.GL_BLEND);
+//两个混合方法都可以用
+//GLES20.glBlendFuncSeparate(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA, GLES20.GL_ZERO, GLES20.GL_ONE);
+GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+-----------------------------------------------------------------------------------------------------------------------------
+
+一个线程渲染多个surface opengl？
+PbufferSurface而非WindowSurface opengl？
+task：
+shareContext listview  多个滤镜--> new branch
+美白，磨皮，红润多个filter	(local new branch)
+D:\github\opengl\AGLFramework\aglframework\
+D:\github\opengl\AndroidOpenGLDemo\
+https://blog.csdn.net/kaelsass/article/details/117358047
+https://blog.csdn.net/qq_21743659/article/details/107530867
+
+如何自定义渲染线程***
+【shareContext必须要自定义EGL环境：shareContext时，仅且仅使用同一个纹理id和纹理单元。】
+1.初始化自定义的EGLSurface、EGLDiaplay、EGLContext.EGLConfig，一个surface一套EGL配置.公共方法？.一套着色器程序和脚本？、shareContext和FrameBuffer.textureID用同一个实例。EGL14.eglMakeCurrent(eglDis, eglSurface, eglSurface, eglCtx);	
+2.FBO离屏绘制即先bindFrameBuffer绘制drawArray到textureID上，再解绑bindFrameBuffer绘制drawArray到屏幕上。非离屏绘制是直接更新纹理id，直接绘制到屏幕上。inputTextureID、outputTextureID、多套着色器程序和脚本时
+离屏渲染：即先绑定bindFrameBuffer后，把纹理id绘制到FrameBuffer中，再解绑bindFrameBuffer后把纹理id绘制到屏幕上
+3.***多个纹理id时(或者多套着色器程序和shader脚本时？)：
+纹理id(FBO离屏绘制).纹理类型 --> 纹理单元 -->指定采样器id所采的纹理单元.采样器id.采样函数texture2D()，这3点必须一一对应，且在glDrawArray绘制前须显式指定。(openGL纹理类型和纹理单元都属于公共区域，即全局变量？)
+4.draw-->EGL14.eglSwapBuffers(eglDis, eglSurface);(自定义EGL环境时，draw完后一定要调用EGL14.eglSwapBuffers(...), 即Display(FrontDisplay)和Surface(BackSurface)进行实际意义上的地址交换)
+
+FBO绑定的纹理id必须是GLES20.GL_TEXTURE_2D类型，而不能是GLES11Ext.GL_TEXTURE_EXTERNAL_OES。
+
+
+【在gl线程中】，给shader属性赋值，并把纹理id绘制到屏幕或者FBO上.二者选其一。要在GL线程中初始化EGL环境。
+和纹理id相关的：纹理类型、纹理单元、采样器类型.采样器单元.采样函数texture2D
+【***将纹理id绘制到FBO或者屏幕上，二者选其一】: inputTextureID即glDrawArray绘制前须显式绑定的纹理id GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID)、outputTextureID即FBO离屏渲染绑定的纹理id。多个纹理id时(或者多套着色器程序和脚本时？)
+1.多个filter： 创建多个着色器程序program，获取shader脚本中的变量，绘制时对shader脚本中的变量赋值
+2.视频帧的一级底图用sampleOES
+3.中间滤镜用texture2D  用FBO离屏渲染，FBO绑定的纹理id管道式一级一级传递绘制：inputTextureID即glDrawArray绘制前须显式绑定的纹理id、outputTextureID即FBO绑定的纹理id、多套着色器程序和脚本时？
+多个filter管道式绘制时，【在glDrawArray绘制前：须显式绑定纹理id：GLES20.glActiveTexture(GLES20.GL_TEXTURE0);GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);,并指定采样器id所采的纹理单元：GLES20.glUniform1i(uTextureSamplerHandle,1);】
+        //https://blog.csdn.net/mumuzi_1/article/details/62047112
+        //注意，我们使用glform1i设置uniform采样器的位置值，或者说纹理单元。通过glUniform1i的设置，我们保证每个uniform采样器对应着正确的纹理单元。
+GLES20.glUniform1i(uTextureSamplerHandle,1);  //定义哪个uniform采样器对应哪个纹理单元， "1"即纹理单元GLES20.GL_TEXTURE1。  多套着色器程序和脚本？
+https://blog.csdn.net/zhangpengzp/article/details/84861785
+https://blog.csdn.net/zhangpengzp/article/details/84860132
+
+红润，磨皮.美白框架搭建：须用FBO离屏渲染实现opengl多次glDrawArray绘制。
+多次渲染调用onDrawArray，而不刷新屏幕。即绑定FBO帧缓冲的离屏渲染，多套program,顶点，片段着色器。
+previewFrame：frameBufferID=0、textureID=OES
+FBO离屏Frame：frameBufferID、textureID、同一个FBO离屏Frame实例对象
+多套着色器脚本程序program即多个红润磨皮美白filter实例对象
+每一帧的多次glDrawArray绘制如何保证按顺序执行？
+同一个FBO离屏Frame实例对象只能通过方法返回值的方式返回？ 或者传入同一个baseFrame实例对象
+
+【glDraw之前的基本api步骤】：
+openGL中的好多都是全局变量，如GLES20.GL_FRAMEBUFFER，用完马上就要释放
+
+
+
+
+滤镜录像：新线程中创建EGL环境+shareContext共享纹理id+MedicCodec+ 传递纹理id，并二次绘制到MedicCodec
+dump录制预览帧：即离屏渲染
+
+glDrawXXX()完后，才能GLES20.glReadPixels(),EGL14.eglSwapBuffers(...)
+系统自带的GLSurfaceView已替你做了EGL环境初始化和eglSwapBuffers操作。但自定义EGL环境时，glDrawXXX()完后必须手动调用EGL14.eglSwapBuffers(...)才能显示glDrawXXX的画面
+
+
+
+
+

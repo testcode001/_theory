@@ -1,0 +1,82 @@
+linux源码编译安装：不能在源代码目录编译，建议在源码目录上层新建一个目录glibc-build，用于编译。
+wget http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.gz
+tar -zxvf glibc-2.29.tar.gz
+mkdir build
+cd build
+../<srcDir>/configure --prefix=/opt/glibc-2.29
+make
+make install
+ 
+命令ldd，查看可执行程序依赖libc的路径。
+命令ldconfig做的这些东西都与运行程序时有关，跟编译时一点关系都没有。编译的时候还是该加-L就得加
+ldd --version 查看版本号
+https://blog.csdn.net/qq_42721097/article/details/120916145
+https://cloud.tencent.com/developer/article/1453908
+https://www.cnblogs.com/clairedandan/p/13811745.html
+【进行前请打开至少三个终端并切换到root下，防止出意外后指令都用不了崩溃！！！】并且【一个窗口用来操作下面步骤，另一个窗口必须cd /lib64，进入/lib64目录等待操作】。
+【是/lib64和/lib/x86_64-linux-gnu/下的软链接都需要更新，我尝试了很多软连接更新，最后锁定出ld-linux-x86-64.so.2、libs.so.6这两个文件需要重新连接】
+export LD_LIBRARY_PATH=/usr/local/glibc/lib/libc-2.29.so
+export LD_PRELOAD=/usr/local/glibc/lib/libc-2.29.so
+
+export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/libc-2.23.so
+export LD_PRELOAD=/lib/x86_64-linux-gnu/libc-2.23.so
+echo $LD_LIBRARY_PATH
+echo $LD_PRELOAD
+
+export LD_LIBRARY_PATH=/usr/local/glibc/lib/libc-2.29.so  ln -sf /usr/local/glibc/lib/libc-2.29.so /lib/x86_64-linux-gnu/libc.so.6
+
+export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/libc-2.23.so ln -s /lib/x86_64-linux-gnu/libc-2.23.so /lib/x86_64-linux-gnu/libc.so.6
+
+
+段错误Segmentation fault崩溃了，请执行：
+LD_PRELOAD=/lib/x86_64-linux-gnu/libc-2.27.so unlink /lib/x86_64-linux-gnu/libc.so.6
+来取消之前操作过的软连接。再执行：
+LD_PRELOAD=/lib/x86_64-linux-gnu/libc-2.27.so ln -s /lib/x86_64-linux-gnu/libc-2.27.so /lib/x86_64-linux-gnu/libc.so.6
+来通过原先正常的libc-2.27.so库，修复段错误，使命令能正常执行
+
+https://blog.csdn.net/qq_42721097/article/details/120916145
+
+1、需要把：
+
+/你的glibc新版安装路径/lib/ld-2.28.so
+
+/你的glibc新版安装路径/lib/libc-2.28.so
+
+这两个文件复制到/lib/x86_64-linux-gnu下。用cp命令复制就行。
+
+2、执行：cd /lib/x86_64-linux-gnu
+
+进入/lib/x86_64-linux-gnu目录下。
+
+3、执行：unlink ld-linux-x86-64.so.2
+
+来取消软链接。
+
+4、执行命令 ：ln -s ld-2.28.so ld-linux-x86-64.so.2
+
+来将ld-linux-x86-64.so.2链接到ld-2.28.so。
+
+5、执行命令：ll ld-linux-x86-64.so.2
+
+发现ld-linux-x86-64.so.2已成功链接到ld-2.28.so的。
+
+6、执行：unlink libc.so.6
+来取消软链接。此时命令开始不能用，提示：No such file or directory。
+7、执行：ldconfig -lv libc-2.28.so
+来建立libc.so.6 -> libc-2.28.so的软链接。
+此时发现命令ls、cp等等出现段错误，或Segmentation fault。
+9、切换到我们之前打开的第二个root模式命令行窗口。注意这个窗口必须进入lib64目录。
+执行：LD_PRELOAD=/lib/x86_64-linux-gnu/libc-2.27.so unlink /lib64/ld-linux-x86-64.so.2
+这个命令是通过原先正常的libc-2.27库，来执行命令，取消/lib64下的/ld-linux-x86-64.so.2的软链接。
+10、执行：/lib/x86_64-linux-gnu/ld-2.28.so /bin/ln -s /lib/x86_64-linux-gnu/ld-2.28.so /lib64/ld-linux-x86-64.so.2
+把/lib64下的/ld-linux-x86-64.so.2链接到/lib/x86_64-linux-gnu/ld-2.28.so。
+
+11、执行：ll ld-linux-x86-64.so.2
+
+现在发现：ld-linux-x86-64.so.2 -> /lib/x86_64-linux-gnu/ld-2.28.so* 链接成功。
+
+11、执行：strings /lib/x86_64-linux-gnu/libc.so.6|grep GLIBC
+
+查看发现GLIBC已是2.28最新
+至此结束所有步骤，指令均能正常运行
+

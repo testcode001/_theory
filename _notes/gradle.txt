@@ -1,0 +1,2 @@
+gradle配置脚本中的manifestPlaceholders属性会在打apk包的时候替换掉AndroidManifest.xml文件中的占位符，即打包时AndroidManifest.xml文件可以通过${变量名}获取gradle配置脚本中的值。
+gradle 学习：compileonly compile implementation api

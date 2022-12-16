@@ -1,0 +1,5 @@
+开启traced、traced_probes 两个进程:	adb shell setprop persist.traced.enable 1
+校验进程是否开启成功：adb shell ps -A | grep traced 
+adb shell perfetto -h
+https://ui.perfetto.dev/#!/
+Addr2line+Objdump

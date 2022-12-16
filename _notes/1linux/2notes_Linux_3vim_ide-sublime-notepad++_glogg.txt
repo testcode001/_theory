@@ -1,3 +1,23 @@
+搜索：ubuntu下安装notepadqq
+Ubuntu下的安装方法:
+sudo add-apt-repository ppa:notepadqq-team/notepadqq
+sudo apt-get update
+sudo apt-get install notepadqq
+Ubuntu下的卸载方法:
+sudo apt-get remove notepadqq
+sudo add-apt-repository --remove ppa:notepadqq-team/notepadqq
+https://github.com/notepadqq/notepadqq/wiki
+启动：在终端，输入notepadqq，回车。
+
+推荐我们采用这个命令来安装：
+sudo snap install --classic notepadqq
+删除Notepadqq：
+sudo snap remove notepadqq
+
+文本编辑器：notepad++、sublime text、vimide、glogg (https://github.com/nickbnf/glogg)
+文本查看器：git bash命令行工具find.grep.sed.awk(cut)+xargs+正则
+-------------------------------------------------------------------------------------------------------------------------
+
 多用命令行模式，而不是哑巴编辑模式
 
 vim插件目录：
@@ -621,12 +641,31 @@ a      //在当前光标位置的右边添加文本
 i       //在当前光标位置的左边添加文本 
 o     //在当前行的下面新建一行并进入插入模式
 
+粘贴windows剪贴板到vim：
+复制也被称为 "yank"，所以用于复制文本的快捷键是 y
+在命令模式下输入:reg，回车，查看寄存器
+接着输入“*p，即可粘贴到光标处。即命令模式下输入“*p，即可粘贴到光标处
+
 文本三巨头：zsh、tmux 和 vim
 tmux/screen 分屏软件
 将zsh作为你的默认shell
 我将我的 .zshrc、 .vimrc 和 .tmux.conf 配置文件
 
+----------------------------------------------------------------------------------
+vim插件网站
+http://www.vim.org/scripts/script_search_results.php
+https://vimawesome.com/?q=tag:autocomplete
 
+https://github.com/ma6174/vim
+https://www.cnblogs.com/ma6174/archive/2011/12/10/2283393.html
+
+https://blog.csdn.net/Oliverlyn/article/details/72868918
+https://blog.csdn.net/gaoliang0/article/details/8798512
+https://www.zhihu.com/question/47691414/answer/373700711
+
+搜索.vimrc  完善
+set list  	显示不可见字符
+set nolist  隐藏不可见字符
 
 
 

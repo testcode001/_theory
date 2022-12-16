@@ -1,0 +1,224 @@
+复杂命令、参数在bashrc里边添加alisa别名。(命令、function函数、shell脚本)，如：
+echo alias mygrep="/usr/bin/grep -E2rnI --exclude-dir 'build'" >> ~/.bashrc
+alias多条命令：
+echo alias logcatall="rm -f ~/Downloads/log001.txt;adb logcat -c;cd ~/Downloads/;adb logcat |tee -a ./log001.txt" >> ~/.bashrc
+source ~/.bashrc
+alias中自定义shell函数：
+附上我本地的alias，使用时仅需带上参数mapping.tx和stacktrace.txt即可：
+alias r8trace='retrace(){ java -jar retrace.jar -verbose $1 $2 | tee out.txt;};retrace'
+ubuntu下指定使用的Python版本：
+echo alias python=/usr/bin/python3.4 >> ~/.bashrc
+source ~/.bashrc
+测试bashrc里的mygrep接受$1等参数
+
+
+
+用linux文本四剑客+正则替代编程工具IDE
+熟练文本四剑客+正则表达式：find.grep.sed.awk(cut)+xargs+正则
+文件查找：find . -name fileName -type f/d
+time find . -name *.xml -type f | xargs grep --color -2n "abc"   #查找当前目录下所有xml文件中包含abc的行，并查看耗时
+time find . -name *.xml -type f | xargs sed -i "/abc/d"   		 #删除当前目录下所有xml文件中包含abc的行，并查看耗时
+find 排除某个目录或多个目录：-path "./code" -prune -o
+-path <ignorePath> -prune -o参数忽略某些目录不查找，但必须要注意要忽略的路径参数必须紧跟着搜索的路径之后，否则该参数无法起作用。注意：后面的-print不能少。
+find . -path "./code" -prune -o -name "*.txt" -print  		#在当前目录除code之外的子目录内搜索 txt文件. 注意："./code"不能写成"./code/"或者"code"
+find . \(-path "./code" -o -path "./code2" \) -prune -o -name "*.txt" -print     #在当前目录及除code和code2之外的子目录中查找txt文件
+find <src-path> -path '<ignor-path1>' -prune -o -path '<ignor-path2>' -prune -o -print
+find <src-path> ! -path '<ignor-path1>*' ! -path '<ignor-path2>*' -print		#不忽略某些目录
+find ./cache ! -name '*.html' -type f		#排除html的文件
+-maxdepth 1 		#查找的最大目录层级
+https://www.runoob.com/linux/linux-comm-find.html
+比如要在/usr/sam目录下查找不在dir1子目录之内的所有文件
+find /usr/sam -path "/usr/sam/dir1" -prune -o -print
+-path "/usr/sam" -prune -o -print 是 -path "/usr/sam" -a -prune -o -print 的简写表达式按顺序求值, -a 和 -o 都是短路求值，与 shell 的 && 和 || 类似。
+如果 -path "/usr/sam" 为真，则求值-prune , 否则不求值-prune。 	-prune返回真，与逻辑表达式为真，否则与逻辑表达式为假。
+如果 -path "/usr/sam" -a -prune 为假，则求值 -print。-print返回真，或逻辑表达式为真；否则不求值 -print，或逻辑表达式为真。
+这个表达式组合特例可以用伪码写为：
+if -path "/usr/sam" then
+           -prune
+else
+           -print
+
+
+字符串查找：grep -E1Rnqi -R递归查找参数必须单独提取出来，不能与其他参数合并
+grep 文件
+grep 字符串.管道(echo.cat "str" |)
+grep默认查找的是文件,用*作为输入文件。若要grep当前目录(.)及其子目录，则必须带参数-R。即grep所有文件最好用*号而不要用点"."，grep目录则必须带参数-R
+wc 字符串(echo.cat | )/文件
+grep命令支持多种排除方法，包括：grep排除目录，grep排除文件，grep排除二进制文件以及grep排除关键字：
+grep -v选项														#grep命令排除关键字
+grep -I选项(大写的i)											#grep排除二进制文件，它可以在搜索时忽略二进制文件。小写i忽略大小写，大写I忽略二进制文件。
+grep -R --exclude='file1' --exclude='file1' "keyword" .  			#grep排除多个文件(注意：文件只能填写文件名，不能包含任何路径) 
+grep -R --exclude-dir='dir1' --exclude-dir='dir2' "keyword" .   #grep排除多个目录(注意：目录只能填写目录名，不能包含任何路径)。––exclude-dir选项需要与-r选项一起使用。
+grep -R -Ia --include="*.txt" --include="*.java" "keyword" .		#遍历当前目录(.)及所有子目录，查找所有.txt类型的文件中包含a的字符
+grep -E "str1.*str2.*str3|str3.*str2.*str1"                     #grep同时满足多个字符串，即一整条字符串的正则表达式
+https://www.runoob.com/linux/linux-comm-grep.html
+-E支持正则、
+-2显示匹配字符串的上下2行、
+r递归查找目录、
+n显示行号、
+q静默输出即不输出、
+-v去除指定字符
+-a：将二进制文档以文本方式处理
+-c：显示匹配次数
+-i：忽略大小写差异。小写i忽略大小写，大写I忽略二进制文件。
+-I：忽略二进制文件
+-l	#(小写L) 或 --file-with-matches : 列出文件内容符合指定的样式的文件名称。
+--color：以特定颜色高亮显示匹配关键字
+--include　　	#指定匹配的文件类型
+--exclude 		#过滤掉不需要匹配的文件类型
+--exclude-dir	#过滤掉不需要匹配的目录
+
+如果你有一个 100 万行的文件，你要在第 100 行加某些文字，此时使用 vim 可能会疯掉！那怎办？就利用 sed 啊！透过 sed 直接修改/取代的功能，你甚至不需要使用 vim 去修订！
+sed是操作、过滤和转换文本内容的强大工具。常用功能有增删改查，过滤，取行。
+熟练sed：查看/编辑模式neif + crud操作
+基本工作方式: sed [工作模式-neif] '[动作]' [输入文本]
+工作模式：即查询和修改
+空： 	#显示script处理后的结果
+-n		#安静模式(单重查询？), 只显示sed匹配到的那一行被列出来
+-e		#多重编辑, 比如你同时又想删除某行, 又想改变其他行, 那么可以用 sed -e '1,5d' -e 's/abc/xxx/g' filename
+-i		#insert这回就是真的改变文件中的内容了; 别的nef参数都只是改变显示，而不改变文件本身. 
+-f		#(文件多重查询)首先将 sed的动作写在一个档案内, 然后通过 sed -f scriptfile 就可以直接执行 scriptfile 内的sed动作 (没有实验成功, 不推荐使用)
+-r	#支持正则表达式
+操作：crud增2.删1.改2.查1。动作与vi相当的类似！  
+a 	#append新增, a 后面可以接字符串, 而这个字符串会出现在下一行  sed '/test/a RRRRRRR' abc.txt
+i 	#insert插入, 后面的字符串, 会出现在上一行
+d 	#delete删除整行,后面不接任何东西  sed -i '/abc/d'  a.txt   同时删除多个字符串：sed -i '/abc/d;/123/d;/456/d;'  a.txt 
+s 	#substitute替换字符串 sed -i '1,$s/old/new/g' log.txt。  sed的字符串替换与 vi 相当的类似！
+c 	#change替换整行, c 后面的字符串, 这些字符串可以取代 n1,n2之间的行，sed '2,5c No 2-5 number' log.txt
+p 	#print打印,通常和 sed -n 一起运作。打印指定行sed -n '3p' log.txt。打印包含字符串的行sed -n '/root/p' log.txt。
+
+q 退出, 匹配到某行退出, 提高效率
+r 匹配到的行读取某文件 例如: sed '1r qqq' abc , 注意, 写入的文本是写在了第1行的后边, 也就是第2行
+w file, 匹配到的行写入某文件  例如: sed -n '/m/w qqq' abc , 从abc中读取带m的行写到qqq文件中, 注意, 这个写入带有覆盖性.
+
+从超大文件中截取指定范围的内容到新文件中
+sed -n '7,20p' big.log >>small.log
+sed -n '7,20p' a.log  #打印指定行之间的内容
+sed -n 7p test.log 打印指定行的内容
+sed -n '$=' a.log    获取文件的行数
+sed -n '/str/=' a.log 获取指定字符串所在的行
+https://www.cnblogs.com/paul8339/p/6376590.html
+-r	#支持正则表达式
+sed -i -r 's/4.3./abc/g' log.txt  #前后各有一个字母，中间是要替换的字符串
+sed -i -r '1,20s/4.3./abc/g' log.txt
+sed -i -r '1,$s/4.3./abc/g' log.txt
+sed -i -r '/str/s/4.3./abc/g' log.txt
+
+find . -name *.xml -type f | xargs sed -i "/abc/d"   			#删除当前目录下所有xml文件的所有包含abc的行
+sed -i "s/oldstring/newstring/g" `grep -rl 'oldstring' dirName` #替换指定dirName目录下所有包含oldstring的文件的内容。 -l是查询多文件时只输出包含匹配字符的文件名
+sed -i "s/oldstring/newstring/g" `ls` #替换当前目录下所有文件的内容
+sed -i "s/oldstring/newstring/g" 1.txt   #替换指定文件中的所有内容
+cat -n text.file | sed ‘s/oldstring/newstring/’ > newtext.file 
+
+str1=`echo "$l" | sed 's/^[ \t]*//g'`
+sed 's/[ \t]*$//g'
+sed s/[[:space:]]//g
+过滤超大文件log既可以用grep，也可以用sed，但grep的速度比sed快。
+grep -E "str1|str2" file
+sed的写法：
+sed -n '/hello/p;/world/p'  file > output
+sed -n '/hello\|world/p' file > output
+vim同时查找aa和bb：/aa\|bb
+https://www.cnblogs.com/dazhidacheng/p/8030481.html
+
+一行一行读取文件内容，并打印指定列.字段
+awk对文本处理操作类似于数据库表
+awk以行为单位，指定分隔符和提取域
+awk工作流程是这样的：读入有'\n'换行符分割的一条记录，然后将记录按指定的域分隔符划分域，填充域
+awk的处理流程是:
+1. 读第一行, 将第一行资料填入变量 $0, $1...$n-NF 等变量中
+2. 依据条件限制, 执行动作
+3. 接下来执行下一行
+
+awk -F'分隔符' '/regex/{提取域}' 文件名 	#-F和分隔符之间不要有空格,默认为空格可不写。/regex/用于查找匹配的行，可省略
+提取域默认打印整行即$0
+awk中同时提供了print和printf两种打印输出的函数。
+print函数的参数可以是变量、数值或者字符串,字符串必须用双引号引用，参数用逗号分隔。如果没有逗号，参数就串联在一起而无法区分。这里，逗号的作用与输出文件的分隔符的作用是一样的，只是后者是空格而已。
+printf函数，其用法和c语言中printf基本相似,可以格式化字符串,输出复杂时，printf更加好用，代码更易懂。
+awk的action函数的循环，选择，printf等与c语言完全一致。 action函数就是一系列awk命令
+if..else;   while ; do..while; for; break; continue; printf 语法都和C语言的语法一致
+awk中的BEGIN 和 END两个特殊的action函数 即页眉和页脚
+BEGIN {print "name,shell"}  {print $1 "," $7} END {print "blue,/bin/nosh"}
+awk {}内, 可以使用 if else ,for(i=0;i<10;i++), i=1 while(i<NF)
+可见, awk的很多用法都等同于C语言, 比如"\t" 分隔符, print的格式, if, while, for 等等
+
+https://www.runoob.com/linux/linux-comm-awk.html
+awk循环.选择语句
+awk内置函数
+awk用户自定义函数
+awk内置变量：
+$0 					整行即所有域
+$1、$2...$n-NF		即各个域
+FS                 设置输入域分隔符，等价于命令行 -F选项
+NF                 浏览记录的域的个数
+NR                 已读的记录数
+ARGC               命令行参数个数
+ARGV               命令行参数排列
+ENVIRON            支持队列中系统环境变量的使用
+FILENAME           awk浏览的文件名
+FNR                浏览文件的记录数
+OFS                输出域分隔符
+ORS                输出记录分隔符
+RS                 控制记录分隔符
+
+seq 9 | sed 'H;g' | awk -v RS='' '{for(i=1;i<=NF;i++)printf("%dx%d=%d%s", i, NR, i*NR, i==NR?"\n":"\t")}'  	#打印九九乘法表
+awk -v  # 设置变量
+awk -va=1 -vb=s '{print $1,$1+a,$1b}' log.txt
+http://blog.sina.com.cn/s/blog_5d22d9b40100jer4.html
+awk内置字符串处理函数
+awk程序设计
+
+https://www.runoob.com/linux/linux-comm-sed.html
+https://www.runoob.com/linux/linux-comm-awk.html
+awk读，sed写.流文本编辑器(echo输入输出重定向),grep -1rn 全文查找
+
+基本上grep和sed能干的活awk全部都能干，而且干得更好。
+--------------------------------------------------------------------------------------------
+文件打印命令：cat、head.tail.more.less、tee(tee将结果输出在屏幕上的同时还保存到文件中)：
+tail -n20 info.log | head -n1
+我们让 tail 选择了文件的最后 20 行，然后将结果通过管道传送给head。然后 head 命令将数据中第一行打印到屏幕上。
+如果想要将上例中的结果在屏幕上显示的同时还保存到文件 results.txt。
+tail -n20 info.log | head -n1 |  tee -a results.txt
+tail -1 fileName 获取最后一行文件内容。
+
+cat -n log.txt #带行号查看文件内容
+https://www.runoob.com/linux/linux-comm-cat.html
+ls -la 文件名		#若不写文件名, 默认为当前目录"."。可用来查看文件存不存在。 
+ls -ld 目录名		#若不写文件名, 默认为当前目录"." 
+
+统计.排序
+sort uniq diff 
+sort -rn排序
+sort -t指定分隔符 -k指定提取域
+sort -u或者uniq去除重复
+wc 统计行数、单词数、字节数
+wc 字符串(echo.cat | )/文件
+cat -n log.txt | wc -l   #统计文件行数
+wc -l log.txt     		 #统计文件行数
+echo "str" | wc -L       #统计字符串长度
+wc - lcw file1.txt file2.txt
+
+basename
+dirname
+readlink
+对字符串.文件的读.写操作：
+echo "" cat | grep | sed | awk、cut 
+head tail  more less
+-------------------------------------------------------------------------------
+http://c.biancheng.net/linux/cut.html
+cut 是以每一行为一个处理对象的，这种机制和 sed 命令一样。
+cut字符串分割：section=$(echo $1 | cut -d '.' -f 1)  
+cut -d : -f 1
+cut -d ' ' -f 1  #而且，你只能在 -d 后面设置一个空格，不能设置多个空格，因为 cut 只允许间隔符是一个字符
+-d指定分隔符，-f指定提取域
+其实，cut 命令共接受三类定位方法：
+第一，按字节（bytes）定位，用-b选项。-b选项支持形如“3-5”这样的写法，而且多个定位数字之间还可以用逗号隔开。-3 表示从第一个字节到第三个字节，而 3- 表示从第三个字节到行尾。
+第二，按字符（characters）定位，用-c选项。如按位置提取中文
+第三，按域（fields）定位，用-f选项。在设定 -f 选项时，也可以使用如“3-5”或者“4-”类似的格式
+
+
+
+
+
+
+

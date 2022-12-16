@@ -13,50 +13,51 @@ wget url -P <aimPath> -O fileName
 -T localfile #PUT method上传一个文件
 curl –u username:password -T /home/neo/size.mp3 ftp://www.quany.info/mp3/
 
-curl参数：
+curl参数(即client URL)：
+https://www.ruanyifeng.com/blog/2011/09/curl.html
+https://www.ruanyifeng.com/blog/2019/09/curl-reference.html
+https://catonmat.net/cookbooks/curl
+https://ai.baidu.com/ai-doc/IMAGEPROCESS/Bk3bclns3
 curl url #访问http页面内容，输出到标准输出
--v 详细的请求信息
--X POST/GET 指定请求凡是为POST/GET请求，默认是get请求
--H "header01" -H "header02" 指定请求头部
+-v 输出详细的请求信息 --trace参数也可以用于调试，还会输出原始的二进制数据。
+-H "header01" -H "header02" 指定请求头部 -H 'Content-Type:application/x-www-form-urlencoded'、 -H 'Content-Type:application/json'
+-A "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" #指定浏览器版本User-Agent。其作用与-H参数相同 -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+-e "mail.linuxidc.com" #指定http的referer请求头，盗链。也可以用-H 'Referer: https://abc.com?q=example'来代替。
+-D head1.txt #将请求的header保存到head1.txt这个文件中去
+-i #打印出服务器回应的 HTTP 标头。
+-I (大写i)则是【只】显示http response的头信息。
+-X POST/-X GET/-X DELETE #指定请求凡是为POST/GET/DELETE请求，默认是get请求可不写
+-G #构造get请求参数的查询字符串。如curl -G -d 'q=kitties' -d 'count=20' https://google.com/search 会发出一个 GET 请求，实际请求的 URL 为https://google.com/search?q=kitties&count=20。如果省略--G，会发出一个 POST 请求。
+-d #--data指定POST请求参数，也可以是json 如: -d "parameterName1=parameterValue1&parameterName2=parameterValue2" -d '{"parameterName1":"parameterValue1","parameterName2":"parameterValue2"}'
+使用-d参数以后，HTTP 请求会自动加上标头Content-Type : application/x-www-form-urlencoded。并且会自动将请求转为 POST 方法，因此可以省略-X POST。
+--data-urlencode #对get或者post请求数据进行URL编码 --data-urlencode参数等同于-d，区别在于会自动将发送的数据进行 URL 编码。
+-k 指定跳过 SSL 检测。
+-E localcert.pem #访问https的时候使用本地证书
 -L 表示如果在response header中如果有location的话就直接转向到location的地址（redirect地址）
-
--d 指定请求参数，也可以是json 如: -d "parameterName1=parameterValue1&parameterName2=parameterValue2" -d '{"parameterName1":"parameterValue1","parameterName2":"parameterValue2"}'
--u name:passwd #用户名.密码  用于FTP文件下载
-
--o page.html #将html源码保存在page.html文件中
--O #保存为原有url连接中的文件名
---limit-rate 80M  #限制url的传输速度最大80MB
-–max-filesize 1024  #限制下载文件大小，超过1M将不执行操作，并且返回出错
--F "upload=@localfile" #上传文件
-
---noproxy 
--x ip:port #proxy服务器ip及其端口
 --retry 10 #表示重试次数
 --retry-delay 60 #表示两次重试之间的时间间隔（秒为单位）
--D head1.txt #将请求的header保存到head1.txt这个文件中去
--c cookie0001.txt#把cookie写入到cookie0001.txt这个文件中
--b cookie0001.txt #把上次的cookie信息追加到http request里面去
--e "mail.linuxidc.com" #指定http的referer请求头，盗链
--A "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" #指定浏览器版本 而"Mozilla/4.73 [en] (X11; U; Linux 2.2; 15 i686"则可以告诉对方你是一台 PC上跑着的Linux，用的是Netscape 4.73
--E localcert.pem #访问https的时候使用本地证书
+-o page.html #将html源码保存在page.html文件中。 curl -o fileName httpUrl就相当于wget httpUrl
+-O #保存为原有url连接中的文件名
+--limit-rate 80M  #限制限制HTTP请求和回应的带宽，最大传输速度80MB/模拟弱网环境200k 
 
-curl -d "leaderboard_id=7778a8143f111272&score=19&app_key=8d49f16fe034b98b&_test_user=test01" "http://172.16.102.208:8089/wiapi/score"
-通过脚本发送post请求，顺便附带文本数据，比如通过"浏览"选择本地的card.txt并上传发送post请求
-答案： curl  -F "blob=@card.txt;type=text/plain"  "http://172.16.102.208:8089/wiapi/score?leaderboard_id=7778a8143f111272&score=40&app_key=8d49f16fe034b98b&_test_user=test01"   
-其中-F 为带文件的形式发送post请求，   blob为文本框中的name元素对应的属性值。<type="text" name="blob">
-POST方式传递过去的数据中若有特殊字符，需将特殊字符转义后发送给服务器端。如value值中包含有空格，则需要先手动将空格转换成%20：
-curl -d "value%201" http://hostname.com #模拟post请求, 没-d参数时默认是get请求
-在新版本的CURL中，--data-urlencode参数会自动转义特殊字符。
-curl --data-urlencode "value 1" http://hostname.com
-curl –data-urlencode http://www.xxx.com/action?name=张三&sex=男  #正确的给url编码
-
+–max-filesize 1024  #限制下载文件大小，超过1M将不执行操作，并且返回出错
+-F "upload=@localfile" #--form表单上传文件，该命令会给请求加上标头Content-Type: multipart/form-data。 curl -F 'file=@photo.png;type=image/png' https://google.com/profile 指定 MIME 类型为image/png
+这样一个HTTP表单，我们要用curl进行模拟，就该是这样的语法：
 <form method="POST" enctype="multipar/form-data" action="http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi">
 <input type=file name=upload>
 <input type=submit name=nick value="go">
 </form>
-这样一个HTTP表单，我们要用curl进行模拟，就该是这样的语法：
-curl -F "upload=@localfile" -F nick=go http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi    #post方式上传文件
-curl --form "fileupload=@filename.txt" http://hostname/resource #上传文件
+curl -F "upload=@localfile" -F nick=go http://cgi2.tky.3web.ne.jp/~zzh/up_file.cgi    #--form表单post上传文件
+curl -F 'file=@photo.png;filename=me.png' https://abc.com/profile #原始文件名为photo.png，但是服务器接收到的文件名为me.png
+
+--noproxy 
+-x ip:port #proxy服务器ip及其端口 curl -x socks5://james:cats@myproxy.com:8080 https://www.example.com 指定 HTTP 请求通过myproxy.com:8080的 socks5 代理发出
+-c cookieFile.txt#把cookie写入到cookieFile.txt这个文件中
+-b cookieFile.txt #把上次的cookie信息追加到http request里面去。
+-b "name=xxx" #会生成一个Header "Cookie: name=xxx"。-b 'foo1=bar;foo2=bar2' 会发送两个 Cookie。
+`-c cookie-file`可以保存服务器返回的cookie到文件，`-b cookie-file`可以使用这个文件作为cookie信息，进行后续的请求。
+-u name:passwd #用户名.密码，用于FTP文件下载
+-S 参数指定只输出错误信息。curl -S -o /dev/null https://abc.com 该命令没有任何输出，除非发生错误。
 
 curl多线程下载：
 $ curl -r 0-10240 -o "zhao.part1" http:/cgi2.tky.3web.ne.jp/~zzh/zhao1.MP3 &\

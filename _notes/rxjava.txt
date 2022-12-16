@@ -1,0 +1,35 @@
+RxJava：
+1.创建被观察者Observable.create()，创建观察者，建立订阅关系Observable.subacribe()-->执行观察者和被观察者的订阅回调Observer.onSubacribe()-->Observable.subacribe()
+(Observable<T>/Flowable<T>/Single<T>/Completable/Maybe<T>)被观察者-->(Observer.Consumer/SingleObserver/CompletableObserver/MaybeObserver)观察者
+Emitter从被观察者的订阅回调Observable.subacribe()中获取，Disposable从观察者的订阅回调Observer.onSubacribe()中获取。
+2.数据流Emitter发射/取消(ObservableEmitter/SingleEmitter/CompletableEmitter)-->观察者回调
+Emitter.onNext().onComplete().onSuccess().onError()-->map(Function.apply()).flatMap(Function.apply())-->Observer.onNext().onComplete().onError()
+Function.apply()函数会在发射器Emitter每次发射数据后执行一次，做一次数据类型转换。
+3.取消订阅关系 Disposable.dispose()、CompositeDisposable
+RxJava线程调度subscribeOn(Schedulers.io()/Schedulers.computation())和observeOn(AndroidSchedulers.mainThread())：subscribeOn()执行线程和observeOn()回调线程：
+多次调用subscribeOn() 只有第一次的有效, 其余的会被忽略。多次指定Observer的线程是可以的, 也就是说每调用一次observeOn() , Observer的线程就会切换一次
+https://blog.csdn.net/geduo_83/article/details/89929354
+
+ObservableEmitter：
+1．被观察者可以发送无限个onNext, 观察者也可以接收无限个onNext.
+2．当Observable发送了一个onComplete后, Observable的onComplete之后的事件将会继续发送, 而Observer收到onComplete事件之后将不再继续接收事件.
+3．当Observable发送了一个onError后, Observable中onError之后的事件将继续发送, 而Observer收到onError事件之后将不再继续接收事件.
+4．Observable可以不发送onComplete或onError.
+5．最为关键的是onComplete和onError必须唯一并且互斥, 即不能发多个onComplete, 也不能发多个onError, 也不能先发一个onComplete, 然后再发一个onError, 反之亦然
+注: 关于onComplete和onError唯一并且互斥这一点, 是需要自行在代码中进行控制, 如果你的代码逻辑中违背了这个规则, 并不一定会导致程序崩溃. 比如发送多个onComplete是可以正常运行的, 依然是收到第一个onComplete就不再接收了，
+ 但若是发送多个onError, 则收到第二个onError事件会导致程序会崩溃.当我们写多个onComplete时，不会报错
+当我们又有onComplete又有onError时，发现在调用onComplete后会爆出异常
+
+https://blog.csdn.net/u012124438/article/details/53730717
+https://blog.csdn.net/chmodzora/article/details/81713280
+https://blog.csdn.net/u011486491/article/details/80680709
+https://www.jianshu.com/p/09e95195534e
+
+Observablerx提取泛型响应回调接口：即回调函数的数据类型与被观察者的数据类型绑定
+https://www.jianshu.com/p/cd3557b1a474
+https://www.jianshu.com/p/387e4af55031
+RxJava常用操作符.即函数
+RxJava 常用操作符等、如何实现串行、并行请求？
+像到淘宝的首页，条目类型很多，而且样式也不一致，顶部轮播图，中间网格，底部瀑布流。一般后端不会一个接口给完（因为他们查的表，一般会不一样），
+所以在使用RxJava时，一般都会使用concatMap操作符连接多个顺序接口，再toList聚合在一起，一次性发送，再渲染界面。
+https://www.jianshu.com/p/5bd8fdc81d10

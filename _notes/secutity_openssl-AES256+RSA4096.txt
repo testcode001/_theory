@@ -29,6 +29,12 @@ The whole PKI system of SSH is different from X.509. PKI(Public Key Infrastructu
 Java Crypto API requires key files to be in PKCS12 format, and that you can use OpenSSL to convert the file into PKCS12 like this:
 字符串形式：base64形式的公钥，私钥(java所用私钥须是pkcs8编码格式)
 二进制文件形式：der文件公钥和p12文件私钥
+ssh-keygen -t rsa -b 4096 -f my_id -C "email@example.com"
+[-b 4096] 表示 RSA 密钥长度 4096 bits （默认 2048 bits）。Ed25519 算法不需要指定。
+ssh-keygen -t ed25519 -C "yourMail@mail.com"     #Ed25519 的安全性在RSA2048与RSA4096之间，等价于约RSA3000，且性能在数十倍以上。
+必须要有 passphrase。如果私钥文件遗失，没有 passphrase 也无法解锁（只能暴力破解）。不要偷懒，passphrase 一定要加。
+一对密钥只对应一个 Git 服务。一对密钥通吃各 Git 服务不太明智。
+严格来讲，你应该在不同的机器上用不同的密钥，出了问题好排查处理。但实际上复杂的管理反而更容易让人犯错，选择你能 hold 住的方式更为重要。
 
 私钥，公钥，数字证书(即公钥和一些个人信息的合成)等的文件的格式: PEM(base64字符串) DER(二进制文件) X509 PKCS(二进制文件)这几种格式是可以用openssl互相转化的。
 根据私钥生成公钥
@@ -285,6 +291,27 @@ RSA2048和AES256都是理论证明过以现有计算能力不能在多项式级�
 “勒索”病毒原理是什么？
 答：病毒传播原因是内网电脑通过网络下载不明信息后，导致中毒并不是通过路由器上共享端口（135-139，445端口）下载的，
 只要有人中毒后在内网会通过电脑的共享端口（445端口）进行传播，因此防护此病毒要在传输介质也就是交换机上做策略解决或者电脑终端维护才能彻底解决！
+-------------------------------------------------------------------------------------------
+GPG Key：
+the GPG command line tools：
+https://www.gnupg.org/download/
+生成密钥对：gpg --gen-key
+打印密钥信息：gpg --fingerprint
+导出公钥：gpg -a --export <秘钥id> > newkey.asc  #其中-a选项为导出为ASCII格式
+导出私钥：gpg -a --export-secret-keys <秘钥id> > newkey_pri.asc  #其中 -a选项为导出为ASCII格式
+将公钥转为RSA格式：gpg --export <秘钥id> | openpgp2pem <秘钥id>  #openpgp2pem 为monkeysphere 安装后的命令；
+将私钥转为RSA格式：gpg --export-secret-key <秘钥id> | openpgp2pem <秘钥id>  #openpgp2pem 为monkeysphere 安装后的命令；
+https://blog.csdn.net/qq_39565343/article/details/114097363
+GPG密钥实际上是密钥的集合。 有一个主密钥，通常仅用于签名和认证。 GPG建议的用法是创建一个用于加密的子项。 该子密钥是一个单独的密钥，出于所有目的和目的，该子密钥由您的主密钥签名并同时传输。 通过这种做法，您可以在保持主密钥有效的同时自行撤消加密子密钥（例如，加密子密钥遭到破坏）。
+要意识到的重要一点是，一个GPG密钥包含多个密钥。 为了备份和存储，您可以将它们当作一个键来操作，但是当需要使用一个键时，可以单独使用它们。
+本练习将使用为身份验证创建的子项来完成SSH连接。 该身份验证子项将完全用ssh key-gen替换您过去生成的密钥对。 如果需要多个SSH密钥，则可以根据需要创建任意多个。
+ssh与gpg区别：
+1.SSH (Secure Shell) 用于交互通信过程中的安全，是双向的。GPG (GNU Privacy Guard) 既可用于加密，也可用于签名，这些都是单向的。
+2.私钥在 SSH 中被称为 private key，而在 GPG 中被称为 secret key。公钥则都叫 public key。
+3.一般来讲，SSH 的公钥只有你的服务器知道，别人也不需要知道。GPG 的公钥就不一样了，巴不得全世界知道，告诉大家“认准这个证书，谨防假冒！”
+4.对于 SSH，建议一站一钥，万一丢了也好处理。对于 GPG，一把主钥＋多个子钥即可。如果你明白了 GPG 的多用途，完全可以把 GPG 的子密钥 [A] 用于 SSH 登录。
 
+ 
 
-
+ 
+ 
