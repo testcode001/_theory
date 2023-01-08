@@ -1,5 +1,46 @@
+人工智能：
+https://www.captainbed.net/
+听了吴恩达的网课之后，豁然开朗
+https://www.jianshu.com/p/c0215d26d20a
+卷积神经网络(Convolutional Neural Network,CNN)：图像openCV
+循环神经网络(Recurrent Neural Network, RNN)：nlp文字.爬虫
+生成式对抗网络(Generative Adversarial Networks, GAN)： deepfakes
+将AI拉下神坛（四）：越挫越勇，在对抗中创造！你可以轻松地认知GAN的存在。
+https://www.jianshu.com/p/e3e9277b3703
+机器学习.深度学习.图神经网络GNN(Graph Neural Networks)
+http://m.elecfans.com/article/691826.html
+CNN
+RNN
+GAN
+ANN
+DNN
+facenet：
+https://www.cnblogs.com/lijie-blog/p/10168073.html
+https://www.jianshu.com/p/af52dd10058c
+
+--------------------------------------------------------------------------------------------------------------
+
 labelImg+labelme标注工具的使用与安装：
 https://www.cnblogs.com/WalterJ726/p/12864497.html
+
+图像特征三大类型：
+边缘：图像强度发生突变的区域，其实就是高强度梯度区域；
+角点：两个边缘相交的地方，看起来像一个角；
+斑点：按特征划分的区域，强度特别高、强度特别低或具备特定纹理的区域；
+Harris角点概述
+Harris角点检测是一种基于灰度图像的角点提取算法，稳定性高，在opencv中harris角点检测的性能相对较低，因为其使用了高斯滤波。
+基于灰度图像的角点检测又分为基于梯度、基于模板和基于模板梯度组合三类型的方法，而Harris算法就是基于灰度图像中的基于模板类型的算法。
+Harris角点原理
+人眼对角点的识别通常是通过一个局部的小窗口内完成的：如果在各个方向上移动这个小窗口，窗口内的灰度发生了较大的变化，那么说明窗口内存在角点，具体分为以下三种情况：
+如果在各个方向移动，灰度几乎不变，说明是平坦区域；
+如果只沿着某一个方向移动，灰度几乎不变，说明是直线；
+如果沿各个方向移动，灰度均发生变化，说明是角点。
+Shi-Tomasi角点概述
+  Shi-Tomasi角点检测是改进了Harris算法，次算法最原始的定义是将矩阵M的行列式与M的迹想见，再将差值进行同预先给定的预制进行比较，后来再次改进，若两个特征值中较小的一个大于最小阈值，则会得到强角点。
+Shi-Tomasi原理
+由于Harris算法的稳定性和k值有关，Shi-Tomasi发现，角点的稳定性和矩阵M的较小特征值有关，改进的Harris算法即直接计算出矩阵M的特征值，用较小的特征值与阈值比较，大于阈值的即为强特征点。
+https://www.cnblogs.com/qq21497936/p/12990814.html
+
 
 index：
 一幅图像包括目标物体(前景1)、背景0还有噪声。

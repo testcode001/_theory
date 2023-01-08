@@ -95,7 +95,7 @@ git reset --hard commitID/sha1前6位 退到/进到 指定commit的sha码
 git merge commitID					代码回滚后，merge到指定版本
 git checkout <commitID> <filename>	git检出指定版本的某个文件(还原某个文件到指定版本)
 git checkout HEAD <filename>		git检出版本回退后的某个文件
-git revert commitID                 还原一个错误提交/撤销某次提交
+git revert commitID                 还原一个错误提交/撤销某次提交(还原单个提交用git revert，还原多个连续提交用git reset --hard)
 
 对本地库的多次提交，在push到远程仓库之前把这几个本地的commit合并为一个：
 git reset --hard d1dff09fd56

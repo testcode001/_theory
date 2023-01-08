@@ -1,0 +1,327 @@
+make/makefile/cmake/nmake
+https://zhuanlan.zhihu.com/p/111110992
+
+1. gcc
+它是GNU Compiler Collection（就是GNU编译器套件），也可以简单认为是编译器，它可以编译很多种编程语言（括C、C++、Objective-C、Fortran、Java等等）。
+我们的程序只有一个源文件时，直接就可以用gcc命令编译它。
+可是，如果我们的程序包含很多个源文件时，该咋整？用gcc命令逐个去编译时，就发现很容易混乱而且工作量大，所以出现了下面make工具。
+
+2. make
+make工具可以看成是一个智能的批处理工具，它本身并没有编译和链接的功能，而是用类似于批处理的方式—通过调用makefile文件中用户指定的命令来进行编译和链接的。
+
+3. makefile
+这个是啥东西？
+简单的说就像一首歌的乐谱，make工具就像指挥家，指挥家根据乐谱指挥整个乐团怎么样演奏，make工具就根据makefile中的命令进行编译和链接的。makefile命令中就包含了调用gcc（也可以是别的编译器）去编译某个源文件的命令。
+makefile在一些简单的工程完全可以人工拿下，但是当工程非常大的时候，手写makefile也是非常麻烦的，如果换了个平台makefile又要重新修改，这时候就出现了下面的Cmake这个工具。
+http://c.biancheng.net/
+
+4. cmake
+cmake就可以更加简单的生成makefile文件给上面那个make用。当然cmake还有其他更牛X功能，就是可以跨平台生成对应平台能用的makefile，我们就不用再自己去修改了。
+可是cmake根据什么生成makefile呢？它又要根据一个叫CMakeLists.txt文件（学名：组态档）去生成makefile。
+
+5. CMakeList.txt
+到最后CMakeLists.txt文件谁写啊？亲，是你自己手写的。
+
+6. nmake[1]
+nmake又是啥东西？
+nmake是Microsoft Visual Studio中的附带命令，需要安装VS，实际上可以说相当于linux的make，明白了么？
+
+总结一下大体流程[2]
+1.用编辑器编写源代码，如.c文件。
+2.用编译器编译代码生成目标文件，如.o。
+3.用链接器连接目标代码生成可执行文件，如.exe。
+但如果源文件太多，一个一个编译那得多麻烦啊？于是人们想到，为啥不设计一种类似批处理的程序，来批处理编译源文件呢？
+于是就有了make工具，它是一个自动化编译工具，你可以使用一条命令实现完全编译。但是你需要编写一个规则文件，make依据它来批处理编译，这个文件就是makefile，所以编写makefile文件也是一个程序员所必备的技能。
+对于一个大工程，编写makefile实在是件复杂的事，于是人们又想，为什么不设计一个工具，读入所有源文件之后，自动生成makefile呢，于是就出现了cmake工具，它能够输出各种各样的makefile或者project文件,从而帮助程序员减轻负担。但是随之而来也就是编写cmakelist文件，它是cmake所依据的规则。（cmake中有很多设置库的，此时还不是可执行文件，而make生成后才是二进制可执行文件。）
+
+Ninja是一个比Make更快速的小型构建系统。
+github仓库地址：https://github.com/ninja-build/ninja
+官网：https://ninja-build.org/
+基本使用
+#!/bin/bash 
+INSTALL_PREFIX=/home/zgl/test
+GCC_DIR=/home/zgl/gcc8.2.0
+mkdir build && cd build
+CMAKE_OPTIONS="-G Ninja .." //加上一些自己配置
+#cmake -G "MinGW Makefiles" ../
+cmake $CMAKE_OPTIONS
+ninja -j 64
+ninja install
+
+Ninja源码安装:
+构造Ninja可使用CMake或python，需要先安装re2c：
+1、安装re2c。下载地址：http://re2c.org/index.html
+tar -xzvf re2c-3.0.tar.xz
+cd  re2c-3.0
+autoreconf -i -W all (没有configure可以先执行Autotools)
+./configure
+make
+make install
+2、re2c安装成功之后开始Ninja安装。
+3、Ninja编译
+git clone https://github.com/ninja-build/ninja.git && cd ninja
+./configure.py --bootstrap
+cp ninja /usr/bin
+4、安装成功之后使用ninja --version可查看安装的版本
+https://zhuanlan.zhihu.com/p/321882707
+
+
+
+
+
+
+
+makefile文件三要素以及形式：
+目标：依赖
+	(tab)gcc.g++命令行/linux命令等任意shell命令(末尾不能有空格.tab键.回车等不可见字符)
+
+比如：(编译main.c、test.c，生成main可执行文件)
+main:main.o test.o　　
+　　gcc -o main main.o test.o
+main.o:main.c test.h
+　　gcc -c main.c
+test.o test.c test.h
+　　gcc -c test.c
+
+$@表示目标文件的名称，包含扩展名
+$*表示目标文件的名称，不包含扩展名
+$^表示所有的依赖文件，以空格隔开，不重复
+$<表示第一个依赖文件的名称
+所以上面写法可以简化为：
+main:main.o test.o
+　　gcc -o $@ $^　　#这里目标文件为main使用$@表示，这里所有依赖为main.o test.o使用$^表示。下面的类似
+main.o:main.c test.h
+　　gcc -c $<　　　　#这里第一个依赖是main.c使用$<表示，下面的类似
+test.o:test.c test.h
+　　gcc -c $<
+
+由于makefile有个缺省规则:
+.c.o:
+　　gcc -c $<
+这个.c.o:规则表示所有的.o文件依赖相应的.c文件，就是依赖除后缀名外的相同名的文件。
+
+所以上面的写法可以简化为：
+main:main.o test.o
+　　gcc -o main $^
+.c.o:
+　　gcc -c $<
+
+------------------------------------------------------------------------------------------------------
+Makefile：
+https://blog.csdn.net/yym6789/article/details/105183625/
+https://wenku.baidu.com/view/78483b76f31dc281e53a580216fc700abb6852e9.html
+http://www.gnu.org/software/make/manual/make.html
+makefile变量赋值时，'='号两边要留空格， shell不允许'='号两边有空格哦。取变量值是$(vars), 而shell取变量值是${vars}
+Makefile中的变量默认都是全局变量，和shell脚本一样。
+所有自定义的变量必须先用 := (覆盖)初始化后，才能使用 += 追加内容
+:= 覆盖
++= 追加
+?= 是如果没有被赋值过就赋予等号后面的值
+= 是最基本的赋值 后展开
+　　1、“=”
+　　make会将整个makefile展开后，再决定变量的值。也就是说，变量的值将会是整个makefile中最后被指定的值。看例子：
+　　x = foo
+y = $(x) bar
+x = xyz
+　　在上例中，y的值将会是 xyz bar ，而不是 foo bar 。
+　　2、“:=”
+　　“:=”表示变量的值决定于它在makefile中的位置，而不是整个makefile展开后的最终值。
+　　x := foo
+y := $(x) bar
+x := xyz
+　　在上例中，y的值将会是 foo bar ，而不是 xyz bar 了。
+通配符：*、%，Makefile中统配符可以出现在以下两种场合：1.用在规则的目标、依赖中 2.出现在规则的命令中
+注释符#
+@ 即silent静默，不输出执行命令本身
+$@表示目标文件的名称，包含扩展名
+$*表示目标文件的名称，不包含扩展名
+$^表示所有的依赖文件，以空格隔开，不重复
+$<表示第一个依赖文件的名称
+$?依赖项中，所有比目标文件新的依赖文件
+$+表示所有的依赖文件，空格隔开，可以重复
+"\" 用来连接本行和下一行，将其视为一行
+在第一个规则之后出现的所有以[Tab]字符开始的行都会被当作命令来处理。
+每一行command是一个进程，不同行之间变量值不能传递。所以，Makefile中的shell不管多长也要写在一行。
+http://blog.csdn.net/wubin1124/article/details/4337794
+http://blog.sina.com.cn/s/blog_54dd80920102v5qe.html
+
+makefile文件三要素以及形式：
+targetName: 依赖1 依赖2 \(依赖文件比目标新，生成目标的命令就会执行) 
+(tab)gcc.g++命令行/linux命令等任意shell命令(末尾不能有空格.tab键.回车等不可见字符)
+
+Makefile调试：notepad++查看Makefile的空格.tab.和换行符
+makefile 打印语句：$(info/warning/error "the value of LOCAL_PATH is $(varName)")
+循环.选择语句
+ifeq/ifneq(varA,varB)
+...
+else
+...
+endif
+ifdef/ifndef varName 
+...
+else 
+...
+endif
+常用内置函数wildcard：
+http://blog.csdn.net/secondjanuary/article/details/9363009
+wildcard通配符，wildcard把指定目录./下的所有后缀是cpp的文件全部展开；获取工作目录下的所有的.cpp文件列表
+patsubst替换通配符，patsubst把$(SRCS)中的变量符合后缀是.cpp的全部替换成.o
+Makefile内置变量：比较重要的是CC, CXX, .INCLUDE_DIRS, .DEFAULT_GOAL等
+makefile中要调用shell脚本需要特殊的语法。$(shell xxx)
+Makefile片段: 与其他Makefile共用上下文环境变量，并用include指令包含在其他Makefile文件中
+符号标志：
+   -   若在command的前面加一个"-"，表示若此command发生错误不予理会，继续执行下去.
+   $(macro) 应用这个变量，可以自动的将定义的宏加以展开，并替换使用。
+缺省规则：
+   .c.o:
+      gcc -c $<   这个规则表示所有的 .o文件都是依赖与其相应的.c文件的.例如mytool.o依赖于mytool.c
+
+
+make编译：
+make [targetName]  #若没有给出targetName，则选编译脚本中的第一target为编译目标。makefile开头的目标即为Makefile的默认目标。TARGETS可以是空格分开的多个文件名，也可以是一个标签（例如：执行清空的“clean”）
+make: 自动在当前目录下查找Makefile或者makefile来运行。也可以用-f参数指定：make -f fileName # 指定makefile文件来编译
+make [options] [targets] [VAR=VALUE]...[VAR=VALUE]是在命令行上指定环境变量	
+make clean : 调用makefile中的clean标签下的linux命令
+像clean这种，没有被第一个目标文件直接或间接关联，那么它后面所定义的命令将不会被自动执行，可通过make clean显示调用执行
+-n   # 发现错误继续执行而不是退出。例如，我们可以使用这个选项检测出哪个文件编译失败。
+-k   #使make仅打印出此命令将会做的事情而不实际执行。
+make -p #查看make的默认宏
+
+make原理：
+若文件的依赖关系没变，只改变文件内容，则不用make clean
+若文件的依赖关系改变，并更改了Makefile文件，则必须make clean
+
+make error: 
+makefile的执行过程就像函数调用的堆栈
+依赖的文件存在，则调用命令执行；依赖的文件不存在，则直接报错退出。
+对于所定义的命令的错误或是编译不成功，make则根本不理会。
+------------------------------------------------------------------------------------------------------
+target: dependences
+(tab)linuxCmd
+1.变量.函数.循环.选择语句	
+2.内置变量.内置函数.export/unexport传递参数.关键字 	文件.片段
+http://www.cnblogs.com/wang_yb/p/3990952.html
+http://www.ha97.com/961.html
+http://linux.chinaunix.net/techdoc/develop/2009/07/09/1122854.shtml
+
+makefile函数：
+define <command-name>
+command
+...
+endef
+
+all:
+    $(command-name)
+
+
+
+在makefile中定义一个临时目标
+a:
+  @echo $(LLVMGCC)
+然后make a
+
+Makefile调试：
+var.mk
+%:
+        @echo'$*=$($*)'  
+d-%:
+        @echo'$*=$($*)'
+        @echo'  origin = $(origin $*)'
+        @echo'   value = $(value  $*)'
+        @echo'  flavor = $(flavor $*)'
+
+[hchen@RHELSVR5]$ 
+make -f test.mk -f var.mk d-COMPILE.c
+COMPILE.c=cc -Ifoo -Ibar -O -Wall   -c
+  origin = default
+  flavor = recursive
+   value = $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+我们可以看到：
+make的第一个-f后是要测试的makefile，第二个是我们的debug makefile。
+后面直接跟变量名，如果在变量名前加”d-”，则输出更为详细的东西。
+说一说”d-” 前缀（其意为details），其中调用了下面三个参数。
+
+$(origin)：告诉你这个变量是来自哪儿，file表示文件，environment表示环境变量，还有environment override，command line，override，automatic等。
+$(value)：打出这个变量没有被展开的样子。比如上述示例中的 foo 变量。
+$(flavor)：有两个值，simple表示是一般展开的变量，recursive表示递归展开的变量。
+http://blog.csdn.net/lizhiqiang5846/article/details/7394181
+http://oreilly.com.cn/samplechap/gnumakesc/mng_pro_gnu3-12.pdf
+
+Makefile调试：
+有时候，我们不想让我们的makefile中的规则执行起来，我们只想检查一下我们的命
+令，或是执行的序列。于是我们可以使用make命令的下述参数：
+
+    “-n”
+    “--just-print”
+    “--dry-run”
+    “--recon”
+    不执行参数，这些参数只是打印命令，不管目标是否更新，把规则和连带规则下的
+命令打印出来，但不执行，这些参数对于我们调试makefile很有用处。
+
+    “-t”
+    “--touch”
+    这个参数的意思就是把目标文件的时间更新，但不更改目标文件。也就是说，make
+假装编译目标，但不是真正的编译目标，只是把目标变成已编译过的状态。
+
+    “-q”
+    “--question”
+    这个参数的行为是找目标的意思，也就是说，如果目标存在，那么其什么也不会输
+出，当然也不会执行编译，如果目标不存在，其会打印出一条出错信息。
+
+    “-W ;”
+    “--what-if=;”
+    “--assume-new=;”
+    “--new-file=;”
+    这个参数需要指定一个文件。一般是是源文件（或依赖文件），Make会根据规则推
+导来运行依赖于这个文件的命令，一般来说，可以和“-n”参数一同使用，来查看这个依
+赖文件所发生的规则命令。
+
+另外一个很有意思的用法是结合“-p”和“-v”来输出makefile被执行时的信息（这个将在
+后面讲述）。
+
+makefile
+http://goodcandle.cnblogs.com/archive/2006/03/30/278702.html
+http://www.ibm.com/developerworks/cn/linux/l-makefile/
+http://www.cnblogs.com/hnrainll/archive/2013/01/06/2847069.html
+伪目标即没有依赖，不是一个要生成的文件
+Makefile把第一个看到的目标作为其最终目标，其他目标默认不执行，除非你显示调用。
+
+shell一定要写在target内部， 否则你写了也白费劲， 是会被make忽略掉的.
+Makefile中的shell，每一行是一个进程，不同行之间变量值不能传递。所以，Makefile中的shell不管多长也要写在一行。
+Makefile中的变量以$开头， 所以为了避免和shell的变量冲突，shell的变量以$$开头，Shell自己的变量是不需要括号的
+
+
+gdb调试技巧：
+http://coolshell.cn/articles/3643.html
+
+
+
+
+Makefile： 文件不存在即报错退出
+依赖的文件存在，则调用命令执行；依赖的文件不存在，则直接报错退出。对于所定义的命令的错误，或是编译不成功，make则根本不理会。
+makefile的执行过程即函数调用的过程
+
+mm -B只适合于Android.mk文件
+
+
+
+makefile
+http://www.cnblogs.com/hesiming/archive/2011/03/15/1984444.html
+http://blog.chinaunix.net/uid-25838286-id-3204120.html
+android makefile 定义变量:http://blog.csdn.net/earbao/article/details/38702245
+android makefile 变量赋值：http://blog.csdn.net/wubin1124/article/details/4337794
+makefiel 调试： http://blog.csdn.net/mevin/article/details/6618546
+
+
+
+Tell CMake where to find the compiler by setting either the environment
+variable "CC" or the CMake cache entry CMAKE_C_COMPILER to the full path to
+the compiler, or to the compiler name if it is in the PATH.
+
+Tell CMake where to find the compiler by setting either the environment
+variable "CXX" or the CMake cache entry CMAKE_CXX_COMPILER to the full path
+to the compiler, or to the compiler name if it is in the PATH.
+
+
+
+

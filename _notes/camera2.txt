@@ -1,50 +1,149 @@
 多线程环境下，寻找并确定单次流程taskID的全局唯一标识符(文件名+时间戳)，注意分析不同流程taskID log在多线程中的交叉打印。
 
-ZSL HDR
-https://www.zhihu.com/question/264307309/answer/284940491
 
-ZSL (zero shutter lag) 中文名称为零延时拍照，是为了减少拍照延时,让拍照&回显瞬间完成的一种技术。
-Single Shot
-当开始预览后，sensor 和 VFE 会产生 preview 和 snapshot帧, 而最新的snapshot 帧数据会被存储在buffer 中。
-当拍照被触发,系统计算实际的拍照时间,找出在buffer中的相应帧,然后返回帧到用户，这就是所谓的"ZERO"。
-系统计算出shutter lag的时间,然后把某个帧认作是拍照实时的那帧数据。
-ZSL的实现机制
-因为ZSL实现需要实现一下几点：
-1. 一个surfaceView用于预览
-2. 一个队列缓存snapshot的数据
-3. 拍照动作获取队列某桢数据作为拍照数据输出
-4. 输出的照片需要YUV->JPEG数据的转码
-https://www.cnblogs.com/bluestorm/p/11051253.html
+现在的手机基本都是多个物理镜头，由主摄Wide，超广角UtralWide、微距Macro、长焦Tele、UtralTele、以及前置镜头，有的手机还有两颗前置镜头，
+普通应用只能获取前后两颗镜头的逻辑id，其他镜头的id无法获取到，只有系统应用等加了白名单的应用才能获取到。
+镜头根据其焦距(Focal_Length)的长短，也即拍摄时的视角FOV，可分为标准镜头，广角镜头和长焦距镜头等 [3]  。
+https://baike.baidu.com/item/%E7%84%A6%E8%B7%9D/1880759?fr=aladdin
 
-Camera2 HighSpeedCaptureSession
-https://www.jianshu.com/p/0d2f200ab374
+一次拍照流程：
+点击拍照按钮，
+开始触发AE_Trigger，AE收敛结束，
+开始触发AF_Trigger，AF收敛结束，
+开始下发拍照请求，拍照数据返回，送算法处理，算法处理完成返回后，开始做滤镜和水印处理，然后送yuv数据给底层做reprocess，最后返回jpeg本地保存到数据库里边
+多帧的话要等到meta和image对其后，才能送算法处理
+
+OpenGl的和纹理和绘制相关的操作必须运行在GL线程中，而不能运行在其他线程(主线程、相机打开开流线程、拍照后的图片保存线程、录像编码线程等)。
+1.主线程
+2.Camera2打开开流线程
+3.图片保存线程
+4.自定义EGL的渲染线程RenderThread：自定义线程+自定义EGL环境配置：1.根据EGLDisplay创建EGLConfig，2.根据EGLDisplay和EGLConfig创建EGLContext，3.根据根据EGLDisplay和EGLConfig以及外部surface创建EGLSurface，4.最后将EGLDisplay、EGLSurface、EGLContext关联起来
+自定义EGL的RenderThread如何requestRender？(AGLFrameWork.GLView.GLThread，即类似于线程池或者LogUtilToFile的双重while循环线程)
+5.录像创建编码线程Encoder
+滤镜录像(编码线程shareContext.MagicCamera.EglCore().没有音频？)：MediaCodec.MediaMuxer+自定义EGL只用于滤镜录像，滤镜拍照还是用的是GLSurfaceView
+MediaCodec用于滤镜录像MediaCodec.createInputSurface()或者一个session实现丝滑录像MediaCodec.createPersistentInputSurface()+MediaRecorder.setInputSurface(Surface surface) 
+MediaCodec的出队inputBuffer或者outputBuffer全部用MediaCodec的回调函数中的index和getInputBuffer(index)或者getOutputBuffer(index)来代替
+MediaCodec.configure(mediaformat, null/outputSurface, null, 0);
+MediaCodec.createInputSurface()(this method only can call between #configure and #start)-->创建EGLSurface，自定义EGL环境, shareContext的egl环境搭建
+MediaCodec.start()开始编码
+MediaMuxer.start(); MediaMuxer.writeSampleData();
+MediaCodec视频编码：将surface画面编码成视频文件
+MediaCodec视频解码：将视频文件解码成surface画面
+MediaCodec就是一个数据转换中心，且输入输出缓冲区ByteBuffer必须用自己内部的循环队列：出队inputBuffer填充数据，入队inputBuffer开始编码或者解码，出队outputBuffer编码或者解码好的数据，释放buffer即releaseOutputBuffer()。(编码.解码  音频.视频)
+获取当前EGL环境：
+EGL14.eglGetCurrentContext(); 可用于shareContext：即把GL线程中的GLContext传递到录像的编码线程中，并自定义EGL环境，录像的编码线程也就可以调用OpenGl的纹理、绘制相关的api操作了
+EGL14.eglGetCurrentSurface();
+EGL14.eglGetCurrentDisplay();
+EGL14.eglSwapBuffers(mEGLDisplay, mEglSurface)
+自定义EGL，shareContext用于滤镜录像，多Surface共享实时预览
+
+各业务逻辑的生命周期长短范围划分：持久化、当前进程、CameraDevice、CameraCaptureSession、单次拍照
+
+模块的划分及资源的申请顺序及释放：
+1.Camera2：CameraDevice、CameraCaptureSession、Image、ImageReader、ImageWriter，HandlerThread.quit()及相关回调顺序
+2.Surface、SurfaceTexture及相关回调顺序
+3.OpenGL：GLES20.glDelete...()
+GLES20.glDeleteProgram();
+GLES20.glDeleteShader();
+GLES20.glDeleteTextures();
+GLES20.glDeleteBuffers();
+GLES20.glDeleteFramebuffers(1, fbs, 0);
+GLES20.glDeleteRenderbuffers(1, fbs, 0);
+自定义EGL的资源释放：
+EGL14.eglMakeCurrent(mEGLDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE,EGL14.EGL_NO_CONTEXT);
+EGL14.eglDestroyContext(mEGLDisplay, mEGLContext);
+EGL14.eglDestroySurface(mEGLDisplay, mEGLSurface);
+EGL14.eglTerminate(mEGLDisplay);
+EGL14.eglReleaseThread();
+mEGLSurface = EGL14.EGL_NO_SURFACE;
+mEGLDisplay = EGL14.EGL_NO_DISPLAY;
+mEGLContext = EGL14.EGL_NO_CONTEXT;
+mEGLConfig = null;
+4.MediaCodec、MediaFormat、MediaRecorder、MediaMuxer、MediaExtractor、ByteBuffer、MediaCodec.BufferInfo
+5.算法：ImageQueue.clear();
+6.性能
+
+线程间通信.类的调用：1.数据传递：构造函数数据传递 2.数据共享：内部类共享外部类数据、单利内存共享、文件持久化共享 3.Handler.sendMessage()
+线程切换：1.Handler.sendMessage() 2.Thread.start()
+多线程同步
+
+耗时操作：开启新线程+轮询/回调函数+超时机制
+1.自身耗时：开启新线程、
+2.调用三方模块耗时：开启新线程+轮询/回调函数+超时机制
+3.网络耗时：超时机制+回调函数(底层定义接口，上层传递实例对象，底层调用上层)
+
+类似于线程池.opengl的帧绘制线程或者LogUtilToFile的双重while循环线程：
+1.子线程双重while循环+消息队列LinkedList+线程间通信 (外层循环控制线程状态，内层循环遍历消息队列) 2.线程的唤醒及退出由外部控制、线程的阻塞由线程内部自己控制
+relase方法：消息队列清空+线程池即子线程关闭
+
+相同的方法实现抽取到父类方法，相同的方法工作流抽取到父类接口中。
+批量类的重构：相似的流程方法抽取到父接口中，由子类具体实现。相同的(公共的)具体实现抽取到父类中，由父类提供默认实现。
+用自己看的懂的伪代码创建具体思路-->完全copy模仿具体实现-->优化.吸收.标准化
 
 
-github： camera2
-搜索：
-MFNR（多帧降噪）+ZSL（零延时拍照）
-camera gain值
-camera sensor cmos ccd isp
-imageSensor: cmos ccd
-isp
-dsp
-https://blog.csdn.net/wangliang888888/article/details/103695002
-https://blog.csdn.net/qian520ao/article/details/78156214
+只有滤镜拍照，没有视频滤镜:
+baseFilter类中：isNeedRendererScreen属性和OffScreenFrame属性配合。(用到上一个filter的textureId，下一个filter的frameBuffer)
+多套着色器程序和着色器脚本时，须在运行绘制时创建.编译.链接着色器程序和脚本，并获取shader脚本中的属性位置。即OpenGL的所有操作都在onDrawFrame()中完成，但要判断有些操作只初始化一次。
+glsurfaceview的画布surface和渲染器render是分离的
+在onDrawFrame()绘制时创建着色器程序program，且只初始化一次
+FBO离屏绘制绑定的纹理类型必须是GLES20.GL_TEXTURE_2D，视频帧绑定的纹理类型必须是GLES11Ext.GL_TEXTURE_EXTERNAL_OES
+AGLFramework
 
-https://www.cnblogs.com/-9-8/p/4692298.html
-3A即AF自动对焦（测距）、AE自动曝光(测光)及AWB自动白平衡：
-https://source.android.com/devices/camera/camera3_3Amodes
+onDrawFrame(GL10 gl) {
+	OESSourceFilter: isNeedRendererScreen=false
+	FilterGroup: isNeedRendererScreen=false
+	if(isCapture){
+		capture(Frame);
+	}
+	ScreenFilter： isNeedRendererScreen=true
+}
+其中OESSourceFilter和ScreenFilter是必须的,且其片段shader没有对预览帧做任何处理(一个是oes的shader，一个是sampler2D的shader)，FilterGroup是可选的。
+updateFilterGroup(): 红润，磨皮,美白，贴纸，lut滤镜。贴纸fliter必须作为filtrGroup的最后一个(即screenFilter的前一个)，否则该图层会被之后的filter改变图片颜色。
 
+每一个filter.即baseFilter中调用如下具体的绘制方法：
+Frame：FrameBuffer textureId previewWidth previewHeight
+1.OESSourceFrame
+2.一个中间filter，一个OffScreenFrame。即多个OffScreenFrame (FBO离屏绘制时，inputTextureID即GLES20.glActiveTexture(...)GLES20.glBindTexture(...)、outputTextureID即drawToTexture或者drawToScreen，inputTextureID和outputTextureID不能是同一个)
+渲染贴纸时，需要开启混合GLES20.glEnable(GLES20.GL_BLEND);将图片纹理id绘制到离屏的outputTextureID上。
+return OffScreenFrame;
+for循环可多次glDrawArrays(...)到FBO上(inputTextureID和outputTextureID)，最后才绘制到屏幕上
 
+shader脚本中有attribute或者uniform修饰符修饰的变量，都是由外部glAPI传入的，其他变量都是shader脚本内部使用的。
 
+https://blog.csdn.net/wangchao1412/article/details/103835643
+https://blog.csdn.net/AndroidAlvin/article/details/103307362
+https://blog.csdn.net/King1425/article/details/77776931
+https://blog.csdn.net/liuderong0/article/details/95936807
+磨皮相对美白稍微要复杂一些，人物的正常肤，色应该是偏红，所以则会导致人物图像的红色通道偏亮，使红色通道保留的细节成分较少，相比之下，绿色通道保留更多细节，所以，一般情况下我们也可以只采用过滤绿色通道来实现实时磨皮。
+1.取出绿色通道，对绿色通道进行模糊处理，例如高斯模糊，得到模糊后的值sampleColor
+2.用原图绿色通道值减去sampleColor，加上0.5（即128），1+2两个步骤即PS中的高反差保留
+3.对上述结果值进行3-5次强光处理，此步骤可以使得噪声更加突出
+4.计算原图的灰度值，公式为0.299R + 0.587G + 0.114*B
+5.将灰度值作为阈值，用来排除非皮肤部分，根据灰度值计算，将原图与1-3后的结果图合成
+6.对混合后结果增加亮度
+7.以灰度值作为透明度将原图与混合后结果进行滤色、柔光等混合，并调节饱和度
+在有了美白的基础之后是不是觉得磨皮像在做数学题一样，写出公式即可，虽然步骤多一点，但是却有迹可循，上面提到的模糊一般的做法是在一个像素周围取一圈像素，然后按一定的权重取均值，混合利用OpenGL内置函数mix()即可,柔光等光线调节则与前面的美白异曲同工。
+https://github.com/smzhldr/AGLFramework
+https://github.com/wangchao0837/OpenGlCameraRender
+滤镜录像：MagicCamera
 
+shader脚本的好多内置函数都是纯数值计算函数如：
+mix(a, b, c) 返回return a*(1-c)+y*a的线性混合数值
+clamp(a, min, max)：先拿a和min比较获取较大值，再拿较大值和max比较获取较小值，即获取三个参数中处在中间的那个值。min必须比max小。
+min(a, b)
+max(a, b)
+
+Reprocess：创建请求，创建连接，执行响应
+CameraDevice.createReprocessCaptureRequest(TotalCaptureResult inputResult) 
+InputConfiguration、OutputConfiguration-->SessionConfiguration-->CameraCaptureSession.getInputSurface()-->ImageWriter.newInstance(Surface surface, int maxImages)
+ImageWriter.queueInputImage(Image image)
+-----------------------------------------------------------------------------------------------------------------------------
 
 Exif信息(ExifTools)即3A信息及其子配置项：https://github.com/exiftool/exiftool https://exiftool.org/
-Auto Exposure自动曝光：光圈.快门.iso.测光模式(平均测光、中央重点测光、点测光).曝光补偿
-Auto Focus自动对焦：焦距
+Auto Exposure自动曝光：光圈.快门.iso.测光模式(平均测光、中央重点测光、点测光).曝光补偿 	点击手动触发测光AE_Trigger.测光区域Rectangle多个.AF对焦区域锁定
+Auto Focus自动对焦：焦距Focal_Length   点击手动触发对焦AF_Trigger.对焦区域Rectangle.AE测光区域锁定
 Auto White Balance自动白平衡
-Auto Flash打开闪光灯
-
+Auto Flash打开闪光灯FLASH_MODE
 
 1.硬件：1.闪光灯flash，2.lens镜头(光圈aperture、AF、FOCUS_DISTANCE)，3.sensor传感器.光电转换-->模数转换.(快门exposureTime.曝光补偿COMPENSATION_RANGE、ISO感光度sensitivity、AE测光、AWB), 4.ISP图像信号处理器
 2.软件算法：3A算法（AWB、AE、AF）、ISP中的算法(Gamma、Color Calibration、Noise Calibration、镜头阴影矫正LSC(Lens Shading Correction)、坏点校正（Defect Pixel Correction）、黑电平校正BLC(Black Level Correction) )
@@ -108,6 +207,7 @@ preview，拍照，录像：只有surfaceList是相同的，就可以共用一�
 CameraCharacteristics参数设定.configMap数据校验：分辨率，帧率，通道数、位深、数据格式
 图片处理：ImageReader.setOnImageAvailableListener()
 拍照和预览可以共用一个CameraDevice和CameraCaptureSession
+录像和预览可以共用一个CameraDevice，一般无法共用CameraCaptureSession。除非用一个session实现录像： MediaCodec创建永久surface即MediaCodec.createPersistentInputSurface()，并传递给MediaRecorder即MediaRecorder.setInputSurface(Surface surface)
 拍照和录像可以共用一个CameraDevice
 前后置则不可共用同一个CameraDevice，必须关掉CameraDevice和CameraCaptureSession后再打开
 
@@ -145,21 +245,6 @@ jpg图的onCaptureCompleted(...CaptureResult result)回调会先于onImageAvaila
 RAW图像就是CMOS或者CCD图像感应器将捕捉到的光源信号转化为数字信号的原始数据。RAW文件是一种记录了数码相机传感器的原始信息，同时记录了由相机拍摄所产生的一些元数据（Metadata，如ISO的设置、快门速度、光圈值、白平衡等）的文件。
 由于相机各厂商记录原始数据文件格式不统一，RAW只能用各厂商的软件编辑浏览，所以Adobe开发出DNG，改变了这一各自为王的局面。
 
-camera 点击 af ae 区域 矩阵转换
-http://www.javashuo.com/article/p-psjnsnnp-a.html
-https://wenku.baidu.com/view/f3c3fb61ddccda38376bafe7.html
-
- EIS(Electric Image Stabilization)指的是电子防抖技术,是一种通过软件算法实现的防抖能力。
- EIS电子防抖技术的原理是利用手机加速度传感器和陀螺仪模块侦测手机抖动的幅度，通过动态调节整ISO、快门和成像算法来修正模糊。
- 电子防抖实际上是一种通过降低画质来补偿抖动的技术，此技术试图在画质和画面抖动之间取得一个平衡点。
-
-测试：
-线程异步Image.closed
-https://blog.csdn.net/a260724032/article/details/103228875
-
-https://developer.android.com/reference/android/hardware/camera2/CaptureRequest
-
-
 1.MediaInfo
 https://github.com/MediaArea/MediaInfo
 https://MediaArea.net/MediaInfo
@@ -172,4 +257,158 @@ https://potplayer.daum.net
 4.ffmpeg
 
 
+ZSL HDR
+https://www.zhihu.com/question/264307309/answer/284940491
+ZSL (zero shutter lag) 中文名称为零延时拍照，是为了减少拍照延时,让拍照&回显瞬间完成的一种技术。
+Single Shot
+当开始预览后，sensor 和 VFE 会产生 preview 和 snapshot帧, 而最新的snapshot 帧数据会被存储在buffer 中。
+当拍照被触发,系统计算实际的拍照时间,找出在buffer中的相应帧,然后返回帧到用户，这就是所谓的"ZERO"。
+系统计算出shutter lag的时间,然后把某个帧认作是拍照实时的那帧数据。
+ZSL的实现机制，因为ZSL实现需要实现一下几点：
+1. 一个surfaceView用于预览
+2. 一个队列缓存snapshot的数据
+3. 拍照动作获取队列某桢数据作为拍照数据输出
+4. 输出的照片需要YUV->JPEG数据的转码
+https://www.cnblogs.com/bluestorm/p/11051253.html
 
+
+github： camera2
+搜索：
+MFNR（多帧降噪）+ZSL（零延时拍照）
+camera gain值
+camera sensor cmos ccd isp
+imageSensor: cmos ccd
+isp
+dsp
+https://blog.csdn.net/wangliang888888/article/details/103695002
+https://blog.csdn.net/qian520ao/article/details/78156214
+
+https://www.cnblogs.com/-9-8/p/4692298.html
+3A即AF自动对焦（测距）、AE自动曝光(测光)及AWB自动白平衡：
+https://source.android.com/devices/camera/camera3_3Amodes
+camera 点击 af ae 区域 矩阵转换
+http://www.javashuo.com/article/p-psjnsnnp-a.html
+https://wenku.baidu.com/view/f3c3fb61ddccda38376bafe7.html
+
+Camera2 HighSpeedCaptureSession
+https://www.jianshu.com/p/0d2f200ab374
+
+EIS(Electric Image Stabilization)指的是电子防抖技术,是一种通过软件算法实现的防抖能力。
+EIS电子防抖技术的原理是利用手机加速度传感器和陀螺仪模块侦测手机抖动的幅度，通过动态调节整ISO、快门和成像算法来修正模糊。
+电子防抖实际上是一种通过降低画质来补偿抖动的技术，此技术试图在画质和画面抖动之间取得一个平衡点。
+
+测试：
+线程异步Image.closed
+https://blog.csdn.net/a260724032/article/details/103228875
+
+https://developer.android.com/reference/android/hardware/camera2/CaptureRequest
+-----------------------------------------------------------------------------------------------------------------------------
+
+https://m.book118.com/html/2022/0509/8126040142004077.shtm
+图像处理与模式识别.pdf：需要 数学分析(微积分)、高等代数(线性代数)、概率论与数理统计
+图像处理与分析.pdf
+数字图像处理.pdf
+数字图像处理与计算机视觉.pdf
+
+https://blog.csdn.net/bigzhizhi/article/details/117808062
+https://blog.csdn.net/weixin_35693423/article/details/113038229
+https://blog.csdn.net/weixin_35625739/article/details/113038235
+-----------------------------------------------------------------------------------------------------------------------------
+
+图像处理相关术语:
+AE：自动曝光(Automatic Exposure)
+自动曝光算法(AE)将根据可用的光源条件自动设置曝光值。当主体拍摄物和背景的亮度相差很大时，一般会造成主体拍摄物的过曝光或曝光不足，为了克服这个问题，一些特定的AE算法着重考虑了主体拍摄物的亮度情况，在进行亮度调整时给予这部分更多的比重。
+
+AF：自动对焦(Auto Focus)
+自动对焦算法(AF)是通过既得图像对比度移动镜头使图像对比度达到最大。总的来说，自动对焦技术就是通过调整聚焦镜头的位置获得最高的图像频率成分，得到更高的图像对比度。其中，获得最佳的对焦点是一个不断积累的过程，它通过比较每一帧图像的对比度从而获得镜头移动范围内最大的对比度点，进而确定对焦距离。
+
+AWB：自动白平衡(Automatic white balance)
+自动白平衡算法(AWB)根据光源条件调整图片颜色的保真程度。物体在不同光线照射下会出现不同程度的色差，一般将一幅图像的整体色差信号用作色温数据，当这幅图像的大部分区域被一个统一的颜色覆盖时，这种色彩补偿就可能损失一部分完整的色彩。为了弥补这个缺陷，一些特定的AWB算法被提出来以适应不同的色温情况。例如，由于色温较低，图像传感器捕捉黄昏为黄色色调，而在日光充足的环境下，会呈现较高的蓝色色调。使用这些算法，模拟摄像机不仅在低光照环境下拍摄更好的图像，还能够提供更好的色彩还原和偏色补偿功能。
+
+BNC：同轴电缆连接器(Bayonet Nut Connector)
+BNC接头，是一种用于同轴电缆的连接器。主要用于电子工程设备上，连接终端出口或者入口。BNC接头之所以没有被淘汰，因为同轴电缆是一种屏蔽电缆，有传送距离长、信号稳定的优点。目前它还被大量用于通信系统中，如网络设备中的E1接口就是用两根BNC接头的同轴电缆来连接的，在高档的监视器、音响设备中也经常用来传送音频、视频信号。
+
+CCD：电荷耦合元件(Charge-coupled Device)
+CCD是一种半导体器件，能够把光学影像转化为电信号。 在视频监控领域，CCD是图像传感器的一种。
+
+CMOS：互补金属氧化物半导体(Complementary Metal Oxide Semiconductor)
+互补金属氧化物半导体，电压控制的一种放大器件，是组成CMOS数字集成电路的基本单元。CMOS制造工艺现常常被用于数码影像器材的感光元件。同CCD一样，CMOS也是图像传感器的一种。
+
+DLP：数字光处理技术(Digital Light Processing)
+DLP这种技术要先把影像信号经过数字处理，然后再把光投影出来。DLP是采用光学半导体产生数字式多光源显示的解决方案。它依靠可靠性极高的全数字显示技术，能在各类产品(如大屏幕数字电视、公司/家庭/专业会议投影机和数码相机(DLP Cinema))中提供最佳图像效果。
+
+DNR：数字降噪 (Digital Noise Reduction)
+DNR为数字降噪技术，用数字处理降低混杂在视频信号中的杂质。由于图像噪波的出现是随机的，因此每一帧图像出现的噪波是不同的。3D数字降噪通过对比相邻的几帧图像，将不重叠的信息(即噪波)自动滤出，从而显示出比较纯净细腻的画面。
+
+FPS：每秒传输帧数(Frames Per Second)
+FPS是图像领域中的定义，是指画面每秒传输帧数，通俗来讲就是指动画或视频的画面数。FPS是测量用于保存、显示动态视频的信息数量。每秒钟帧数愈多，所显示的动作就会愈流畅。通常，要避免动作不流畅的最低是30。
+
+HDR：高动态范围图像(High-Dynamic Range)
+HDR相比普通的图像，可以提供更多的动态范围和图像细节，根据不同的曝光时间的LDR图像，利用每个曝光时间相对应最佳细节的LDR图像来合成最终HDR图像 ，能够更好的反映出真实环境中的视觉效果。
+
+ISP：图像信号处理器(Image Signal Processing)
+通过光学透镜后的图像被CCD或者CMOS采集，需要经过ISP的处理才可以输出我们应用所需要的图像。ISP是成像设备性能的决定因素。
+
+LCD：液晶显示器( Liquid Crystal Display)
+LCD液晶显示器由一定数量的彩色或黑白像素组成，放置于光源或者反射面前方。液晶显示器功耗很低，因此倍受青睐。它的主要原理是以电流刺激液晶分子产生点、线、面配合背部灯管构成画面。
+
+LED：发光二极管(light emitting diode)
+LED是一种通过控制半导体发光二极管的显示方式，由镓(Ga)与砷(As)、磷§、氮(N)、铟(In)的化合物制成的二极管，当电子与空穴复合时能辐射出可见光，因而可以用来制成发光二极管。在安防领域，我们常说的LED显示屏便是由一个个小的LED模块组成。
+
+Lx：勒克斯照度单位(Lux)
+照度是反映光照强度的一种单位，其物理意义是照射到单位面积上的光通量，照度的单位是每平方米的流明(Lm)数，也叫做勒克斯(Lux)。1lx大约等于1烛光在1米距离的照度，我们在摄像机参数规格中常见的最低照度，表示该摄像机只需在所标示的LUX数值下，即能获取清晰的影像画面，此数值越小越好，说明CMOS的灵敏度越高。
+
+MP：百万像素(Mega Pixel)
+在安防领域，MP用来表示摄像机的解析度。例如，我们现在通常说的500万、800万摄像机也经常写成5MP、8MP。
+
+PDP：等离子显示板(Plasma Display Panel)
+PDP采用等离子管作为发光元件，屏幕上每一个等离子管对应一个像素，屏幕以玻璃作为基板，基板间隔一定距离，四周经气密性封接形成一个个放电空间。简单说来，PDP是一种利用气体放电的显示装置。
+
+PTZ：云台控制(Pan/Tilt/Zoom )
+在摄像机监视的场景范围内，当移动目标出现后，用户可以手动锁定(例如通过鼠标点击来锁定目标)或预置位自动触发锁定某个运动目标，来触发PTZ摄像机进行自主自动的PTZ跟踪，并自动控制PTZ摄像机的云台进行全方位旋转，针对被锁定的运动目标进行视觉导向的自动跟踪，以确保跟踪目标持续出现在镜头中央。自动PTZ跟踪模块弥补了固定摄像机监控视野窄的缺点，是完善的安全监控系统所必备的功能。
+
+RGB：三原色光，色彩模式标准(red，green，blue)
+RGB色彩模式是工业界的一种颜色标准，是通过对红®、绿(G)、蓝(B)三个颜色通道的变化以及它们相互之间的叠加来得到各式各样的颜色的，RGB即是代表红、绿、蓝三个通道的颜色。RGB的所谓“多少”就是指亮度，并使用整数来表示。通常情况下，RGB各有256级亮度，用数字表示为从0、1、2…直到255。注意虽然数字最高是255，但0也是数值之一，因此共256级。
+
+SNR：信噪比(Signal Noise Ratio)
+信噪比，又称为讯噪比，即放大器的输出信号的电压与同时输出的噪声电压的比，常常用分贝数表示。设备的信噪比越高表明它产生的杂音越少。图象的信噪比应该等于信号与噪声的功率谱之比，但通常功率谱难以计算，有一种方法可以近似估计图象信噪比，即信号与噪声的方差之比。首先计算图象所有象素的局部方差，将局部方差的最大值认为是信号方差，最小值是噪声方差，求出它们的比值，再转成dB数，最后用经验公式修正。
+
+WDR：宽动态范围(Wide Dynamic Range)
+宽动态就是场景中特别亮的部位和特别暗的部位同时都能看得特别清楚。宽动态范围是图像能分辨最亮的亮度信号值与能分辨的最暗的亮光信号值的比值。宽动态处理包括多曝光数据融合、全局对比度均衡、局部对比度融合增强，先进的运动估计/运动补偿等。该技术使得画面暗区细节清晰可见，同时抑制了亮区饱和，实现120db以上宽动态范围。
+　　原理：原图像的主体很暗，而后景较亮但也不甚清楚的状态下，通过高速快门与低速快门曝光、底纹修正、内部控制及勾边处理，输出较清晰的WDR图像。
+　　宽动态的基本功能是在同一时间内，以不同的曝光速度捕捉到两幅清晰区域不同的图像，在这两幅图像中消除其中较差的像素，保留优质的像素，再将两者合成在一起。采用这种宽动态技术原理的摄像机种类有：双倍速CCD传感器加上DSP芯片，和普通的CCD加上双快门。当在强光源（日光、灯具或反光等）照射下的高亮度区域及阴影、逆光等相对亮度较低的区域在图像中同时存在时，摄像机输出的图像会出现明亮区域因曝光过度成为白色，而黑暗区域因曝光不足成为黑色，严重影响图像质量。摄像机在同一场景中对最亮区域及较暗区域的表现是存在局限的，这种局限就是通常所讲的“动态范围”。
+
+BLC：背光补偿(Backlight Compensation)
+通常，普通摄像机的AGC工作点是通过对整个视场的内容作平均来确定的，但如果视场中包含一个很亮的背景区和一个很暗的前景目标，则此时确定的AGC工作点有可能对于前景目标是不够合适的，而背光补偿功能有可能改善前景目标显示状况。背光补偿方式有两种，第一，将全部图像区域亮度增强，使得前景区域可以被观察到（BLC功能）。第二，仅对前景进行亮度控制，背景的亮度保持不变
+
+自动增益控制AGC(Auto Gain Control)
+所有的摄像机都有一个将来自CCD的信号放大到可以使用的视频放大器，其放大即有增益，等效于有较高的灵敏度，可使其在微光下灵敏，然而在强光照的环境中放大器将过载，使视频信号畸变。为此，需利用摄像机的自动增益控制（AGC）电路去探测视频信号的电平，适时的开启和关闭AGC，从而使摄像机能够在较大的光照范围内工作，即在低照度时自动增加摄像机的灵敏度，从而提高图像信号的强度来获得清晰的图像。
+
+3D数码低照度降噪3D-DNR (3Dimension-Digital Noise Reduction)
+3D-DNR噪声抑制滤波器能够有效消除噪声与提升图像质量。能通过32dB的AGC，使获得更清晰的图像（3D：水平X＋垂直Y+时间T）
+
+数码慢快门DSS（Digital Slow shutter）
+数码慢快门又叫帧累积技术，在信号处理时，将多帧图像累积为一帧再进行输出，用以改善在照度很低的情况下，提升拍摄图像的亮度，从而提升对物体的识别能力。
+
+超强光抑制HSBLC(Highlight Suppress Back Light Compensation)
+通过DSS技术，3D-DNR技术，AGC控制机制，在低照度环境下不仅能使画面变得更亮，并能优化移动物体，降低噪声，能够完美应用于低照度下的监控（如图4所示）。将输入信号放大并自动减少低照度下的噪声后,使摄像机通过更低的快门速度充分曝光并通过累积帧亮度信号的方式使图像更清晰。
+-----------------------------------------------------------------------------------------------------------------------------
+Camera2视频教程
+https://blog.csdn.net/qq_42194101/article/details/125591459
+https://deepinout.com/
+https://v.deepinout.com/
+https://ask.deepinout.com/
+https://deepinout.com/android-camera-official-documentation/android-camera-hal-dev/android-camera-hal-develop-overview.html
+https://source.android.google.cn/docs/core/camera
+https://developer.android.google.cn/ndk/reference/group/camera#group___camera_1ggafc2f1ec5a67e5f5a1119c0d324721bd2aab570a0d19e52c35c79d429e6927ed50
+https://developer.android.google.cn/reference/android/hardware/camera2/params/package-summary
+
+isp hidl
+http://camera.geek-docs.com/
+http://camera.geek-docs.com/camera-isp/digital-camera-system-intro.html
+https://deepinout.com/
+https://deepinout.com/android-camera-official-documentation
+https://deepinout.com/android-camera-official-documentation/android-camera2-api/android-camera-architecture-intro.html
+
+https://deepinout.com/opencv-python-tutorial-4-0-0
+https://www.cnblogs.com/1234567FENG/p/16398416.html

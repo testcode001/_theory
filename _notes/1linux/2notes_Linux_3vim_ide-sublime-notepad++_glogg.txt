@@ -75,6 +75,16 @@ set tags=tags;/  "若当前目录找不到tags文件，则到上层目录查找
 set autochdir
 ctags：
 Ctrl-]：跳转到光标所在的变量名或函数处。"Ctrl-o"或“Ctrl-t”退回原来的地方。
+
+ctags常用命令：
+ctags –R . 生成索引文件
+Ctrl+ ] 跳到光标所在变量的定义处
+Ctrl+ t 返回查找或跳转，从哪里跳过来的跳回哪里，即使用了很多次 Ctrl+]，该命令也会回到最初一次的位置
+vi –t tag 找到名为 tag 的变量的定义处
+g] 列出变量的所有引用供用户选择
+:ts tagslist，同 g]
+:tp tagspreview，上一个tag标记文件
+:tn tagsnext)，下一个tag标记文件
  
 2.
 cscope命令：查找变量.函数的调用

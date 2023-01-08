@@ -15,7 +15,7 @@ source ~/.bashrc
 
 用linux文本四剑客+正则替代编程工具IDE
 熟练文本四剑客+正则表达式：find.grep.sed.awk(cut)+xargs+正则
-文件查找：find . -name fileName -type f/d
+文件查找：find . -iname logu*l.java -type f/d
 time find . -name *.xml -type f | xargs grep --color -2n "abc"   #查找当前目录下所有xml文件中包含abc的行，并查看耗时
 time find . -name *.xml -type f | xargs sed -i "/abc/d"   		 #删除当前目录下所有xml文件中包含abc的行，并查看耗时
 find 排除某个目录或多个目录：-path "./code" -prune -o
@@ -54,8 +54,8 @@ grep -E "str1.*str2.*str3|str3.*str2.*str1"                     #grep同时满�
 https://www.runoob.com/linux/linux-comm-grep.html
 -E支持正则、
 -2显示匹配字符串的上下2行、
-r递归查找目录、
-n显示行号、
+-R递归查找目录、
+-n显示行号、
 q静默输出即不输出、
 -v去除指定字符
 -a：将二进制文档以文本方式处理

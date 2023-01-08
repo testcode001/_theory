@@ -1,9 +1,9 @@
 https://blog.csdn.net/linhaiyun_ytdx/article/details/48065259
 https://blog.csdn.net/linhaiyun_ytdx/article/details/48064065
 
-注：C++与C兼容，原来C语言中的头文件在C++也能使用，不过最好还是使用C++重新封装的C头文件，头文件名称去掉“.h”在头部加上“c”就可以了，如s t d i o . h可以写为 c s t d i o
-
-C头文件一览
+标准库头文件、操作系统库头文件、三方库头文件、自定义头文件
+C标准库头文件分类：字符串.文件.基本输入流
+#include <dlfcn.h>　　　　 //dlopen(const char* libfile,int flag);该函数将在运行时把一个新库加载进内存。dlsym();dlclose(void* handler);
 #include <assert.h>　　　　//设定插入点
 #include <ctype.h>　　　　 //字符处理
 #include <errno.h>　　　　 //定义错误码
@@ -22,77 +22,6 @@ C头文件一览
 #include <time.h>　　　　　//定义关于时间的函数
 #include <wchar.h>　　　　 //宽字符处理及输入／输出
 #include <wctype.h>　　　　//宽字符分类
-
-传统C++
-#include <fstream.h>　　　 //改用<fstream>
-#include <iomanip.h>　　　 //改用<iomainip>
-#include <iostream.h>　　　//改用<iostream>
-#include <strstrea.h>　　　//该类不再支持，改用<sstream>中的stringstream
-————————————————————————————————
-
-标准C++
-#include <string>　　　　　//字符串类
-#include <fstream> 　　　 //文件输入／输出
-#include <ofstream> 　　　 //文件输出
-#include <ifstream> 　　　 //文件输入
-#include <iostream> 　　　//数据流输入／输出
-#include <list>　　　　　　//STL 线性列表容器list、set、map
-#include <set>　　　　　　 //STL 集合容器
-#include <map>　　　　　　 //STL 映射容器
-#include <queue>　　　　　 //STL 队列容器
-#include <deque>　　　　　 //STL 双端队列容器
-#include <stack>　　　　　 //STL 堆栈容器
-#include <vector>　　　　　//STL 向量.矢量.动态数组容器
-#include <bitset>　　　　　//STL 位集容器
-#include <algorithm>　　　 //STL 通用算法
-#include <iterator>        //STL迭代器
-#include <numeric>         //STL常用的数字操作
-#include <memory>          //STL通过分配器进行的内存分配
-#include <utility>　　　　 //STL 通用模板类
-#include <functional>　　　//STL 定义运算函数（代替运算符）
-#include <exception>　　　 //异常处理类
-#include <thread>			//多线程
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-#include <chrono>
-
-#include <cctype>         //字符处理
-#include <cerrno> 　　　　 //定义错误码
-#include <cfloat>　　　　 //浮点数处理
-#include <ciso646>         //对应各种运算符的宏
-#include <climits> 　　　　//定义各种数据类型最值的常量
-#include <clocale> 　　　　//定义本地化函数
-#include <cmath> 　　　　　//定义数学函数
-#include <complex>　　　　 //复数类
-#include <csignal>         //信号机制支持
-#include <csetjmp>         //异常处理支持
-#include <cstdarg>         //不定参数列表支持
-#include <cstddef>         //常用常量
-#include <cstdio> 　　　　 //定义输入／输出函数
-#include <cstdlib> 　　　　//定义杂项函数及内存分配函数
-#include <cstring> 　　　　//字符串处理
-#include <ctime> 　　　　　//定义关于时间的函数
-#include <cwchar> 　　　　 //宽字符处理及输入／输出
-#include <cwctype> 　　　　//宽字符分类
-
-#include <limits> 　　　　 //定义各种数据类型最值常量
-#include <locale>         //本地化特定信息
-#include <new>            //动态内存分配
-#include <iomanip> 　　　 //参数化输入／输出
-#include <ios>　　　　　　 //基本输入／输出支持
-#include <iosfwd>　　　　　//输入／输出系统使用的前置声明
-#include <istream>　　　　 //基本输入流
-#include <ostream>　　　　 //基本输出流
-#include <sstream>　　　　 //基于字符串的流
-#include <stdexcept>　　　 //标准异常类
-#include <streambuf>　　　 //底层输入／输出支持
-#include <typeinfo>        //运行期间类型信息
-#include <valarray>        //对包含值的数组的操作
-
-
-————————————————————————————————
-
 C99增加的部分
 #include <complex.h>　　 //复数处理
 #include <fenv.h>　　　　//浮点环境
@@ -101,9 +30,264 @@ C99增加的部分
 #include <stdint.h>　　　//整型环境
 #include <tgmath.h>　　　//通用类型数学宏
 
+————————————————————————————————
+C++基本数据类型修饰符有signed、unsigned、long、short, signed long、unsigned long、signed short、unsigned short，默认修饰符为signed
+C++基本数据类型: 比java基本数据类型多了2个，即无类型void一般用于函数返回值以及函数参数，和宽字符型wchar_t，实际上其空间和值与unsigned short 一样。std::string其实是容器，类型转换使用。
+c++基本数据类型之间的转换int/char*/string：
+int->string：std::to_string(number); 
+string->int：std::atoi(student_number.c_str()); 
+string->char*：student_name.c_str();
+char*->string：string(char *);
+int->char*：std::itoa(number, char*, 10); 
+char*->int：std::atoi(char*);
+https://blog.csdn.net/shouhu010/article/details/128828583
+string类遍历每个字符的3种方法：1.下标遍历	2.迭代器	3.范围for
+https://blog.csdn.net/m0_64645696/article/details/123031194
+//计算一维数组的长度：int length = sizeof(array)/sizeof(array[0])
+int aar[] = {1, 2, 3, 4, 5, 6};
+arrayLength = sizeof(aar) / sizeof(aar[0])；
+
+
+https://cplusplus.com/reference/algorithm/
+标准C++头文件分类：字符串.文件.基本输入流	容器.算法.迭代器.智能指针 	多线程同步.5个	C头文件		网络？
+using namespace std;
+#include <string>　　　　　//字符串类
+#include <fstream> 　　　 //文件输入／输出
+#include <ofstream> 　　　 //文件输出
+#include <ifstream> 　　　 //文件输入
+#include <iostream> 　　　//数据流输入／输出
+
+#include <list>　　　　　　//STL 双向链表.线性列表容器.list、set、map
+#include <unordered_map>
+#include <map>　　　　　　 //STL 映射容器
+#include <set>　　　　　　 //STL 集合容器
+#include <forward_list>	   //STL 单项链表.线性列表容器
+#include <unordered_map>
+#include <unordered_set>
+#include <stack>　　　　　 //STL 堆栈容器
+#include <queue>　　　　　 //STL 队列容器
+#include <deque>　　　　　 //STL 双端队列容器
+#include <vector>　　　　　//STL 向量.矢量.动态数组容器 内存空间大小是能够改变的。vector创建无需指定大小，只需指定类型，vector<int> a
+#include <array>　 　　　　//STL 数组容器，内存空间大小是固定的。 		array创建需要同时指定类型和大小，array<int, 3> a。
+#include <bitset>　　　　　//STL 位集容器
+#include <algorithm>　　　 //STL 通用算法 
+#include <iterator>        //STL迭代器
+#include <functional>　　　//STL 定义运算函数（代替运算符）
+#include <utility>　　　　 //STL 通用模板类
+#include <numeric>         //STL常用的数字操作
+
+#include <memory>          //STL通过分配器进行的内存分配、智能指针
+#include <new>            	//动态内存分配
+#include <thread>			//多线程
+#include <mutex>
+#include <condition_variable>
+#include <future>         // std::async, std::future
+#include <atomic>
+#include <chrono>
+#include <exception>　　　 //异常处理类
+
+注：C++与C兼容，原来C语言中的头文件在C++也能使用，不过最好还是使用C++重新封装的C头文件，头文件名称去掉“.h”在头部加上“c”就可以了，如stdio.h可以写为cstdio
+#include <cstring> 　　　　//字符串处理
+#include <cstdio> 　　　　 //定义输入／输出函数
+#include <cstdlib> 　　　　//定义杂项函数及内存分配函数
+#include <cctype>         //字符处理
+#include <cwchar> 　　　　 //宽字符处理及输入／输出
+#include <cwctype> 　　　　//宽字符分类
+#include <cfloat>　　　　 //浮点数处理
+
+#include <ctime> 　　　　　//定义关于时间的函数
+#include <clocale> 　　　　//定义本地化函数
+#include <cmath> 　　　　　//定义数学函数
+
+#include <cerrno> 　　　　 //定义错误码
+#include <ciso646>         //对应各种运算符的宏
+#include <climits> 　　　　//定义各种数据类型最值的常量
+#include <cstddef>         //常用常量
+#include <cstdint>         //int32_t和int64_t等类型的typedef自定义
+#include <cstdarg>         //不定参数列表支持
+
+#include <complex>　　　　 //复数类
+#include <csignal>         //信号机制支持
+#include <csetjmp>         //异常处理支持
+#include <stdexcept>　　　 //标准异常类
+
+#include <iomanip> 　　　 //参数化输入／输出
+#include <ios>　　　　　　 //基本输入／输出支持
+#include <iosfwd>　　　　　//输入／输出系统使用的前置声明
+#include <istream>　　　　 //基本输入流
+#include <ostream>　　　　 //基本输出流
+#include <sstream>　　　　 //基于字符串的流
+#include <streambuf>　　　 //底层输入／输出支持
+#include <typeinfo>        //运行期间类型信息
+#include <valarray>        //对包含值的数组的操作
+
+————————————————————————————————
+C++头文件详解：
+
+指针和迭代器都可以有++，--操作，但不属于算数运算
+
+迭代器是容器和算法<algorithm>之间的粘合剂
+iterator iter; 	// 声明迭代器iter
+for(iter = 容器.begin(); iter != 容器.end(); iter++){
+	cout << *iter 或者是 iter->first ;                                
+}
+STL 中有用于操作迭代器的三个函数模板，需要包含头文件#include <algorithm>，它们是：
+advance(p, n)：使迭代器 p 向前或向后移动 n 个元素。
+distance(p, q)：计算两个迭代器之间的距离，即迭代器 p 经过多少次 + + 操作后和迭代器 q 相等。注意：如果调用时 p 已经指向 q 的后面，则这个函数会陷入死循环。
+iter_swap(p, q)：用于交换两个迭代器 p、q 指向的值。
+https://blog.csdn.net/qq_19887221/article/details/123251571
+迭代器的算术运算，并不是所有迭代器都支持这些算术运算，但是vector迭代器支持。
+(1)加法：iter1 + n
+         iter1 - n
+比如 ivec.begin() + 2即为指向第2个元素(从0开始数)
+(2)减法：iter1 - iter2
+这个减法运算返回difference_type类型，其为signed类型。
+vector<int>::difference_type delt;
+注意：不能将两个迭代器相加！
+迭代器失效
+在改变vector的长度之后，比如经过push_back()或者erase()操作之后，已经存在的迭代器会失效。
+
+stack和queue一样没有迭代器。访问元素的唯一方式是遍历容器内容，并移除访问过的每一个元素。
+为了访问 queue 中的全部元素，必须删除它们。如果不想删除容器中的元素，必须将它们复制到另一个容器中。
+stack<int> q;	//以int型为例
+int x;
+q.push(x);		//将x压入栈顶
+q.top();		//返回栈顶的元素
+q.pop();		//删除栈顶的元素
+q.size();		//返回栈中元素的个数
+q.empty();		//检查栈是否为空,若为空返回true,否则返回false
+
+只能访问queue容器适配器的第一个和最后一个元素。只能在容器的末尾添加新元素，只能从头部移除元素。
+https://www.cnblogs.com/zzr-stdio/p/14435610.html
+queue 的成员函数：
+front()：返回 queue 中第一个元素的引用。如果 queue 是常量，就返回一个常引用；如果 queue 为空，返回值是未定义的。
+back()：返回 queue 中最后一个元素的引用。如果 queue 是常量，就返回一个常引用；如果 queue 为空，返回值是未定义的。
+push(const T& obj)：在 queue 的尾部添加一个元素的副本。这是通过调用底层容器的成员函数 push_back() 来完成的。
+push(T&& obj)：以移动的方式在 queue 的尾部添加元素。这是通过调用底层容器的具有右值引用参数的成员函数 push_back() 来完成的。
+pop()：删除 queue 中的第一个元素。
+size()：返回 queue 中元素的个数。
+empty()：如果 queue 中没有元素的话，返回 true。
+emplace()：用传给 emplace() 的参数调用 T 的构造函数，在 queue 的尾部生成对象。
+swap(queue<T> &other_q)：将当前 queue 中的元素和参数 queue 中的元素交换。它们需要包含相同类型的元素。也可以调用全局函数模板 swap() 来完成同样的操作。
+
+<algorithm>定义了设计用于元素范围的函数集合。任何对象序列的范围可以通过迭代器或指针访问。
+包含了所有vector、list、set、map操作能想到的一些函数，如查找，替换、排序、逆序reverse、unique数组去重、计数、判断等常用的功能全部在里面
+https://cplusplus.com/reference/algorithm/
+std::adjacent_find：在序列中查找第一对相邻且值相等的元素；
+std::find: 对一个输入序列，查找第一个等于给定值的元素；
+std::find_end: 查找有B定义的序列在A序列中最后一次出现的位置(B可能是A的子序列)；
+std::find_first_of:查找A序列中第一个与序列B中任一元素值相等的元素位置；
+std::find_if: 在序列中返回满足谓词(给定的条件)的第一个元素；
+std::find_if_not:在序列中返回不满足谓词的第一个元素；
+std::all_of: 如果序列中所有元素均满足给定的条件，则返回true；
+std::any_of: 如果序列中存在元素满足给定的条件，则返回true；
+std::none_of: 如果序列中所有元素均不满足给定的条件，则返回true；
+std::binary_search:对一个升序序列做二分搜索，判断序列中是否有与给定值相等的元素；
+std::search: 在序列A中，搜索B首次出现的位置(B可能是A的子序列)；
+std::search_n: 在给定序列中，搜索给定值连续出现n次的位置；
+std::copy: 将一个序列中的元素拷贝到新的位置；
+std::copy_backward:把一个序列复制到另一个序列，按照由尾到头顺序依次复制元素；
+std::copy_if: 将一个序列中满足给定条件的元素拷贝到新的位置；
+std::copy_n: 将一个序列中的前n个元素拷贝到新的位置；
+std::count: 返回序列中等于给定值元素的个数；
+std::count_if: 返回序列中满足给定条件的元素的个数；
+std::equal: 比较两个序列的对应元素是否相等；
+std::equal_range:在已排序的序列中，查找元素等于给定值组成的子范围；
+std::lower_bound:在升序的序列中，查找第一个不小于给定值的元素；
+std::upper_bound:在已排序的序列中，查找第一个大于给定值的元素；
+std::fill: 用给定值填充序列中的每个元素；
+std::fill_n: 用给定值填充序列中的n个元素；
+std::for_each: 将指定函数应用于范围内的每一个元素；
+std::generate: 对序列中的每个元素，用依次调用函数gen的返回值赋值；
+std::generate_n:对序列中的n个元素，用依次调用指定函数gen的返回值赋值；
+std::includes: 判断第二个已排序的序列是否全部都出现在第一个已排序的序列中；
+std::inplace_merge:对两个升序的序列执行原地合并，合并后的序列仍保持升序；
+std::merge: 对两个升序的序列合并，结果序列保持升序；
+std::is_heap: 判断序列是否为二叉堆；
+std::is_heap_until:查找第一个不是堆顺序的元素；
+std::make_heap: 对于一个序列，构造一个二叉堆；
+std::pop_heap: 堆的根节点被移除，堆的元素数目减1并保持堆性质；
+std::push_heap: 向堆中增加一个新元素，新元素最初保存在last-1位置；
+std::sort_heap: 对一个堆，执行原地堆排序，得到一个升序结果；
+std::is_partitioned：判断序列是否按指定谓词划分过；
+std::partition: 对序列重排，使得满足谓词的元素位于最前；
+std::partition_copy:输入序列中，满足谓词的元素复制到result_true，其它元素复制到result_false；
+std::partition_point:输入序列已经是partition，折半查找到分界点；
+std::stable_partiton:对序列重排，使得满足谓词的元素在前，不满足谓词的元素在后，且两组元素内部的相对顺序不变；
+std::is_permutation:判断两个序列是否为同一元素的两个排列；
+std::next_permutation:n个元素有n!中排列。这些排列中，规定升序序列为最小排列，降序序列为最大的排列，任意两个排列按照字典序分出大小。该函数返回当前序列作为一个排列按字典序的下一个排列；
+std::prev_permutation:返回当前序列作为一个排列按字典序的上一个排列；
+std::is_sorted: 判断序列是否为升序；
+std::is_sorted_until:查找序列中第一个未排序的元素；
+std::nth_element:对序列重排，使得指定的位置出现的元素就是有序情况下应该在该位置出现的那个元素，且在指定位置之前的元素都小于指定位置元素，在指定位置之后的元素都大于指定位置元素；
+std::partial_sort:对序列进行部分排序；
+std::partial_sort_copy:拷贝部分排序的序列；
+std::sort: 对序列进行排序；
+std::stable_sort:对序列进行稳定排序；
+std::iter_swap: 交换两个迭代器指向的元素；
+std::swap: 交换两个对象，优先使用移动语义；
+std::swap_ranges:交换两个序列中对应元素；
+std::lexicographical_compare：对两个序列做字典比较，如果第一个序列在字典序下小于第二个序列，则返回true；
+std::min: 返回两个值中的最小值；
+std::min_element：返回序列中的最小值；
+std::max: 返回两个值中的最大值；
+std::max_element:返回序列中的最大值；
+std::minmax: 返回由最小值与最大值构成的std::pair；
+std::minmax_element:返回由序列中最小元素与最大元素构成的std::pair；
+std::mismatch: 比较两个序列的对应元素，返回用std::pair表示的第一处不匹配在两个序列的位置；
+std::move: 把输入序列中的逐个元素移动到结果序列；注意与   http://blog.csdn.net/fengbingchun/article/details/52558914 中的不同；
+std::move_backward:把输入序列中的逐个元素自尾到头移动到结果序列；
+std::shuffle: 使用均匀随机数生成器，随机打乱指定范围中的元素的位置；
+std::random_shuffle:n个元素有!n个排列，该函数给出随机选择的一个排列；
+std::remove: 删除序列中等于给定值的所有元素；
+std::remove_if: 删除序列中满足给定谓词的元素；
+std::remove_copy:把一个序列中不等于给定值的元素复制到另一个序列中；
+std::remove_copy_if:把一个序列中不满足给定谓词的元素复制到另一个序列中；
+std::replace: 把序列中等于给定值的元素替换为新值；
+std::replace_if:把序列中满足给定谓词的元素替换为新值；
+std::replace_copy:拷贝序列，对于等于老值的元素复制时使用新值；
+std::replace_copy_if:拷贝序列，对于满足给定谓词的元素复制时使用新值；
+std::reverse: 把序列中的元素逆序；
+std::reverse_copy:拷贝序列的逆序到另一个序列中；
+std::rotate: 等效于循环左移序列，使得迭代器middle所指的元素成为首元素；
+std::rotate_copy:等效于循环左移序列并拷贝到新的序列中，使得迭代器middle所指的元素成为首元素；
+std::set_difference:两个升序序列之差；
+std::set_intersection:两个升序序列的交；
+std::set_symmetric_difference:两个升序序列的对称差；
+std::set_union: 两个升序序列的并；
+std::transform: 对序列中的每一个元素，执行一元操作，结果写入另一序列中；或对两个序列中对应的每一对元素，执行二元操作，结果写入另一序列中；
+std::unique: 对序列中一群连续的相等的元素，仅保留第一个元素；
+std::unique_copy:把一个序列中的元素拷贝到另一个序列，对于一群连续的相等的元素，仅拷贝第一个元素。
+————————————————————————————————
+C头文件详解：
+extern "C" {...代码块} 则告诉编译器在编译fun这个函数名时按着C的规则去翻译，即c++程序中使用c代码：extern "C"{...代码块} 关键字代码块：表示使用的是c代码
+
+头文件string.h 字符串处理
+本分类的函数用于对字符串进行合并、比较等操作
+字符串拷贝 块拷贝(目的和源存储区不可重叠) memcpy
+字符串设置 memset 将某一块内存中的全部设置为指定的值
+块拷贝(目的和源存储区可重叠) memmove
+串拷贝 strcpy
+按长度的串拷贝 strncpy
+字符串连接函数 串连接 strcat
+按长度连接字符串 strncat
+串比较函数 块比较 memcmp
+字符串比较 strcmp
+字符串比较(用于非英文字符) strcoll
+按长度对字符串比较 strncmp
+字符串转换 strxfrm
+字符与字符串查找 字符查找 memchr
+字符查找 strchr
+字符串查找 strcspn
+字符串查找 strpbrk
+字符串查找 strspn
+字符串查找 strstr
+字符串分解 strtok
+错误字符串映射 strerror
+求字符串长度 strlen
+
 头文件 ctype.h
 字符处理函数: 本类别函数用于对单个字符进行处理，包括字符的类别测试和字符的大小写转换
-----------------------------------------
 字符测试是否字母和数字 isalnum
 是否字母 isalpha
 是否控制字符 iscntrl
@@ -117,72 +301,8 @@ C99增加的部分
 字符大小写转换函数 转换为大写字母 toupper
 转换为小写字母 tolower
 
-头文件 local.h
-地区化: 本类别的函数用于处理不同国家的语言差异。
-----------------------------------------
-地区控制 地区设置 setlocale
-数字格式约定查询 国家的货币、日期、时间等的格式转换 localeconv
-
-
-
-头文件 math.h
-数学函数: 本分类给出了各种数学计算函数，必须提醒的是ANSIC标准中的数据格式并不符合IEEE754标准，一些C语言编译器却遵循IEEE754(例如frinklin C51)
-----------------------------------------
-
-反余弦 acos
-反正弦 asin
-反正切 atan
-反正切2 atan2
-余弦 cos
-正弦 sin
-正切 tan
-
-双曲余弦 cosh
-双曲正弦 sinh
-双曲正切 tanh
-
-指数函数 exp
-指数分解函数 frexp
-乘积指数函数 fdexp
-自然对数 log
-以10为底的对数 log10
-浮点数分解函数 modf
-
-幂函数 pow
-平方根函数 sqrt
-
-求下限接近整数 ceil
-绝对值 fabs
-求上限接近整数 floor
-求余数 fmod
-
-
-
-头文件 setjmp.h io.h
-本分类函数用于实现在不同底函数之间直接跳转代码。
-----------------------------------------
-保存调用环境 setjmp
-恢复调用环境 longjmp
-
-头文件 signal.h
-信号处理: 该分类函数用于处理那些在程序执行过程中发生例外的情况。
-----------------------------------------
-指定信号处理函数 signal
-发送信号 raise
-
-
-头文件 stdarg.h
-可变参数处理: 本类函数用于实现诸如printf,scanf等参数数量可变底函数。
-----------------------------------------
-可变参数访问宏
-可变参数开始宏 va_start
-可变参数结束宏 va_end
-可变参数访问宏 访问下一个可变参数宏 va_arg
-
-
 头文件 stdio.h
 输入输出函数:该分类用于处理包括文件、控制台等各种输入输出设备，各种函数以“流”的方式实现
-----------------------------------------
 删除文件 remove
 修改文件名称 rename
 生成临时文件名称 tmpfile
@@ -237,7 +357,6 @@ C99增加的部分
 
 头文件 stdlib.h
 实用工具函数: 本分类给出了一些函数无法按以上分类，但又是编程所必须要的。
-----------------------------------------
 字符串转换函数
 字符串转换为整数 atoi
 字符串转换为长整数 atol
@@ -273,34 +392,8 @@ C99增加的部分
 多字节字符的字符串操作 将多字节串转换为整数数组 mbstowcs
 将多字节串转换为字符数组 mcstowbs
 
-头文件 string.h
-字符串处理: 本分类的函数用于对字符串进行合并、比较等操作
-----------------------------------------
-字符串拷贝 块拷贝(目的和源存储区不可重叠) memcpy
-块拷贝(目的和源存储区可重叠) memmove
-串拷贝 strcpy
-按长度的串拷贝 strncpy
-字符串连接函数 串连接 strcat
-按长度连接字符串 strncat
-串比较函数 块比较 memcmp
-字符串比较 strcmp
-字符串比较(用于非英文字符) strcoll
-按长度对字符串比较 strncmp
-字符串转换 strxfrm
-字符与字符串查找 字符查找 memchr
-字符查找 strchr
-字符串查找 strcspn
-字符串查找 strpbrk
-字符串查找 strspn
-字符串查找 strstr
-字符串分解 strtok
-杂类函数 字符串设置 memset
-错误字符串映射 strerror
-求字符串长度 strlen
-
 头文件 time.h
 日期和时间函数: 本类别给出时间和日期处理函数
-----------------------------------------
 时间操作函数得到处理器时间 clock
 得到时间差 difftime
 设置时间 mktime
@@ -309,14 +402,82 @@ C99增加的部分
 得到字符串表示的时间 ctime
 得到指定格式的时间 strftime
 
+头文件 local.h
+地区化: 本类别的函数用于处理不同国家的语言差异。
+地区控制 地区设置 setlocale
+数字格式约定查询 国家的货币、日期、时间等的格式转换 localeconv
 
-序号 库类别 头文件
-----------------------------------------
-1   错误处理      errno.h
-2   字符处理      ctyphe.
-3   地区化        local.h
-4   数学函数      math.h
-5   信号处理      signal.h
-6   输入输出      stdio.h
-7   实用工具程序   stdlib.h
-8   字符串处理     string.h
+头文件 math.h
+数学函数: 本分类给出了各种数学计算函数，必须提醒的是ANSIC标准中的数据格式并不符合IEEE754标准，一些C语言编译器却遵循IEEE754(例如frinklin C51)
+反余弦 acos
+反正弦 asin
+反正切 atan
+反正切2 atan2
+余弦 cos
+正弦 sin
+正切 tan
+双曲余弦 cosh
+双曲正弦 sinh
+双曲正切 tanh
+指数函数 exp
+指数分解函数 frexp
+乘积指数函数 fdexp
+自然对数 log
+以10为底的对数 log10
+浮点数分解函数 modf
+幂函数 pow
+平方根函数 sqrt
+求下限接近整数 ceil
+绝对值 fabs
+求上限接近整数 floor
+求余数 fmod
+
+头文件 setjmp.h io.h
+本分类函数用于实现在不同底函数之间直接跳转代码。
+保存调用环境 setjmp
+恢复调用环境 longjmp
+
+头文件 signal.h
+信号处理: 该分类函数用于处理那些在程序执行过程中发生例外的情况。
+指定信号处理函数 signal
+发送信号 raise
+
+头文件 stdarg.h
+可变参数处理: 本类函数用于实现诸如printf,scanf等参数数量可变底函数。
+可变参数访问宏
+可变参数开始宏 va_start
+可变参数结束宏 va_end
+可变参数访问宏 访问下一个可变参数宏 va_arg
+
+dlfcn.h
+dlopen流程：
+1.打开库：void* dlopen(const char* libfile,int flag);
+2.取函数：void* dlsym(void* handler, const char* symbol);
+3.运行函数：func
+4.关闭库：int dlclose(void* handler);
+编译时候要加入-ldl(指定dl库) -rdynamic(通知链接器将所有符号添加到动态符号表中(目的是能够通过使用 dlopen 来实现向后跟踪)，例如：gcc test.c -o test -ldl -rdynamic
+dlerror()： 返回一个描述最后一次调用dlopen、dlsym，或 dlclose 的错误信息的字符串。
+dlopen实例：
+#include <stdio.h>
+#include <stdlib.h>
+#include <dlfcn.h>
+#define DLL_PATH "./libsd.so"
+typedef int (*func)(int, int);
+int main(){
+    void *dlhandler;
+    char *error;
+    func func = NULL;
+    dlhandler = dlopen(DLL_PATH,RTLD_LAZY);
+    if(dlhandler == NULL){
+        fprintf(stderr,"%s\n",dlerror());
+        exit(-1);
+    }
+    dlerror();
+    func = dlsym(dlhandler,"sumab");
+    printf("%d\n",func(1,2));
+    dlclose(dlhandler);
+    return 0;
+}
+
+
+

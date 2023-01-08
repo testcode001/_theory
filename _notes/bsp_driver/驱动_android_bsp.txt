@@ -1,0 +1,981 @@
+hal开发教程：
+https://blog.csdn.net/u013082948/article/details/80529419
+https://blog.csdn.net/weixin_39624071/article/details/111841392
+https://blog.csdn.net/qq_38226902/article/details/124968709
+hal开发流程总结：
+编写HIDL数据类型和接口文件
+调用update-makefiles.sh生成Android.bp编译脚本
+调用generate-source.sh生成.h/.cpp源码文件，编写业务逻辑
+修改Android.bp文件，创建编译目录结构准备编译mm/mmm (mm/mmm命令只有在完成一次系统源码编译后才能使用)
+1、通用硬件模块(libhardware.so) 
+一般来说HAL moudle需要涉及的是三个关键结构体：struct hw_module_t;   struct hw_module_methods_t;  struct hw_device_t;  这三个结构体定义在hardware.h中。
+(1)头文件为：/hardware/libhardware/include/hardware/hardware.h头文件中主要定义了通用硬件模块结构体hw_module_t，声明了JNI调用的接口函数hw_get_module
+每一个设备的数据结构都必须也以hw_device_t开始。hw_get_module函数声明如下：
+    int hw_get_module(const char *id, const struct hw_module_t **module);
+参数id为模块标识，定义在/hardware/libhardware/include/hardware录下的硬件模块头文件中，
+参数module是硬件模块地址，定义在/hardware/libhardware/include/hardware/hardware.h中
+下面以lights模块为例进行分析：
+     在lights.h中定义有lights模块的ID
+     #define LIGHTS_HARDWARE_MODULE_ID "lights"
+     在JNI层会通过hw_ge_module()方法获得对应的模块，对于lights，在
+frameworks/base/services/jni/com_android_server_LightsService.cpp的init_native方法中
+可以看到，在hw_get_module_by_class函数中，先通过property_get获得varient_key中定义的系统属性，如果系统中有定义该属性，就会获得一个模块名.属性名组成的一个so的名称，然后去定义两个patch(/system/lib/hw、/vendor/lib/hw)下查看，该so是否存在，如果存在，则会调用load函数，dlopen加载打开.so.例如在rockchip的rk29平台上，有定义ro.product.board = rk29sdk，在这里会得到lights.rk29sdk.so。
+在这里会打开对应了so，比如lights.rk29sdk.so,然后获得这个模块中定义的hw_module_t的地址。后面JNI就能通过这个接口和hal层进行沟通了。
+https://www.cnblogs.com/armlinux/archive/2012/01/14/2396768.html
+HIDL的全称是HAL interface definition language（硬件抽象层接口定义语言），在此之前Android 有AIDL，架构在Android binder 之上，用来定义Android 基于Binder通信的Client 与Service之间的接口。
+HIDL也是类似的作用，只不过定义的是Android Framework与Android HAL实现之间的接口。
+
+
+
+vmware虚拟机-->ubuntu
+https://www.vmware.com/cn/products/workstation-pro.html
+vmware安装教程：
+https://blog.csdn.net/weixin_48375618/article/details/125724469
+复制本机文件到VMware虚拟机中
+https://xinzhi.wenda.so.com/m/a/1629685863205515
+千锋教育、黑马： bsp开发教程
+android bsp开发教程：
+https://www.bilibili.com/video/av288823316/
+https://www.aliyundrive.com/drive/folder/63c048a408b8e33d4a6d4190a8b3ffad58cc643c
+https://blog.csdn.net/weixin_39624071/article/details/111841392
+https://t.elecfans.com/9545.html
+ARM bootloader开发
+https://www.bilibili.com/video/BV1mm4y1U7MG/
+
+嵌入式Linux驱动开发基础知识
+https://www.bilibili.com/video/BV14f4y1Q7ti/
+https://www.100ask.net/
+https://github.com/100askteam/
+https://github.com/100askTeam/01_all_series_quickstart
+git://github.com/100askTeam/01_all_series_quickstart.git
+https://100ask.taobao.com
+https://blog.csdn.net/weixin_43444989/article/details/124389612
+
+GNU常用工具：addr2line、ar、gprof、nm、objcopy、objdump、ranlib、size、strings、strip。
+https://blog.csdn.net/A642960662/article/details/123078067
+搜索：nm命令中符号类型详解
+nm列出的符号有很多，常见的有三种：nm --help 
+1.一种是在库中被调用，但并没有在库中定义（表明需要其他库支持），用U表示；
+2.一种是在库中定义的函数，用T表示，这是最常见的；
+3.另一种所谓的“弱态”符号，它们虽然在库中定义，但可能被其他库中的同名符号覆盖，用W表示。
+最多的用法：nm -A * |grep “aaa” | c++filt  // -A 为了显示文件， c++filt转换为可读风格，好像有个参数也能实现类似功能
+.o、.a、.so动态库或静态库符号显示器 nm
+预处理器  cpp
+c编译器   gcc
+c++编译器   g++
+汇编器 as
+连接器ld	(ld --help)
+创建静态链接库:  ar  cqs  libxxxx.a  xx1.o xx2.o xx3.o  ar命令可以用来创建、修改库，也可以从库中提出单个模块
+二进制工具集：objcopy(裁剪器)、objdump(二进制信息查看器)、hexdump
+ldd命令可以查看程序的库依赖
+file ramdisk.image看看此文件信息，发现它是一个gzip压缩的文件
+
+https://blog.csdn.net/u013082948/article/details/80529419
+https://www.cnblogs.com/armlinux/archive/2012/01/14/2396768.html
+加bsp微信：
+https://blog.csdn.net/weixin_39624071/article/details/111841392
+weixin_39615741
+https://blog.csdn.net/weixin_39615741/article/details/111841389
+
+
+
+
+
+
+android bsp学习_要想成为一名物联网工程师，需要学习哪些知识？
+https://blog.csdn.net/liu17234050/article/details/107809846
+https://blog.csdn.net/weixin_34078749/article/details/112394946
+能阅读硬件驱动电路的原理图和芯片数据手册Datasheet。
+嵌入式LINUX里含有不同版本的bootloader的裁剪.编译, 不同版本的linux内核的裁剪.编译, 各主要驱动程序模块的编写.编译Makefile.及使用、根文件系统rootfs的制作(busybox)及挂载这4大块。
+https://www.wuxianghu.com/id/37176.html
+https://zhuanlan.zhihu.com/p/130755604
+8、BSP开发
+ARM系统结构
+Bootloader设计与移植
+Linux内核开发移植
+Linux根文件系统组成分析及其制作过程(busybox)
+9、Linux+Android设备驱动开发
+Linux设备驱动开发
+工程实例驱动开发
+Linux设备驱动高级开发
+
+
+当前Android板级支持包(BSP)移植开发人员不仅需要熟悉具体型号芯片的开发手册,还需要调整部分驱动封装代码,工作效率较低。
+为此,通过对Android	Linux内核源代码进行重构,设计并实现一种基于源代码分类管理的Andriod BSP移植管理框架。
+形式化定义Android Linux内核源码重构规则,基于该规则对Android Linux内核源码按照原生Linux 内核代码、Google Android驱动程序、厂商板硬件相关BSP代码 3类进行管理,设计Android BSP移植自动适配工具, 实现面向特定开发板和特定Linux内核版本的Android  Linux内核源代码自动生成。
+测试结果表明该管理框架能够提高BSP移植开发人员移植和升级开发板Android Linux内核的工作效率
+
+搜索：如何快速阅读芯片手册datasheet：
+能阅读 硬件驱动电路的原理图 和 芯片Datasheet。
+硬件电路图的GPIO引脚(Pin desscriptions)、内存的物理内存地址、中断
+芯片数据手册datasheet的寄存器(寄存器地址即寄存器的ID)，数据手册查看各专用寄存器的每个bit位的详细配置及描述
+一种芯片对应一个数据手册datasheet：1.开发手册的引脚电路图、2.内存映射模型mmap(DDR运行内存、寄存器Register Name) 、3.数据.控制.地址寄存器的操作流程和配置方法、
+主芯片相同的不同开发板，基本上只有LED、按键引脚、LCD型号不同，学习了A板子的视频也可以在B板子上使用。(更多公司.更多芯片.更多板子)
+举个例子：我要去操作内存，我就首先去核心板原理图中找到对应内存(寄存器)的型号，然后去看内存的数据手册，了解要操作他需要涉及哪些引脚，了解之后，再回到核心板原理图看这些引脚接到了芯片的哪里，之后再去芯片的手册中查看涉及到哪些寄存器，以及如何操作这些寄存器。
+我们可以这么去读芯片数据手册datasheet：
+1、先看看芯片的特性（Features）、应用场合（Applications）以及内部框图。这有助于我们对芯片有一个宏观的了解，此时需要弄清楚该芯片的一些比较特殊的功能，充分利用芯片的特殊功能，对整体电路的设计，将会有极大的好处。
+2、重点关注芯片的参数，同时可以参考手册给出的一些参数图（如AD9945的 TPC 1，TPC2等），这是是否采用该芯片的重要依据。像AD9945，就可以关注采样率（maximum clock rate）、数据位数（AD converter）、功耗（power consumption）、可调增益范围（gain range）等。
+3、选定器件后，研究芯片管脚定义、推荐的PCB layout，这些都是在硬件设计过程中必须掌握的。所有管脚中，要特别留意控制信号引脚或者特殊信号引脚，这是将来用好该芯片的前提。比如AD9945的SHP、SHD、PBLK、CLPOB等。
+4、认真研读芯片内部寄存器，对寄存器的理解程度，直接决定了你对芯片的掌握程度。比如AD9945就有4个寄存器：Operation、Control、Clamp Level和VGA gain，对于这些寄存器，必须清楚它们上电后的初始值、所能实现的功能、每个bit所代表的含义这些基本情况。
+5、仔细研究手册给出的时序图，这是对芯片进行正确操作的关键。单个信号的周期、上升时间、下降时间、建立时间、保持时间，以及信号之间的相位关系，所有这些都必须研究透彻。像AD9945的Figure 8 和 Figure 9 就很值得花费时间去仔细研究。
+https://zhuanlan.zhihu.com/p/516099004
+第2章“MemoryMap”（内存映射）比较关键，对于定位存储器和外设所对应的基址有直接指导意义，这一部分应该细看。
+第3~34章对应于CPU内部集成的外设或总线控制器，当具体编写某接口的驱动时，应该详细阅读，主要是分析数据、控制、地址寄存器（数据手册中一般会以表格列出）的访问控制和具体设备的操作流程（数据手册中会给出步骤，有的还会给出流程图）。譬如为了编写S3C6410A的I2C控制器驱动，我们需要详细阅读类似图2.29的寄存器定义表格和图2.30的操作流程图。
+第44章“ELECTRICAL DATA”（对于电气数据，在图2.28中未画出），描述芯片的电气特性，如电压、电流和各种工作模式下的时序、建立时间和保持时间的要求。所有的数据手册都会包含类似章节，这一章对于硬件工程师比较关键，但是，一般来说，驱动工程师并不需要阅读。第45章“MECHANICAL DATA”（机械数据）描述芯片的物理特性、尺寸和封装，硬件工程师会依据这一章绘制芯片的封装（Footprint），但是，驱动工程师无须阅读。
+https://blog.csdn.net/weixin_41579872/article/details/123580091
+https://jingyan.baidu.com/article/851fbc379bcd0a3e1e15ab78.html
+https://baijiahao.baidu.com/s?id=1749515961492580170
+https://zhidao.baidu.com/question/305954349.html
+https://betheme.net/news/txtlist_i105067v.html
+
+搜素：寄存器分类。有通用寄存器，还有一些其他的专用寄存器。
+通用寄存器有顺序、有编号、有名字、有用途
+寄存器排列是有顺序的，都是在0~31位之间，接下来我们来简单介绍他们各自存在的顺序和编号。切记它们的编号和顺序不能错，就像你的身份证号码，是唯一的。
+32位寄存器有自己的编号，16位寄存器也有属于自己的独立的编号，同样8位寄存器也有属于自己的编号。当然，他们是重叠的，当改变了32位的寄存器，相应的16位寄存器也会跟着改变。切记它们的顺序不能记错。
+32位的通用寄存器有8个：EAX，ECX，EDX，EBX，ESP，EBP，ESI，EDI，每个寄存器都对应一个编号：0号，1号，2号，3号……
+16位的通用寄存器有8个：AX，CX，DX，BX，SP，BP，SI，DI。对应的编号：0号，1号，2号，3号……
+8位的通用寄存器有8个：AL，CL，DL，BL，AH，CH，DH，BH。对应的编号：0号，1号，2号，3号……。
+32位通用寄存器的指定名称及用途：
+EAX：累加器（Accumulator）,操作数和结果数据累加器;
+ECX：计数（Counter）,字符串和循环操作的计数器;
+EDX：用于保存乘法形成的部分结果或者除法之前部分被除数;
+EBX：基地址(Base), DS段的数据指针,在内存寻址时存放基地址;
+ESP：堆栈（Stack）指针,被形象地称为栈顶指针;
+EBP：基址指针(BASE POINTER), SS段的数据指针;
+ESI：字符串操作的源（Source）指针,SS段的数据指针;
+EDI：字符串操作的目标（Destination）指针,ES段的数据指针
+寄存器能存储数据的最大值：
+8位寄存器能存储数据的最大值为28；
+16位寄存器能存储数据的最大值为216；
+32位寄存器能存储数据的最大值为232。
+计算机存储数据的地方有三个:处理器(CPU)、内存和硬盘。处理器的读写速度比内存快，内存的读写速度高于硬盘。寄存器就是处理器中用来存储数据的地方，寄存器的读写速度要高于内存。
+那么寄存器有多大，取决于计算机的位数，在32位计算机里最大宽度为32位，在64位计算机里最大宽度为64位。
+32位和64位CPU提供的所有宽度如下：·
+32位处理器：8位 16位 32位·
+64位处理器：8位 16位 32位 64位
+32位处理器中：EAX、ECX、EDX、EBX、ESP、EBP、ESI、EDI这8个寄存器通常存放一般性的数据，被称为通用寄存器。通用寄存器逻辑结构图必须记住，对以后学习有帮助，如图2-3-3所示
+EAX、ECX、EDX、EBX为数据寄存器；
+ESP、EBP为指针寄存器；
+ESI、EDI变址寄存器。
+每个寄存器都有自己的逻辑结构，
+https://www.zhihu.com/question/291255701/answer/474405270
+单片机中的寄存器多数是八位的,也就是每个寄存器可以放8个二进制数。
+
+位置无关代码：即该段代码无论放在内存的哪个地址，都能正确运行。究其原因，是因为代码里没有使用绝对地址，都是相对地址。
+运行地址：也叫链接地址，是程序定位的绝对地址，即在编译连接时确定的地址。如果程序中有位置相关指令，程序在运行时，程序必须在运行地址上。
+加载地址：程序放置的位置。
+如果程序是烧到nand flash中。这句话里面的意思就是main.o烧到nand flash 中从0地址（当然也可以是其他数）开始的地方，但他的运行地址是在 从0x30000000地址开始的地方,这里0x30000000就是指定的程序运行时”应该“所在的位置， AT(0)指定程序装载时所在的位置。
+对于本程序在没有执行完 copy_steppingstone_to_sdram之前，程序实际运行的地址是从0开始的，而不是0x30000000,然而程序还是可以正常运行的，这是因为在没copy_steppingstone_to_sdram之前使用的都是相对跳转指令（eg，B,BL 等），
+这些指令的运行， 即计算机不管当前pc指针是多少，他执行的是相对于当前位置的跳转，让PC根据偏移量去执行程序，而不是使用绝对地址。
+从而c在本例中opy_steppingstone_to_sdram之前的代码都是与（指定运行）地址位置无关的代码，简称：位置无关代码。
+要想编写代码无关的程序。除了要使用B、BL跳转指令外，还要在C语言函数中，避免使用全局变量和静态变量。
+然而，那些指令编写的代码是位置无关代码，那些指令又是位置相关代码呢？？
+https://blog.csdn.net/chun_1959/article/details/25073259
+当我们在进行嵌入式的程序编写的时候，往往需要将我们在虚拟机生成的ELF可执行文件转换为二进制的文件。
+原因：ELF可执行文件是针对于带有Linux操作系统的情况下才能使用，而当我们处于裸机的时候，就需要我们将这个ELF头去掉，同时为了节省我们的空间也需要将一些无用的调试信息，行号等去掉。
+应用程序（.c文件）必须经过预处理，编译，汇编，链接后才变成可执行文件，在链接时，要对所有的目标文件进行重定位，建立符号引用队则，同时为变量、函数等分配运行地址。
+当程序执行时，【系统必须把代码加载到链接时所指定的地址空间】，以保证程序在执行过程中对变量、函数等符号的正确引用，使程序正常运行。
+在具有操作系统的系统中，重定位过程由操作系统自动完成。在设计Bootloader程序时，必须在裸机环境中进行，这时【Bootloader映象文件的运行地址必须由程序员设定】。
+通常情况下，将Bootloader程序下载到ROM的0x0地址进行启动，而在大多数应用系统中，为了快速启动，首先将Bootloader程序拷贝到SDRAM中再运行。因此，一般情况下，这两者的地址并不同。
+objcopy 从定义的最低（可加载）地址开始二进制文件，而不是零...bin文件大小是最低寻址字节和最高寻址字节的差值。
+https://blog.csdn.net/m0_56145255/article/details/123384394
+
+BootLoader开机引导：
+上电后CPU执行指令的运行内存地址，
+bin文件加载到内存的运行内存地址，bin文件存放在磁盘/外设的存储内存地址
+应用程序或os镜像映射到RAM内存中的运行内存地址，由bootloader从ROM中搬运到RAM中
+bootloader链接脚本的SECTIONS段数据:
+.text 代码段
+.rodata 只读数据段(静态域、常量池)
+.data 指定读.写数据段/已初始化数据段
+.bss 未初始化数据段
+链接脚本要素：可查看U-Boot源码中的sample链接脚本
+1.哪一个.o文件放到代码段的起始位置
+2.起始位置的.o放到哪个基地址上，有两种写法：1.0x0相对地址，会加上-Ttext=0x0000000a地址变成绝对地址。2.0x0000000a绝对地址。  ld -Ttext=0x0000000a
+3.代码段(NAND flash存储地址上运行)、数据段(ram内存地址上运行)等是不连续的情况
+ld -Ttext=0x0000000a(基地址) [-T链接脚本名] -Tdata		#ld链接器，确定函数名与十六进制内存地址的对应关系
+
+Bootloader：
+U-Boot源码下载：https://ftp.denx.de/pub/u-boot/
+U-Boot官网：https://u-boot.readthedocs.io/en/latest/
+查看U-Boot源码根目录下的README文档：
+配置：make xxx_config
+配置文件：include/configs/xxx.h
+U-boot开源源码的修改，编译，fastboot命令刷机，加载引导
+uboot命令：输入help，查看所有命令。help cmdName查看指定命令帮助
+md内存显示(memory display)
+nm内存修改(memory modify)
+printenv查看当前环境变量、setenv设置环境变量、saveenv保存环境变量
+磁盘程序加载顺序：Bootloader0.1.2(U-boot引导程序).镜像文件-->OS的kernel.镜像文件-->根文件系统rootfs.镜像文件-->app应用程序
+Bootloader0即芯片内部固化的只读程序，Bootloader0通过引脚将Bootloader1加载到芯片内的指定内存地址并引导，Bootloader1将Bootloader2加载到DDR的主内存后，由Bootloader2加载OS的kernel
+Bootloader1交互的数据结构、数据存放地址、数据内容
+
+Linux内核官方网下载kernel源码：https://kernel.org/pub/linux/kernel
+搜索：Ubuntu下载kernel源码。 make help
+Ubuntu编译安装linux内核（2）：
+https://blog.51cto.com/u_13731941/5399450 
+kernel源码的编译文档：kernel3.4.5/Documentation/kbuild
+以Linux3.4.39内核在开发板上的移植为例，学习如何从一个纯净的Linux内核编译、配置得到适合在一个特定平台运行的镜像，具体Linux内核移植具体步骤如下：
+1.解压源码
+2.解压BSP
+3.修改顶层和BSP下的Makefile
+4.修改链接地址机器ID号并拷贝默认配置文件
+5.移植串口驱动支持
+6.emmc驱动移植
+7.ext4文件系统的支持移植
+8.内核配置、编译
+架构级移植，大约需要2-3年
+芯片级移植，大约需要2-3个月
+BSP级移植，大约需要2-3周
+https://makelinux.github.io/kernel/map/
+汇编常见语法
+
+根文件系统的制作(busybox)
+busybox官网：https://www.busybox.net/
+下载busybox源码，解压，make defconfig，make menuconfig配置，编译
+VFS虚拟文件系统并不是一种实际的文件系统，它是物理文件系统与服务之间的一个接口层。df -aTh查看/sysfs就是虚拟文件系统
+VFS只存在于内存中，不存在于任何外部空间
+VFS在系统启动时建立，在系统关闭时消亡
+
+android bsp.hal开发教程.环境搭建
+android bsp开发 android驱动开发 BSP驱动开发工程师
+整个嵌入式系统内核的加载和启动就完全由BootLoader(U-Boot即Universal Bootloader)来完成。在嵌入式系统中，通常并没有像BIOS那样的固件程序（有的嵌入式CPU也会内嵌一段短小的启动程序）
+https://blog.csdn.net/tugouxp/article/details/109446072
+BSP，内核中针对具体的一款电路板和元器件所添加的代码。
+可以认为所有针对设备的代码都是驱动，但上下两层，上层的更关注设备的功能实现，具备一定的通用性，也就是我们前面说的驱动。下层就是BSP，这部分代码都是完全依附于某一款特定的电路板和元器件，不可以在不同板子之间通用。
+BSP的开发也要依赖具体的操作系统类型，为具体某款内核操作系统的子系统服务，适配具体的硬件体系架构。BSP作为内核能够运行于一款特定的硬件设备板子的支撑是必不可少的，必须和内核子系统静态链接。
+
+嵌入式驱动的数据手册电路图常用命名方式：
+常用控制接口：
+EN：Enable，使能。使芯片能够工作。要用的时候，就打开EN脚，不用的时候就关闭。有些芯片是高使能，有些是低使能，要看规格书才知道。
+CS：Chip Select，片选。芯片的选择。通常用于发数据的时候选择哪个芯片接收。例如一根SPI总线可以挂载多个设备，DDR总线上也会挂载多颗DDR内存芯片，此时就需要CS来控制把数据发给哪个设备。
+RST：Reset，重启。有些时候简称为R或者全称RESET。也有些时候标注RST_N，表示Reset信号是拉低生效。
+INT：Interrupt，中断。中断的意思，就是你正睡觉的时候有人把你摇醒了，或者你正看电影的时候女朋友来了个电话。
+PD：Power Down，断电。断电不一定非要把芯片的外部供电给断掉，如果芯片自带PD脚，直接拉一下PD脚，也相当于断电了。摄像头上会用到这根线，因为一般的摄像头有3组供电，要控制三个电源直接断电，不如直接操作PD脚来的简单。（注意，在USB Type-C接口中也有一个Power Delivery也叫PD，跟这个完全不一样，不要看错了。）
+CLK：Clock，时钟。时钟线容易干扰别人也容易被别人干扰，Layout的时候需要保护好。对于数字传输总线的时钟，一般都标称为xxx_xCLK，如SPI_CLK、SDIO_CLK、I2S_MCLK（Main Clock）等。对于系统时钟，往往会用标注频率。如SYS_26M、32K等。标了数字而不标CLK三个字，也是无所谓的，因为只有时钟才会这么标。
+CTRL：control，控制。写CONTROL太长了，所以都简写为CTRL，或者有时候用CMD（Command）。
+SW：Switch，开关。信号线开关、按键开关等都可以用SW。
+PWM：PWM，脉宽调制。比如通过PWM控制电机的转速等。
+REF：Reference，参考。例如I_REF，V_REF等。参考电流、参考电压。
+FB：Feedback。反馈。升压、降压电路上都会有反馈信号，意义和Reference是类似的，芯片根据外部采集来的电压高低，动态调整输出。外部电压偏低了，就加大输出，外部电压偏高了，就减小输出。
+A/D：Analog/Digital，模拟和数字的。如DBB=Digital Baseband，AGNG=Analog Ground。
+D/DATA：数据。I2C上叫做SDA（Serial DATA），SPI上叫做SPI_DI、SPI_DO（Data In，Data Out），DDR数据线上叫做D0，D1，D32等。
+A/Address：地址线。用法同数据线。主要用在DDR等地址和数据分开的传输接口上。其他的接口，慢的像I2C、SPI，快的像MIPI、RJ45等，都是地址和数据放在一组线上传输的，就没有地址线了。
+如上图所示，Camera上的几个接口，从上往下分别是：Camera0的Main Clock、Camera的I2C接口的Data和Clock，Main Camera的Reset，低有效。之所以将pin20命名为CAM0，是因为这颗芯片有2个Camera接口，分别是CAM0和CAM1。Main Camera就是主摄像头。I2C线上既没有标是第几个I2C接口，也没有标CAM是是第几个，所以可以大胆猜测是因为这两个摄像头用的是同一组I2C进行控制，且不和其他I2C接口共用。
+常用方向的标识：
+TX/RX：Transmit，Receive。发送和接收。这个概念用在串口（UART）上是最多的，一根线负责发送，一根线负责接收。这里要特别注意，一台设备的发送，对应另一台设备就是接收，TX要接到RX上去。如果TX接TX，两个都发送，就收不到数据了。为了防止出错，可以标注为：UART1_MRST、UART1_MTSR。Master RX Slave TX的意思。Master就是主控芯片，Slave就是从设备。TX、RX很容易标错的，尤其是原理图有几十页的情况下。
+P/N：Positive、Negative。正和负。用于差分信号线。现在除了DDR和SDIO之外，其他很少有并行数据传输接口了。USB、LAN、MIPI的LCD和Camera、SATA等等，高速数据总线几乎都变成了串行传输数据了。串行信号线速度很高，随便就上GHz，电压很低只有几百毫伏，因此很容易被干扰，要做成差分信号，即用两根线传一个数据，一个传正的一个传负的。传到另外一边，数据相减，干扰信号被减掉，数据信号负负得正被加倍。如下图所示的MIPI接口的查分始终信号。
+L/R：Left、Right。通常用于音频线，区分左右。有些时候如喇叭的信号是通过差分来传输的，就是SPK_L_N、SPK_L_P这样的标识。如下图，某2.1声道智能音箱音频输出（喇叭连接器端）。TAS5751是音频功放，HF是高频High frequency（2.1音响有专门的低频输出）。P和N用+和-代替。
+常用设备缩写：
+BB：Baseband，基带处理器。十几年前的的手机芯片只有通信功能，没有这么强大的AP（跑系统的CPU），手机里的主芯片都叫做Baseband基带芯片。后来手机性能强大了，还是有很多老工程师习惯把主芯片叫做BB，而不是叫CPU。
+P（GPIO）：很多小芯片，例如单片机，接口通用化比较高，大部分都是GPIO口，做什么用都行，就不在管脚上标那么清楚了，直接用P1，P2，P1_3这样的方式来标明。P多少就是第多少个GPIO。P1_3就是第1组的第3个GPIO。（不同组的GPIO可能电压域不一样）
+如上图所示，是大部分开始使用51单片机时采用的标识引脚方法（这里的网络名字标识不规范，不建议大家使用）。
+BAT：Battery，电池。所有的电池电压都可以叫做VBAT。
+CHG：Charge，充电。
+CAM：Camera，摄像头。上面有提到过。
+LCD：显示器
+TP：Touch Panel，触摸屏。（注意不要和Test Point测试点搞混了）
+DC：Direct Current，直流电。用在设备上通常用作外部直流输入接口，而不是指供电方式或者供电电压什么的。例如VCC_DC_IN的含义，就是外部DC接口供电。
+
+
+
+
+linux内核驱动模块裁剪：各模块可以像软件一样，加载和卸载，执行make <arch>_defconfig生成.config文件，执行make menuconfig命令，打开图形化窗口进行裁剪，执行make menuconfig的时候，会执行顶层的Makefile。
+arm-linux-gcc交叉编译器
+系统移植可以分为配置系统和编译系统两大块，其中
+1、通过命令makemenuconfig进行图形化界面配置的步骤为配置系统。
+2、内核源码包中，不同的目录收集不同的代码块，要通过配置系统将“有用”的代码块“挑选”出来，以便给后续的编译系统编译。
+通过以网卡芯片DM9000的配置为例，讲解menuconfig、Makefile、.config文件之间的联系。
+(1).config文件默认在内核源码中是没有的，要先执行"make xxxx_defconfig"生成.config文件，这是对内核的初步配置。其中DM9000对应的名字是CONFIG_DM9000，等号后面的对DM9000的配置选项；
+(2)执行"make menuconfig"，在menuconfig会读取.config和Kconfig，在menuconfig中可以找到DM9000配置项，可以再次选择；
+(3)Kconfig中DM900的内容是.config和menuconfig内容的来源，仔细对比DM9000在三个文件中的名字，可以发现关联；
+(4)关闭menuconfig后，会把改变过的选项写会到.config中；
+(5)Makefile会去.config中读取每项配置，其中就包括CONFIG_DM9000，如果CONFIG_DM9000=y则将编译进内核，如果CONFIG_DM9000=n则不会编译，如果CONFIG_DM9000=m则单独编译成.ko文件；
+kconfig文件的语法分析？kconfig的总入口是arch/arm/kconfig，不是源码顶层的kconfig，入口一定是根据某款平台的。
+概括起来，kconfig的用法有三种：
+（1）添加一个菜单选项，菜单选项不是代表某种功能，只有进去菜单里面，才能选择功能属性，意义不大。
+如添加一个helloworld菜单。
+格式：
+menu “xxxxxx”
+……
+……
+endmenu
+（2）定义一个功能属性选项，一个功能属性对应一块代码。定义的功能属性最好放在菜单选项里面。
+如直接添加一个功能属性printf hello
+格式：config HAVE_PWM     
+config  XXX （XXX是宏） 
+bool （二态，0或1，后面带提示内容，几乎都有）
+default  y                 （y默认是选中的，n默认则是不选）
+select  宏1                ( 要是当前的功能属性选上，则宏1代表的功能属性一定自动选上，用户不能修改。 )  
+depend on 宏 2        ( 当前功能属性依赖于宏2的功能属性，若宏2功能属性没有选上，则当前功能选项不能显示出来。)
+help  帮助信息
+xxxxxxx
+（3）导入别的目录的Kconfig：source “xxx/xxx/kconfig”
+可以这样用法：
+menu “xxxxxx”
+config HAVE_PWM
+bool
+source “xxx/xxx/kconfig”
+endmenu
+
+内核驱动的编写、编译、及使用：
+内核模块编写三要素：
+#include <linux/init.h>
+#include <linux/module.h>
+1.入口(加载)：module_init(入口函数名) 			//module_init为宏定义
+static int __init xxx_func(void)
+{
+	.......
+    初始化cdev结构;
+    申请设备号；
+    注册设备号；
+    申请分配设备结构体的内存；  /*非必须*/
+}
+2.出口(卸载)：module_exit(卸载函数名) 			//module_exit为宏定义
+static void __exit xxx_func(void)
+{
+	.......
+    释放原先申请的设备号；
+    释放原先申请的内存；
+    注销cdev设备；
+}
+3.GPL协议声明：MODULE_LICENSE("GPL License") 	//MODULE_LICENSE为宏定义
+
+内核模块编译：可参考编译步骤文档：kernel3.4.5/Documentation/kbuild/modules.txt
+编写Makefile文件，编译器为gcc或者交叉编译工具：make -C <path_to_kernel_src> M=$PWD modules
+调试时一般使用外部编译、动态编译obj-m成.ko文件 (产品发布时一般使用内部编译、或静态编译obj–y)
+静态编译和动态编译是指编译后的代码是否可以动态的加载.insmod和卸载.rmmod。静态编译即将驱动直接编译进内核，与内核一起整体运行，生命周期从内核启动开始到内核运行结束
+kernel源码的编译文档：kernel3.4.5/Documentation/kbuild
+通过Makefile文件来编写驱动编译的规则。下面是四种常见的较为简单的编译规则, 此处假如我们的驱动文件是test.c：
+对应make menuconfig的配置选项
+obj–y += test.o
+obj-n += test.o
+obj-m += test.o
+obj-($CONFIG_TEST) += test.o
+obj-y表示需要把test.c编译进内核，当我们不知道如何配置config和Kconfig,或者是配置后但驱动仍无法编译到，就可以采用这种配置方式。这种方式的好处就是仅仅在Makefile中编写规则，且Makefile能被编译系统加载到，其对应的驱动不再受config和Kconfig约束，就可以被编译进内核。
+obj-n表示默认不编译，该配置几乎用不到，毕竟一般情况下，我们不会写一个不进行编译的代码。但当多项目，或者多平台复用代码时，可能会根据项目或者平台来进行选择项的编译，此时不需要编译的代码就可以采用obj-n的方式来进行配置。
+obj-m表示默认编译为模块，需要注意当执行make modules时才会被编译。当发现驱动没有进行编译时，可以查看是否是采用obj-m，且是以执行make modules的方式进行编译的。
+obj-($CONFIG_TEST)，我把该方式称之为条件编译，根据CONFIG_TEST的配置来进行编译，我们可以在项目对应的config中配置CONFIG_TEST为m，y或者n，从而obj-($CONFIG_TEST)可变为obj-m，obj-y，obj-n。通常情况下，均采用obj-($CONFIG_TEST) += test.o的方式进行配置。
+https://new.qq.com/rain/a/20220613A09HGI00.html
+obj-y是.c或.s 
+obj-m是.ko(模块) 
+obj-n是目标不会被编译 
+“加等号”左边的“obj-y ”表示要编译，并链接进内核（链接进内核是 linux 源码中自带的工具处理的，驱动工程师完全不用关心具体是怎么实现的）
+obj-y += misc.o
+打开“drivers/char”上一层目录的 Makefile 文件，找到char，右边由文件变为文件夹了，表示强制编译当前目录“/drivers”的下一级目录“/char”。在执行编译命令执行到这一句的时候，就会先跳转到“/char”目录下的“Makefile”文件：
+obj-y += char/
+
+内核模块的使用：
+查看内核模块信息的命令：modinfo test.ko
+查看当前内核中已经插入的动态模块命令：lsmod
+查看内核模块日志的命令：dmesg
+加载内核模块：insmod test.ko (module_init函数会被调用，且只被执行一次)。驱动程序的设备号、设备文件、相关结构体中的属性要保证唯一性，否则无法注册到内核kernel中
+卸载内核模块：rmmod test (没有.ko后缀，module_exit函数会被调用，且只被执行一次)
+
+linux的驱动通常分为字符设备驱动、块设备驱动和网络设备驱动三大块。
+字符设备是最普遍的应用，用于简单控制、读写、传输数据等等,如：键盘.鼠标.触摸屏.LCD.LED。I/O传输过程以字符为单位进行传输，用户请求与硬件操作是同步的
+块设备主要与硬盘、EMMC闪存卡等存储设备有关。I/O传输过程以块(4K.内存缓冲)为单位进行传输，与字符设备驱动相反，用户请求与硬件操作是异步的
+网络设备驱动则是与以太网、wifi相关的驱动。
+字符设备和块设备都有设备文件，网络设备没有设备文件
+块设备驱动和网络设备驱动一般由原厂提供，可以直接使用，我们开发人员只需要根据具体应用需求编写相应的字符设备驱动即可。
+搜索：普通字符设备驱动涉及到的一些结构体：
+1.cdev				字符设备结构体<----用操作函数结构体初始化字符设备
+struct cdev {
+	struct kobject kobj; 	//内嵌的kobject对象
+	struct module *owner; 	//所属模板
+	const struct file_operations *ops; //文件操作的结构体
+	struct list_head list;	//用来将已经向内核注册的所有字符设备形成链表
+	dev_t dev; 				//设备号
+	unsigned int count;		//隶属于同一主设备号的次设备号的个数
+};
+cdev结构体的dev_t成员定义了设备号，为32位，其中12位是主设备号，20位是次设备号，我们只需使用二个简单的宏就可以从dev_t 中获取主设备号和次设备号：MAJOR(dev_t dev) MINOR(dev_t dev)
+相反地，可以通过主.次设备号来生成dev_t：MKDEV(int major,int minor)
+cdev的相关操作函数：
+void cdev_init(struct cdev *, const struct file_operations *); //初始化使cdev设备和文件操作结构file_operations相关联
+struct cdev *cdev_alloc(void); //为cdev分配内存
+int cdev_add(struct cdev *, dev_t, unsigned); //向内核注册一个设备
+void cdev_del(struct cdev *); //从内核删除一个设备
+Linux 2.6内核分配和释放设备号
+在调用cdev_add()函数向系统注册字符设备之前，首先应向系统申请设备号，有二种方法申请设备号：
+一种是静态申请设备号：int register_chrdev_region(dev_t from,unsigned count,const char *name)
+另一种是动态申请设备号：int alloc_chrdev_region(dev_t *dev,unsigned baseminor,unsigned count,const char *name);
+其中，静态申请是已知起始设备号的情况，如先使用cat /proc/devices 命令查得哪个设备号未事先使用（不推荐使用静态申请）；动态申请是由系统自动分配，只需设置major = 0即可。
+相反地，在调用cdev_del()函数从系统中注销字符设备之后，应该向系统申请释放原先申请的设备号，使用：void unregister_chrdev_region(dev_t from,unsigned count);
+2.dev_t				设备号结构体<----自动或手动分配设备号
+3.file_operations	操作函数结构体<----实现操作函数集合，在<include/linux/fs.h>头文件中定义
+struct file_operations { 
+　　struct module *owner; //所属模板
+　　loff_t(*llseek) (struct file *, loff_t, int); //移动文件指针位置
+　　ssize_t(*read) (struct file *, char __user *, size_t, loff_t *); //读操作 
+　　ssize_t(*aio_read) (struct kiocb *, char __user *, size_t, loff_t); //异步读
+　　ssize_t(*write) (struct file *, const char __user *, size_t, loff_t *); //写操作
+　　ssize_t(*aio_write) (struct kiocb *, const char __user *, size_t, loff_t); //异步写 
+　　int (*readdir) (struct file *, void *, filldir_t); 
+　　unsigned int (*poll) (struct file *, struct poll_table_struct *); //设备是否可以被非阻塞的读写 
+　　int (*ioctl) (struct inode *, struct file *, unsigned int, unsigned long); //文件相关控制命令
+　　int (*mmap) (struct file *, struct vm_area_struct *);  //文件映射
+　　int (*open) (struct inode *, struct file *); //打开文件 
+　　int (*flush) (struct file *); 
+　　int (*release) (struct inode *, struct file *); //关闭文件
+　　int (*fsync) (struct file *, struct dentry *, int datasync); 
+　　int (*aio_fsync) (struct kiocb *, int datasync); 
+　　int (*fasync) (int, struct file *, int); 
+　　int (*lock) (struct file *, int, struct file_lock *); 
+　　ssize_t(*readv) (struct file *, const struct iovec *, unsigned long, loff_t *); 
+　　ssize_t(*writev) (struct file *, const struct iovec *, unsigned long, loff_t *); 
+　　ssize_t(*sendfile) (struct file *, loff_t *, size_t, read_actor_t, void __user *); 
+　　ssize_t(*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int); 
+　　unsigned long (*get_unmapped_area) (struct file *, unsigned long, unsigned long, unsigned long, unsigned long); 
+　　}; 
+用dev_t、cdev注册，向linux添加该字符设备
+4.struct file结构体
+5.inode结构体、inode_operations结构体
+ struct inode{
+        dev_t                   i_rdev;              /* 实设备标识符 */
+		struct cdev 			*i_cdev;  			/*cdev 是表示字符设备的内核的内部结构*/
+		
+        umode_t                 i_mode;              /* 访问权限控制 */
+        uid_t                   i_uid;               /* 使用者id */
+        gid_t                   i_gid;               /* 使用者id组 */
+        loff_t                  i_size;              /* 以字节为单位的文件大小 */
+ 
+        struct timespec         i_atime;             /* 最后访问时间 */
+        struct timespec         i_mtime;             /* 最后修改(modify)时间 */
+        struct timespec         i_ctime;             /* 最后改变(change)时间 */
+		
+        unsigned int            i_blkbits;           /* 以位为单位的块大小 */
+        unsigned long           i_blocks;            /* 文件的块数 */
+ 
+};
+class结构体<----新建一个class
+device结构体<----依托class并以设备号dev_t建立一个设备节点
+
+
+https://blog.csdn.net/chuangke_andy/category_11295967.html
+掌握Linux GPIO驱动(gpiolib).UART串口驱动、
+学习Linux下platform平台总线、DTS设备树等设备驱动核心机制
+学习Linux下I2C(IIC)、SPI、USB、TTY驱动等子系统驱动
+camera驱动
+wifi/BT驱动
+
+
+搜索：android GPIO/I2C/UART/SPI/USB驱动程序开发流程、用到的结构体
+GPIO驱动内存地址映射.UART串口驱动
+硬件的物理内存地址--经过MMU映射ioremap()iounmap()函数-->虚拟内存地址来操作寄存器
+操作系统运行起来后，操作的是虚拟地址，readl().writel()是读写虚拟内存地址的函数
+GPIO驱动中断处理：request_irq()
+中断底半部：内核中提供了3种中断底半部的实现机制
+GPIO驱动可以归类为Linux设备驱动的字符设备驱动，Linux 的GPIO驱动属于 Linux Driver 中较为容易上手的部分
+https://blog.csdn.net/qq_43555380/article/details/120528407
+Linux Kernel 中对 GPIO 资源进行了抽象，抽象出一个叫做 Gpiolib 的东东，这个东东作为 GPIO 资源的管理核心存在：
+中间层是 Gpiolib，用于管理系统中的 GPIO。Gpiolib 汇总了 GPIO 的通用操作，根据 GPIO 的特性，Gpiolib 对上（其他 Drivers）提供的一套统一通用的操作 GPIO 的软件接口，屏蔽了不同芯片的具体实现。对下，Gpiolib 提供了针对不同芯片操作的一套 framework，针对不同芯片，只需要实现 Specific Chip Driver ，然后使用 Gpiolib 提供的注册函数，将其挂接到 Gpiolib 上，这样就完成了这一套东西。
+对于其他驱动来说，比如 LED 灯驱动，就需要用到通用的Gpiolib的函数来进行 I/O 口的操作。
+在一个芯片中，针对所有的 I/O 口都会有配置，默认状态有些是 I/O 口全部默认 GPIO 输入（稳当）。
+针对GPIO有一些通用的特性，比如设置 GPIO 的方向，读 GPIO 的电平（输入的时候），写 GPIO 的电平（输出的时候），GPIO 作为外部中断输入，等等
+gpio_chip 的抽象，其实是对一组GPIO的Bank 的抽象，通常在硬件上，一个芯片对 IO 口来说，分为了很多个 Bank，每个 Bank 分为了 N 组 GPIO。
+比如：1 个 SoC 将 I/O 分为了 4 个 Bank：
+Bank 1：GPIOA ～ GPIOB
+Bank 2：GPIOC ～ GPIOD
+Bank 3：GPIOE ～ GPIOF
+Bank 4：GPIOG ～ GPIOH
+每个 Bank 都有 N 组寄存器来表示 GPIO 的操作，比如：Bank 1 中，针对 GPIO A：
+GPIOA_CFG 来表示对 GPIO A 的配置
+GPIOA_PULL 来表示对 GPIO A 的上下拉的配置
+GPIOA_DIR 来表示对 GPIO A 配置成为输入或者输出
+GPIOA_DATA 来表示 GPIO A 设置为输出的时候设置为高低或者输入的时候读高低
+https://stephenzhou.blog.csdn.net/article/details/98082006
+结构体主要定义在 include/linux/gpio/driver.h 和 /drivers/gpio/gpiolib.h 头文件中。
+struct gpio_chip {
+	const char		*label;
+	struct gpio_device	*gpiodev;
+	struct device		*parent;
+	struct module		*owner;
+ 
+	int			(*request)(struct gpio_chip *chip,
+						unsigned offset);
+	void			(*free)(struct gpio_chip *chip,
+						unsigned offset);
+	int			(*get_direction)(struct gpio_chip *chip,
+						unsigned offset);
+	int			(*direction_input)(struct gpio_chip *chip,
+						unsigned offset);
+	int			(*direction_output)(struct gpio_chip *chip,
+						unsigned offset, int value);
+	int			(*get)(struct gpio_chip *chip,
+						unsigned offset);
+	int			(*get_multiple)(struct gpio_chip *chip,
+						unsigned long *mask,
+						unsigned long *bits);
+	void			(*set)(struct gpio_chip *chip,
+						unsigned offset, int value);
+	void			(*set_multiple)(struct gpio_chip *chip,
+						unsigned long *mask,
+						unsigned long *bits);
+	int			(*set_config)(struct gpio_chip *chip,
+					      unsigned offset,
+					      unsigned long config);
+	int			(*to_irq)(struct gpio_chip *chip,
+						unsigned offset);
+ 
+	void			(*dbg_show)(struct seq_file *s,
+						struct gpio_chip *chip);
+ 
+	int			(*init_valid_mask)(struct gpio_chip *chip);
+ 
+	int			base;
+	u16			ngpio;
+	const char		*const *names;
+	bool			can_sleep;
+..........
+ 
+};
+既然系统分为多个 Bank，每个 Bank 又由几组组成，那么每个 GPIO 实体就由一个 gpio_desc结构体来描述：
+struct gpio_desc {
+	struct gpio_device	*gdev;
+	unsigned long		flags;
+/* flag symbols are bit numbers */
+#define FLAG_REQUESTED	0
+#define FLAG_IS_OUT	1
+#define FLAG_EXPORT	2	/* protected by sysfs_lock */
+#define FLAG_SYSFS	3	/* exported via /sys/class/gpio/control */
+#define FLAG_ACTIVE_LOW	6	/* value has active low */
+#define FLAG_OPEN_DRAIN	7	/* Gpio is open drain type */
+#define FLAG_OPEN_SOURCE 8	/* Gpio is open source type */
+#define FLAG_USED_AS_IRQ 9	/* GPIO is connected to an IRQ */
+#define FLAG_IRQ_IS_ENABLED 10	/* GPIO is connected to an enabled IRQ */
+#define FLAG_IS_HOGGED	11	/* GPIO is hogged */
+#define FLAG_TRANSITORY 12	/* GPIO may lose value in sleep or reset */
+ 
+	/* Connection label */
+	const char		*label;
+	/* Name of the GPIO */
+	const char		*name;
+};
+如果说 gpio_chip 是对一个 Bank 的 GPIO 的硬件的具体抽象的话，那么 gpio_device 就是软件层面上对一个 Bank 的 GPIO 进行管理的单元，它的数据结构是：
+struct gpio_device {
+	int			id;
+	struct device		dev;
+	struct cdev		chrdev;
+	struct device		*mockdev;
+	struct module		*owner;
+	struct gpio_chip	*chip;
+	struct gpio_desc	*descs;
+	int			base;
+	u16			ngpio;
+	const char		*label;
+	void			*data;
+	struct list_head        list;
+ 
+#ifdef CONFIG_PINCTRL
+	/*
+	 * If CONFIG_PINCTRL is enabled, then gpio controllers can optionally
+	 * describe the actual pin range which they serve in an SoC. This
+	 * information would be used by pinctrl subsystem to configure
+	 * corresponding pins for gpio usage.
+	 */
+	struct list_head pin_ranges;
+#endif
+};
+在底层对接到 Gpiolib 的时候，主要是对 gpio_chip 进行实现，然后调用 gpiochip_add 的接口，向 Gpiolib 注册你的 GPIO 。
+实现的过程，主要是根据芯片手册，实现对应的 GPIO 的操作，也就是说，把寄存器操作编程成为函数，对接到这个 gpio_chip 结构体上。
+注册一个GPIO资源函数：gpiochip_add_data(chip, data)
+在对接底层完成后，Gpiolib 为其他的驱动提供了一些列的调用APIs：
+1、gpio_request：向内核申请 gpio要使用 GPIO 首先应该向内核进行申请，返回 0，代表申请成功，可以进行后续操作
+2、gpio_free： 对应 gpio_request，是使用完gpio以后把gpio释放掉
+3、gpio_direction_input ：设置 GPIO 为输入
+4、gpio_direction_output：设置 GPIO 为输出
+5、gpio_get_value ：读取 GPIO 的值
+6、gpio_set_value：设置 GPIO 口的值
+
+
+https://blog.csdn.net/weixin_42638731/article/details/122309122
+https://blog.csdn.net/yyzsyx/article/details/128427387
+硬件驱动电路的原理图
+在表11.15中，详细描述了GPF的主要控制寄存器。GPB的相关寄存器的描述与此类似，具体可以参考S3C2410处理器数据手册。
+https://blog.csdn.net/weixin_39781323/article/details/117656395
+
+UART串口驱动
+https://blog.csdn.net/Chuangke_Andy/article/details/122345180
+uart_driver结构体表示 UART 驱动， 其定义在 include/linux/serial_core.h 文件中
+每个串口驱动都需要定义一个 uart_driver，加载驱动时向系统注册这个 uart_driver，注销驱动时注销掉注册的 uart_driver
+int uart_register_driver(struct uart_driver *drv)		//注册uart_driver
+void uart_unregister_driver(struct uart_driver *drv)	//注销uart_driver 
+uart_port结构体表示一个具体的 port， 其定义在 include/linux/serial_core.h 文件中
+int uart_add_one_port(struct uart_driver *drv, struct uart_port *uport)		//将uart_port与相应的uart_driver结合
+int uart_remove_one_port(struct uart_driver *drv, struct uart_port *uport)	//将uart_port从相应的uart_driver中移除
+
+Linux内核中断框架
+Linux的5种IO模型：阻塞式IO模型、非阻塞式IO模型
+
+Platform虚拟总线：物理总线：I2C/SPI/PCI/USB：Linux中的设备-总线-驱动模型，也就是常说的驱动分离
+Platform总线层：结构体struct bus_type
+Platform设备层：结构体struct platform_device，注册/注销方法：platform_device_register()、platform_device_unregister()
+Platform驱动层：结构体struct platform_driver，注册/注销方法：platform_driver_register()、platform_driver_unregister()
+Linux下的字符设备驱动一般都比较简单，只是对IO进行简单的读写操作。但是I2C、SPI、LCD、USB等外设的驱动就比较复杂了，需要考虑到驱动的可重用性，以避免内核中存在大量重复代码，为此人们提出了驱动的分离与分层的思路，演化并诞生出了platform设备驱动
+驱动的分离即将主机驱动和设备驱动分隔开来，实际开发中，主机驱动一般由半导体厂家提供，设备驱动也会由器件厂家写好，我们只需要提供设备信息即可。
+也就是将设备信息从设备驱动中剥离开来，设备驱动使用标准方法获取到设备信息，然后根据获取到的设备信息来初始化设备
+因此驱动只负责驱动，设备只负责设备，想办法将两者进行匹配即可。这就是Linux中的设备-总线-驱动模型，也就是常说的驱动分离
+https://blog.csdn.net/Chuangke_Andy/article/details/122064938
+实际使用中除了 I2C、 SPI、 USB 等总线外，有的外设并没有总线的概念，但是又要使用总线、驱动和设备模型。因此Linux提出了 platform 虚拟总线，相应的还有 platform 驱动和 platform 设备
+platform 驱动并不是独立于字符设备驱动、块设备驱动和网络设备驱动之外的其他种类的驱动，它只是为了驱动的分离与分层而提出来的一种框架，其驱动的具体实现还是需要字符设备驱动、块设备驱动或网络设备驱动
+Linux内核使用 bus_type 结构体表示总线，此结构体定义在文件 include/linux/device.h：
+struct bus_type {
+	const char *name; /* 总线名字 */
+	const char *dev_name;
+	struct device *dev_root;
+	struct device_attribute *dev_attrs;
+	const struct attribute_group **bus_groups; /* 总线属性 */
+	const struct attribute_group **dev_groups; /* 设备属性 */
+	const struct attribute_group **drv_groups; /* 驱动属性 */
+	//match函数，用于完成设备和驱动之间的匹配
+	int (*match)(struct device *dev, struct device_driver *drv); 
+	int (*uevent)(struct device *dev, struct kobj_uevent_env *env);
+	int (*probe)(struct device *dev);
+	int (*remove)(struct device *dev);
+	void (*shutdown)(struct device *dev);
+
+	int (*online)(struct device *dev);
+	int (*offline)(struct device *dev);
+	int (*suspend)(struct device *dev, pm_message_t state);
+	int (*resume)(struct device *dev);
+	const struct dev_pm_ops *pm;
+	const struct iommu_ops *iommu_ops;
+	struct subsys_private *p;
+	struct lock_class_key lock_key;
+};
+platform总线是 bus_type 的一个具体实例，定义在文件 drivers/base/platform.c
+MISC设备驱动
+MISC设备也叫杂项设备，当板子上的某些外设无法分类时，就可使用MISC设备驱动。所有MISC设备驱动的主设备号都为10，不同设备使用不同的从设备号。
+MISC设备会自动创建cdev，不需要手动创建，因此采用MISC设备驱动可以简化字符设备驱动的编写
+Linux中用miscdevice结构体表示MISC设备，include/linux/miscdevice.h文件 中定义了该结构体：
+struct miscdevice {
+ int minor;                          /* 子设备号 */
+ const char *name;                   /* 设备名字 */
+ const struct file_operations *fops; /* 设备操作集 */
+ struct list_head list;
+ struct device *parent;
+ struct device *this_device;
+ const struct attribute_group **groups;
+ const char *nodename;
+ umode_t mode;
+};
+注册MISC设备，该函数会自动创建设备：
+int misc_register(struct miscdevice * misc)
+/*******该函数会自动创建设备，包含了传统设备驱动中的下列步骤*******/
+alloc_chrdev_region();  /* 申请设备号 */
+cdev_init();            /* 初始化 cdev */
+cdev_add();             /* 添加 cdev */
+class_create();         /* 创建类 */
+device_create();        /* 创建设备 */
+注销MISC设备，该函数会自动删除设备：int misc_deregister(struct miscdevice * misc)
+/*******该函数会自动删除设备，包含了传统设备驱动中的下列步骤*******/
+cdev_del();                   /* 删除 cdev */
+unregister_chrdev_region();   /* 注销设备号 */
+device_destroy();             /* 删除设备 */
+class_destroy();              /* 删除类 */
+本实验采用platform+misc 的方式编写beep驱动，采用platform来实现总线、设备和驱动，misc主要负责完成字符设备的创建
+
+I2C设备驱动流程
+https://blog.51cto.com/u_14592069/5711450
+主设备master(MCU)，从设备slave
+I2C时序：
+数据线SDA的高电平，低电平的读.写
+时钟线SCL的高电平，低电平的读.写
+ACK应答：数据线SDA低电平应答
+NACK应答：数据线SDA高电平应答
+I2C协议：查看数据手册datasheet
+https://blog.csdn.net/qq171516044/article/details/16846549
+Linux内核将I2C驱动分为以下两个部分：
+I2C总线驱动：SOC的I2C控制器驱动，也叫做I2C适配器驱动，一般都是由半导体厂商编写的
+I2C设备驱动：针对具体的 I2C 设备而编写的驱动
+因此I2C总线驱动对SOC使用者来说是被屏蔽掉的，我们只要专注于 I2C 设备驱动即可
+I2C总线驱动重点是I2C适配器驱动，两个重要的数据结构：i2c_adapter和i2c_algorithm， 内核将 SOC 的 I2C 适配器抽象成 i2c_adapter，两个结构体都定义在 include/linux/i2c.h 文件中。
+I2C设备驱动是我们要重点关注的，两个重要的数据结构： i2c_client 和i2c_driver，i2c_client 就是描述设备信息的， i2c_driver 描述驱动内容，类似于 platform_driver，两个结构体都定义在 include/linux/i2c.h 文件中
+https://blog.csdn.net/Chuangke_Andy/article/details/122235046
+/* 一个设备对应一个i2c_client，每检测到就会给该设备分配一个i2c_client */
+struct i2c_client {
+	unsigned short flags; 			/* 标志 */
+	unsigned short addr; 			/* 芯片地址， 7 位，存在低 7 位*/
+	......
+	char name[I2C_NAME_SIZE]; 		/* 名字 */
+	struct i2c_adapter *adapter; 	/* 对应的 I2C 适配器 */
+	struct device dev; 				/* 设备结构体 */
+	int irq; 						/* 中断 */
+	struct list_head detected;
+	......
+};
+/* i2c_driver类似platform_driver，是编写I2C设备驱动重点要处理的内容 */
+struct i2c_driver {
+	unsigned int class;
+	int (*attach_adapter)(struct i2c_adapter *) __deprecated;
+	/* 当I2C设备和驱动匹配成功以后 probe 函数就会执行 */
+	int (*probe)(struct i2c_client *, const struct i2c_device_id *);
+	int (*remove)(struct i2c_client *);
+	void (*shutdown)(struct i2c_client *);
+	void (*alert)(struct i2c_client *, unsigned int data);
+	int (*command)(struct i2c_client *client, unsigned int cmd, void *arg);
+	/* 若使用设备树的话，需要设置 device_driver 的of_match_table 成员变量 */
+	struct device_driver driver;
+	/* id_table是传统的、未使用设备树的设备匹配 ID 表 */
+	const struct i2c_device_id *id_table;
+	/* Device detection callback for automatic device creation */
+	int (*detect)(struct i2c_client *, struct i2c_board_info *);
+	const unsigned short *address_list;
+	struct list_head clients;
+};
+综上可见， I2C 设备驱动的主要工作就是构建 i2c_driver，构建完成以后向内核注册这个 i2c_driver，注册和注销函数原型如下：
+int i2c_register_driver(struct module *owner, struct i2c_driver *driver)
+#define i2c_add_driver(driver)  i2c_register_driver(THIS_MODULE, driver) //i2c_add_driver就是对 i2c_register_driver 做了一个简单的封装
+void i2c_del_driver(struct i2c_driver *driver)
+i2c_master_send()写数据
+i2c_master_recv()读数据
+i2c_transfer()函数就可以对I2C设备寄存器进行读写操作，其函数原型如下：
+
+SPI驱动：
+主设备master(MCU)，从设备slave
+SPI 驱动框架和 I2C 很类似，都分为主机控制器驱动和设备驱动，主机控制器也就是 SOC 的 SPI 控制器接口，和 I2C 适配器驱动一样， SPI 主机驱动一般都是由 SOC 厂商编写好的
+SPI主机驱动就是 SOC的 SPI控制器驱动，内核使用 spi_master 表示 SPI主机驱动， spi_master是个结构体，定义在 include/linux/spi/spi.h文件中
+https://blog.csdn.net/Chuangke_Andy/article/details/122336314
+Linux 内核使用 spi_driver 结构体来表示 spi 设备驱动，在编写 SPI 设备驱动的时候需要我们实现 spi_driver。 spi_driver 结构体定义在include/linux/spi/spi.h 文件中
+struct spi_driver {
+	const struct spi_device_id *id_table;
+	int (*probe)(struct spi_device *spi);
+	int (*remove)(struct spi_device *spi);
+	void (*shutdown)(struct spi_device *spi);
+	struct device_driver driver;
+};
+int spi_register_driver(struct spi_driver *sdrv)	//spi_driver 注册函数
+void spi_unregister_driver(struct spi_driver *sdrv)	//spi_driver 注销函数
+
+USB驱动
+https://blog.csdn.net/Chuangke_Andy/article/details/122496912
+
+设备树源文件DTS(device tree source)
+搜索：设备树DTS语法？
+Device Tree是一种描述硬件的数据结构，它起源于OpenFirmware(OF)。Device Tree的应用使得Linux Kernel中的驱动代码和硬件信息实现了相互的隔离，减少了Kernel代码中的耦合。Linux内核从3.x开始正式引入设备树的概念。
+https://blog.csdn.net/love131452098/article/details/124912174
+https://blog.csdn.net/love131452098/article/details/124871051
+系统加载DT主要包含: DTS源文件编译, .dtb分区以及对应镜像文件生成, bootloader运行将.dtb 分区的文件加载到内存中, 将对应的内存地址通过寄存器传递到kernel。
+DT相关的专有名词
+DT		Device Tree
+DTB		Device Tree Blob
+DTBO	Device Tree Blob for Overlay
+DTC		Device Tree Compiler
+DTO		Device Tree Overlay
+DTS		Device Tree Source
+FDT		Flattened Device Tree, a binary format contained in a .dtb blob file
+
+eMMC是embedded MultiMediaCard的简称，即嵌入式多媒体卡， 是一种闪存卡的标准，它定义了基于嵌入式多媒体卡的存储系统的物理架构和访问接口及协议
+https://baijiahao.baidu.com/s?id=1744828059048300942
+
+android的主要驱动有：
+1. 显示驱动 display driver：常用于基于linux的帧缓冲frame buffer 驱动程序。
+2. flash内存驱动flash memory driver :基于MTD的flash驱动程序。
+3. 照相机驱动camera driver :基于linux的v4l video for linux驱动。
+4. 音频驱动 audio driver ：基于ALSA advanced linux sound architechure驱动。
+5. wifi驱动：基于IEEE801.31标准的驱动程序。
+6. 键盘驱动keyboard driver：作为输入设备的键盘驱动。
+7. 蓝牙驱动 bluetooth diver :基于IEEE801.35.1标准的无限传输技术。
+8. binder IPC驱动：android一个特殊的驱动程序，具有单独的设备节点，提供进程间通信的功能。
+9. power management能源管理：管理电池电量等信息。
+
+
+
+linux一切皆文件，我们开发字符设备驱动就是要实现对该设备的read write open release ioctl等函数。一般以设备节点作为目标设备在linux系统中的具体表现形式，然后上层应用程序通过对该设备节点进行read write等操作，实现对目标设备的控制。
+简而言之，设备节点是驱动程序和应用程序之间的桥梁，并以文件的形式存在与linux系统之中。所以，字符设备驱动的开发流程可以总结如下：
+1.申请主、次设备号alloc_chrdev_region()，实现字符设备驱动函数read write open release ioctl等函数，并与初始化cdev设备关联。内核模块加载module_init(入口函数名).卸载module_exit(卸载函数名)函数
+2.把设备注册到linux内核int cdev_add(struct cdev *, dev_t, unsigned);
+3./dev/目录下创建设备文件class_create()函数和device_create()函数：mknod /dev/globalmem c 230 0   //230 0 为你创建设备的主设备与次设备号 (class_destory()、device_destory()函数)
+  写入字符串：echo "hello world!">/dev/globalmem 
+  查看输入信息：cat /dev/globalmem
+  查看读写情况：dmesg -c globalmem
+  通过设备文件对硬件设备.寄存器进行读写操作
+各种驱动结构体的实例化，并对结构体中的属性及读.写函数指针赋值，通过kernel的注册驱动函数注册到kernel中，并创建设备文件
+4.编写应用程序测试，对/dev/目录下的设备文件进行read write等操作
+建立globalmemTest测试程序，代码如下所示：
+#include<fcntl.h>
+#include<stdio.h>
+int main(void)
+{
+ char s[] = "Linux Programmer!\n";
+ char buffer[80];
+ int fd=open("/dev/globalmem",O_RDWR);//打开globalmem设备，fd返回大于2的数则成功，O_RDWR为权限赋予
+ write(fd,s,sizeof(s));          //将字符串s写入globalmem字符设备中
+ printf("test write %d %s\n",fd,s );  
+        close(fd);  //关闭设备
+ fd=open("/dev/globalmem",O_RDWR);
+ read(fd,buffer,sizeof(buffer));   //读取globalmem设备中存储的数据
+ printf("test read %d %s\n",fd,buffer);  //输出结果显示
+ return 0;
+}
+主设备号和次设备号（二者一起为设备号）：
+一个字符设备或块设备都有一个主设备号和一个次设备号。主设备号用来标识与设备文件相连的驱动程序，用来反映设备类型。次设备号被驱动程序用来辨别操作的是哪个设备，用来区分同类型的设备。
+https://blog.csdn.net/kuishao1314aa/article/details/80505657
+https://blog.csdn.net/yanghaoran321/article/details/7498636
+https://blog.csdn.net/c1194758555/article/details/53231684
+https://blog.csdn.net/manchestermi/article/details/48196741
+linux有一种misc设备驱动，相当于简化版的字符设备驱动，其主设备号默认为10，并能动态获取次设备号、自动生成设备节点，这整个过程都封装成一个misc_register函数，极大简化了开发过程。
+man 2 read    #查看read函数所在的内核头文件
+
+字符设备驱动模版：
+#include <linux/stat.h>
+#include <linux/types.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/string.h>
+#include <linux/slab.h>
+#include <linux/fcntl.h>
+#include <linux/device.h>
+#include <linux/uaccess.h>
+#include <linux/gfp.h>
+#include <linux/io.h>
+static int xxx_major = 256;
+// 设备结构体
+struct xxx_dev
+{
+    struct cdev cdev;
+    ...
+}
+struct xxx_dev dev;
+ 
+//打开设备
+static int xxx_open(struct inode *inode, struct file *filp)
+{
+    ...
+    return 0;
+}
+ 
+//关闭设备
+static int xxx_release(struct inode *inode, struct file *filp)
+{
+    ...
+    return 0;
+}
+ 
+// 读设备
+// filp是文件结构指针，buf是用户空间的内存地址，该地址空间不能直接读写，count是要读的字节数，f_pos是读的位置相对于文件开头的偏移
+static ssize_t xxx_read(struct file *filp, char __user *buf, size_t count, loff_t *fpos)
+{
+        ...
+		使用filp->private_data获取设备结构体指针；
+        分析和获取有效的长度；
+        /*内核空间到用户空间的数据传递*/
+        copy_to_user(buf, ..., ...);
+        ...
+ 
+    return 0;
+}
+ 
+// 写设备
+static ssize_t xxx_write(struct file *filp, const char __user *buf, size_t count, loff_t *fpos)
+{
+        ...
+		使用filp->private_data获取设备结构体指针；
+        分析和获取有效的长度；
+        /*用户空间到内核空间的数据传递*/
+        copy_from_user(..., buf, ...);
+        ...
+ 
+    return 0;
+}
+ 
+// ioctl函数
+static int xxx_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
+{
+        ...
+        switch(cmd)
+        {
+        case xxx_CMD1:
+                ...
+                break;
+        case xxx_CMD2:
+                ...
+                break;
+        default:
+                // 不支持的命令
+                return - ENOTTY;
+        }
+ 
+    return 0;
+}
+ 
+// 字符设备文件操作结构体，在模块加载函数的cdev_init(&xxx_dev.cdev, &xxx_fops)的语句中被建立与cdev的连接
+struct file_operations xxx_fops =
+{
+    .owner = THIS_MODULE,
+    .open = xxx_open,
+    .release = xxx_release,
+        .read = xxx_read,
+        .write = xxx_write,
+        .ioctl = xxx_ioctl,
+        ...
+};
+ 
+static void xxx_setup_cdev(struct cdev *dev, int index)
+{
+    int err;
+    int devno = MKDEV(xxx_major, index);
+ 
+    cdev_init(dev, &xxx_fops);
+    dev->owner = THIS_MODULE;
+ 
+    err = cdev_add(dev, devno, 1);
+ 
+    if(err)
+        printk("Error %d adding xxx_dev %d\n", err, index);
+ 
+    return ;
+}
+ 
+// 设备驱动模块加载函数
+static int __init xxx_init(void)
+{
+    int ret;
+    int devno = MKDEV(xxx_major, 0);     
+ 
+    if(xxx_major)
+    {
+        ret = register_chrdev_region(devno, 1, DEV_NAME);
+    }
+    else
+    {
+        ret = alloc_chrdev_region(&devno, 0, 1, DEV_NAME);
+        xxx_major = MAJOR(devno);
+    }
+ 
+    if(ret < 0)
+        return ret;
+   
+        xxx_setup_cdev(&dev.cdev, 0);
+ 
+    return 0;
+}
+ 
+// 设备驱动模块卸载函数
+static void __exit xxx_exit(void)
+{
+    unregister_chrdev_region(MKDEV(xxx_major, 0), 1);  // 释放占用的设备号
+    cdev_del(&xxx_dev.cdev);  // 注销设备
+}
+ 
+module_init(xxx_init);
+module_exit(xxx_exit);
+MODULE_LICENSE("GPL");
+
+
+
+用户空间使用open()系统调用函数打开一个字符设备时（ int fd = open("dev/demo", O_RDWR) ）大致有以下过程：
+1.在虚拟文件系统VFS中的查找对应与字符设备对应 struct inode节点（inode应该是在我们创建mknod的时候创建的吧？）
+2.遍历字符设备列表（chardevs数组），根据inode节点中的 cdev_t设备号找到cdev对象
+3.创建struct file对象（系统采用一个数组来管理一个进程中的多个被打开的设备，每个文件秒速符作为数组下标标识了一个设备对象）
+4.初始化struct file对象，将 struct file对象中的 file_operations成员指向 struct cdev对象中的 file_operations成员（file->fops =  cdev->fops）
+5.回调file->fops->open函数
+对于一个字符设备文件, 其inode->i_cdev 指向字符驱动对象cdev, 如果i_cdev为 NULL ,则说明该设备文件没有被打开，由于多个设备可以共用同一个驱动程序.所以,通过字符设备的inode 中的i_devices 和 cdev中的list组成一个链表。
+
+执行cdev_add()的时候，会创建一个char_device_struct对象， 将其添加到chardevs数组中，char_device_struct的cdev成员就指向我们的cdev设备。
+
+
+

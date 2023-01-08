@@ -1,0 +1,211 @@
+面试题：
+LinkedHashMap: 红黑树
+kotlin
+直播,流媒体协议相关、FFMPEG
+binder进程间通讯怎么跨进程传递大图片？
+MediaCodec自带循环队列的编解码数据处理中心(自带循环队列可实现高内聚低耦合)
+Looper.ThreadLocal原理：Thread.currentThread().ThreadLocalMap。ThreadLocalMap构造函数把this也就是ThreadLocal作为key，Looper作为value塞到ThreadLocalMap对象中。
+Looper如何在子线程中创建：
+1.Looper.prepare();//Looper初始化  mHandler = new Handler(Looper.myLooper());  Looper.loop();//死循环
+2.直接使用HandlerThread
+IdleHandler 有什么用？IdleHandler 是 Handler 提供的一种在消息队列空闲时，执行任务的时机；当 MessageQueue 当前没有立即需要处理的消息时，会执行 IdleHandler；
+IdleHandler 是 MessageQueue 内定义的一个接口，一般可用于做性能优化。当消息队列内没有需要立即执行的 message 时，会主动触发 IdleHandler 的 queueIdle 方法。返回值为 false，即只会执行一次；返回值为 true，即每次当消息队列内没有需要立即执行的消息时，都会触发该方法。
+https://www.jianshu.com/p/4c2aa7b7d9b3
+
+activity启动流程
+android linux进程间通信方式
+解码音视频如何保持同步？
+android app启动过程
+显示系统由底层驱动触发vsync信号，回调上层surfaceFlinger，并调用到surface里的Canvas，再调用到skia的2D图形库去绘制，最后传递给硬件去显示
+input系统和音频系统由外部触发信号来调用
+
+为什么 Android 要采用 Binder 作为 IPC 机制？
+https://www.zhihu.com/question/39440766/answer/89210950
+
+
+android Framework 面试题
+android ams wms面试必问题
+android framework AMS/WMS/DMS.Display/IMS.Input子系统/PMS/SurfaceFlinger.Surface/AudioFlinger，MediaPlayerService
+https://www.cnblogs.com/chenxibobo/p/9643583.html
+https://www.cnblogs.com/chenxibobo/p/9640472.html
+https://www.cnblogs.com/chenxibobo/p/9640085.html
+“可以毫不夸张的说，Android的framework层主要是由WMS、AMS还有View所构成，这三个模块穿插交互在整个framework中，掌握了它们之间的关系和每一个逻辑步骤，你对framework的了解至少有百分之五十”。这是《Android源码与设计模式》作者的原话
+AMS与WMS：
+AMS统一调度所有应用程序的Activity
+WMS控制所有Window的显示与隐藏以及要显示的位置
+Activity与WIndow：
+Activity只负责生命周期和事件处理
+Window只控制视图
+一个Activity包含一个Window，如果Activity没有Window，那就相当于Service
+
+https://jeanboy.blog.csdn.net/
+https://github.com/jeanboydev/android-readthefuckingsourcecode
+https://gitcode.net/mirrors/jeanboydev/android-readthefuckingsourcecode?utm_source=csdn_github_accelerator
+涉及的进程.线程、类.方法.参数.数据、进程间通信方式、线程间通讯方式、进程运行在用户空间还是内核空间
+判断事件触发是由底层驱动触发还是由上层input触发？
+CPU.内存
+GPU.显存
+涉及哪一层：java framework层，native的c++ framework层，hal层
+
+系统Idle空闲进程：即最低优先级的带消息队列和超时机制的for循环的轮询
+同一进程中：实例对象调用(同步调用)，耗时异步调用：
+进程间通信：
+1.实现同一通信协议(com口.ipc.rpc.binder通讯(AIDL.HIDL).socket.pipe.磁盘文件).接口，
+2.建立连接，
+3.获取对端代理对象/实例对象(server)，
+4.复杂数据类型转化为基础数据类型序列化Parcel.反序列化传递数据
+只要有通信，就有协议
+Android进程间通信的方式有很多种,例如:磁盘文件通信、共享内存、Binder、Socket、管道、信号等等
+https://blog.csdn.net/qq_38401088/article/details/123606773
+https://blog.csdn.net/liyuntonglyt/article/details/61912822
+http://c.biancheng.net/view/1208.html
+(接口：两个部分的通信协议/ 多个部分的通信协议.共识即行业标准OpenGL)
+涉及的进程.线程、哪些类.方法.参数.数据、进程间通信方式、线程间通讯方式、进程运行在用户空间还是内核空间，init进程是系统启动时的第一个用户空间进程.根进程
+涉及系统层：java framework层，native的c++ framework层，hal层
+生产者消费者模型可以共用一个消息循环队列，也可以各自拥有一个消息循环队列，以实现高内聚低耦合的模块化复用
+确定事件触发是由底层触发还是由上层触发？
+CPU.内存
+GPU.显存
+任何一个操作系统都需要有相应的IPC机制，比如Windows上可以通过剪贴板等进行进程间通信；
+Linux上可以通过管道(Pipe)、信号(Sinal)、信号量(Semophore)、消息队列(Message)、共享内存(Share Memory)和套接字(Socket)等来进行进程间的通信。对于Android来说，它是一种基于Linux内核的移动操作系统，它的进程间通信方式就是Binder了，通过Binder可以轻松实现进程间的通信。
+管道Pipe是Linux有UNIX继承过来的进程间的通信机制，它是UNIX早期的一个重要通信机制，管道的主要思想是在内存中创建一个共享文件，从而使通信双方利用这个共享文件来传递信息。
+这个共享文件比较特殊，他不属于文件系统并且只存在于内存中。另外管道采用半双工通信方式，数据只能在一个方向流动。通过管道通信，传递数据，需要两次拷贝，进程A将数据拷贝至管道，进程B再从管道拷贝。
+套接字Socket是更基础的进程间的通信机制，与其他通信机制不同的是，套接字可用于不同机器之间的进程间通信。它是全双工的，即在任何时候，通信两端都可以发送或接收数据，即读写操作。在Android中有没有socket的应用场景呢？答案是有的，在Zygote的Java框架层中会创建一个Server端的Socket，这个Socket用来等待AMS请求Zygote来创建新的应用程序进程。
+https://blog.csdn.net/my_csdnboke/article/details/114013494
+
+android系统启动过程：init进程读取init.rc配置文件调用fork()方法创建出-->zygote/serviceManager/surfaceFlinger/mediaServer进程。init进程是系统启动时的第一个用户空间进程.根进程。
+zygote进程.forkSystemServer()->systemserver/Dalivik虚拟机应用进程-->Launcher进程。SystemServer和其他所有Dalivik虚拟机应用进程都是由Zygote fork而来。Zygote fork的第一个进程就是SystemServer，其在手机中的进程名为 system_server。
+system_server 进程承载着整个framework的核心服务，例如创建 ActivityManagerService、PowerManagerService、DisplayManagerService、PackageManagerService、WindowManagerService、LauncherAppsService等80多个核心系统服务。这些服务以不同的线程方式存在于system_server这个进程中。
+https://blog.csdn.net/freekiteyu/article/details/79175010
+https://jeanboy.blog.csdn.net/article/details/79483406
+https://blog.csdn.net/mafei852213034/article/details/106055725
+media_server：启动 AudioFlinger，MediaPlayerService 和 CameraService，负责多媒体播放相关的功能，包括音视频解码
+android编译系统发展历史
+
+app进程启动过程：  
+点击一个桌面应用(例如微信)，Launcher加载应用， LauncherActivity收到触发事件，组装Intent，通过binder发送消息给SystemServer进程，调用Activity的startActivity()来启动进程，启动Activity时，受ActivityManagerService-AMS的服务控制，AMS属于SystemServer进程，因此SystemServer进行会通过Socket IPC来向Zygote发送一个Socket。
+Zygote有一个无限循环，一直在等待Socket请求，收到SystemServer发来新的Socket请求后，Zygote调用系统的fork函数来孵化一个新的进程，比如这里的微信。
+再把启动的入口交给ActivityThread，进入微信的进程中，进行详细的UI展示。
+
+新创建进程的根Activity的启动流程：
+（1）点击桌面APP图标，Launcher进程采用Binder IPC的方式向system_server进程的AMS(ActivityManagerService)发起startActivity的请求。
+（2）system_server进程接收到请求后，采用Socket IPC向Zygote进程发出创建APP进程的请求；Zygote进程fork出新的进程，即APP进程；
+（3）APP进程通过Binder IPC向system_server进程发起attachApplication请求；system_server进程在接收到请求后，进行一系列的准备工作后，再通过Binder IPC向APP进程发送scheduleLaunchActivity的请求
+（4）APP进程接收到请求后，通过Handler向主线程发送LAUNCH_ACTIVITY消息，创建目标Activity，进入Activity的生命周期
+ActivityManagerProxy(app进程内)是AMS的远程接口，ApplicationThreadProxy(system_server进程内)是ApplicationThread的远程接口。
+进程内启动Activity。
+
+app进程内部启动Activity涉及几个进程？AMS所在进程（system_server）和APP进程：
+APP进程通过Binder IPC向system_server进程发起请求
+system_server在接收到请求后，进行一系列准备工作（解析Activity，处理启动参数），再通过Binder IPC向APP进程发送消息
+APP进程在接收到请求后，创建目标Activity，进入Activity的生命周期。
+https://blog.csdn.net/NakajimaFN/article/details/125916330
+
+activity启动过程：system_server进程中初始化Looper-->ApplicationThread、ActivityThread、Instrumentation
+Activity的生命周期包括onCreate、onStart、onResume、onRestart、onStop、onDestory、onSaveInstanceState、onRestoreInstanceState等等，都是ActivityThread调度的，具体逻辑封装在Instrumentation类里。 好好看看这2个类就明白了。
+主要代码作用：
+Instrumentation：负责调用Activity和Application生命周期。
+ActivityTaskManagerService：ATM是Android10中新增内容，负责Activity管理和调度等工作。
+AMS：						负责管理四大组件和进程，包括生命周期和状态切换。
+ActivityTaskManagerInternal：是由ActivityTaskManagerService对外提供的一个抽象类，真正的实现是在 ActivityTaskManagerService#LocalService
+ActivityThread：管理应用程序进程中主线程的执行
+ActivityStackSupervisor：负责所有Activity栈的管理
+TransactionExecutor：主要作用是执行ClientTransaction
+ClientLifecycleManager：生命周期的管理调用
+
+surfaceFlinger：
+android的图形系统中，C/S模型两端的WMS和SurfaceFlinger是图形系统业务的核心
+https://jeanboy.blog.csdn.net/article/details/79483406
+binder的进程间：server：surfaceFlinger.多个Layer.SurfaceComposer.BufferQueue<-->帧数据本身GraphicsBuffer(GraphicsBufferProducer.GraphicsBufferConsumer)<-->client：wms SurfaceComposerClient.surface.window 
+BufferQueueProducer和BufferQueueConsumer持有同一个BufferQueueCore对象，所以生产者和消费者都可以访问BufferQueue定义的属性。
+Layer初始化的时候目前设置为Buffer的数量为3，以前版本是2，这就是Android所说的UI双缓存或者三缓存，也就是时候一个窗口Surface到Layer之间有几个Buffer在其间进行传递，双缓存就是一个在Surface端绘制一个在Layer端显示。
+视频.图片.图层.z轴合成composer：
+进程间通信：
+1.实现同一通信协议(com口.ipc.rpc.binder通讯(AIDL.HIDL).socket.pipe).接口，
+2.建立连接，
+3.获取对端代理对象/实例对象(server)，
+4.复杂数据类型转化为基础数据类型序列化Parcel.反序列化传递数据
+(接口：两个部分的通信协议/ 多个部分的通信协议.共识即行业标准OpenGL)
+https://www.cnblogs.com/hushpa/p/6530905.html
+ui刷新机制：vsync、Choreographer
+HWComposer 代表着硬件显示设备，注册了 VSYNC 信号的回调。
+VSYNC信号本身是由显示驱动产生的，在不支持硬件的 VSYNC，则会创建“VSyncThread”线程来模拟定时 VSYNC 信号。当硬件产生VSYNC信号时，则会发送消息，handler 收到消息进行处理。当 SurfaceFlinger 进程收到 VSync 信号后经层层调用，最终调用到该对象的 handleMessageRefresh() 方法。
+确定事件触发是由底层驱动/硬件触发还是由上层触发？
+
+BufferQueue是Android显示系统的核心，它的设计哲学是生产者-消费者模型，只要往BufferQueue中填充数据，则认为是生产者，只要从BufferQueue中获取数据，则认为是消费者。
+有时候同一个类，在不同的场景下既可能是生产者也有可能是消费者。如SurfaceFlinger，在合成并显示UI内容时，UI元素作为生产者生产内容，SurfaceFlinger作为消费者消费这些内容。而在截屏时，SurfaceFlinger又作为生产者将当前合成显示的UI内容填充到另一个BufferQueue，截屏应用此时作为消费者从BufferQueue中获取数据并生产截图。
+Surface 包含BufferQueue。
+SurfaceFlinger 从WindowManager处接收buffers和window 相关数据。然后SurfaceFlinger 将buffers和window相关数据，合成一个Layer，发送给WindowManager，由WindowManager操控显示在屏幕上。
+fling有扔，掷，抛的意思。flinger是指扔的人。SurfaceFlinger将Surface扔给WindowManager。
+SurfaceFlinger的作用就是合成Layer。
+Layer与Surface的关系如下：Layer = Surface + SurfaceControl
+
+从Suface创建流程中分析可以，创建每一个Layer的时候，在Layer初始化的时候会为当前Layer创建一个BufferQueue队列，用于App端的Surface和SurfaceFlinger端的Layer间图像传递。
+// Creates a custom BufferQueue for SurfaceFlingerConsumer to use
+sp<IGraphicBufferProducer> producer;
+sp<IGraphicBufferConsumer> consumer;
+BufferQueue::createBufferQueue(&producer, &consumer);
+mProducer = new MonitoredProducer(producer, mFlinger);
+mSurfaceFlingerConsumer = new SurfaceFlingerConsumer(consumer, mTextureName);
+mSurfaceFlingerConsumer->setConsumerUsageBits(getEffectiveUsage(0));
+mSurfaceFlingerConsumer->setContentsChangedListener(this);
+mSurfaceFlingerConsumer->setName(mName);
+这段代码在Surface创建流程中已经分析过了
+1：BufferQueue创建了一个的生产者和一个消费者
+2：生产者被封装到了MonitoredProducer中，传递了App端，由Surface持有其代理
+3：消费这被封装到了SurfaceFlingerComsumer中，设置Layer为内容变换监听者，当有新的Buffer到来，Layer进行处理。
+https://www.jianshu.com/p/6244141bdb5b
+
+surface创建过程，显示过程：
+Surface创建的过程就是 Activity 显示的过程，在 ActivityThread.handleResumeActivity() 中调用了 Activity.makeVisible()，我们接着看下 Activity 是怎么显示出来的。
+ViewRoot.relayoutWindow()
+SurfaceSession是JAVA层的一个类，它对应的native实体是一个SurfaceComposerClient对象。
+https://blog.csdn.net/windskier/article/details/7041610
+Android的UI控件最终在Surface上进行绘制；Surface要进行绘制，需要申请显存，绘制，提交显存进行显示。
+Android的显存由两个部分表示，对APP的接口体现为Surface（native/libs/gui/Surface.cpp），对graphics部分（CPU/GPU/OPENGL)体现为GraphicBuffer。
+每个Activity在setContentView之后，系统会为其创建一个ViewRootImpl对象，该对象代替Activity管理其view系统，并和window系统建立关联（Activity的window就是在该类中创建的），并且ViewRootImpl会建立和SurfaceFlinger的连接，监听SurfaceFlinger的VSYNC信号，一旦VSYNC信号发生，ViewRootImpl就会进入到framecallback中进行绘制。其中ViewRootImpl拥有window对应的Surface对象
+对于Canvas的使用流程：Surface.lockCanvas->View.draw(Canvas)-> Surface.unlockCanvasAndPost(Canvas)
+在Surface.lockCanvas中会调用native的对象android_view_Surface.cpp->Surface.dequeueBuffer->BufferQueueProducer.dequeueBuffer得到struct ANativeWindowBuffer 的对象，其实就是一个GraphicBuffer对象，与此同时还返回了FenceID。
+根据ANativeWindowBuffer构建了一个SKBitmap对象，将该对象设置给nativeCanvas（SkiaCanvas），然后就返回到Java空间了。大部分基于Canvas的操作最后会落到SKCanvas上面去,这个在Skia 2D库里面。
+在UI绘制完成后，需要将绘制的内容提交显示，这里用到了Surface::unlockAndPost，主要就是将GraphicBuffer 提交到BufferQueue上等待SurfaceFlinger（comsumer）显示出来。
+https://www.cnblogs.com/wlffangfang/p/11417785.html
+
+主线程handler 为啥不回阻塞主线程：https://www.cnblogs.com/chenxibobo/p/9640472.html
+Looper.loop方法阻塞了主线程,那又是如何响应用户操作和回调 activity 的生命周期的方法的呢?
+Looper.loop() 为什么不会卡死主线程
+mgr.attachApplication(mAppThread, startSeq);这句代码就解释了为什么主线程死循环确依旧能接收接收用户点击消息的原因，因为接收AMS消息的就不是ActivityThread线程而是ApplicationThread的binder线程。这里并没有将ActivityThread传递到AMS中以便回调，因为ActivityThread在loop死循环中等待消息。所以创建另外一个ApplicationThread线程来接收消息，然后让ApplicationThread线程持有带着ActivityThread线程looper的handler对象，向阻塞的主线程发消息，当主线程收到消息后通过Handler机制调用handlerMessage函数将message通过dispatchMessage函数写入messagequeue中后，主线程loop函数读取消息进行处理
+从类的声明可以看出来ApplicationThread就是用于和AMS进行Binder交互的。
+https://www.jianshu.com/p/683278e99ce4
+1, 这里涉及到Linux pipe/epoll机制 ,简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里。此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的epoll机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。
+2,在进入死循环之前创建了新binder线程，在代码ActivityThread.main()中, thread.attach(false)；便会创建一个Binder线程（具体是指ApplicationThread，Binder的服务端，用于接收系统服务AMS发送来的事件），该Binder线程通过Handler将Message发送给主线程.
+应用程序的创建会走到ActivityThread.main函数去初始化应用程序主线程的一些必要的步骤。我们知道为主线程会有一个永不退出的loop循环来接收消息，下面我们来一起看一下如何为应用程序主线程初始化绑定Looper对象。
+可以看到loop()函数里面是个死循环，疑惑点就在这里，主线程在执行loop函数时死循环，那么是如何接收消息的。
+
+Android VSYNC(Choreographer)与UI刷新原理：
+UI刷新流程示意以Textview为例 ，当我们通过setText改变TextView内容后，UI界面不会立刻改变，APP端会先向VSYNC服务请求，等到下一次VSYNC信号触发后，APP端的UI才真的开始刷新
+setText最终调用invalidate申请重绘，最后会通过ViewParent递归到ViewRootImpl的invalidate，请求VSYNC，在请求VSYNC的时候，会添加一个同步栅栏，防止UI线程中同步消息执行，这样做为了加快VSYNC的响应速度，如果不设置，VSYNC到来的时候，正在执行一个同步消息，那么UI更新的Task就会被延迟执行，这是Android的Looper跟MessageQueue决定的
+等到VSYNC到来后，会移除同步栅栏，并率先开始执行当前帧的处理
+View会递归的调用父容器的invalidateChild，逐级回溯，最终走到ViewRootImpl的invalidate，ViewRootImpl会调用scheduleTraversals准备重绘，但是，重绘一般不会立即执行，而是往Choreographer的Choreographer.CALLBACK_TRAVERSAL队列中添加了一个mTraversalRunnable，同时申请VSYNC，这个mTraversalRunnable要一直等到申请的VSYNC到来后才会被执行
+scheduleFrameLocked跟上一个scheduleTraversals类似，也采用了利用mFrameScheduled来保证：在当前申请的VSYNC到来之前，不会再去请求新的VSYNC，因为16ms内申请两个VSYNC没意义。再VSYNC到来之后，Choreographer利用Handler将FrameDisplayEventReceiver封装成一个异步Message，发送到UI线程的MessageQueue
+之所以封装成异步Message，是因为前面添加了一个同步栅栏，同步消息不会被执行。UI线程被唤起，取出该消息，最终调用doFrame进行UI刷新重绘
+doTraversal会先将栅栏移除，然后处理performTraversals，进行测量、布局、绘制，提交当前帧给SurfaceFlinger进行图层合成显示。以上多个boolean变量保证了每16ms最多执行一次UI重绘
+doFrame也采用了一个boolean遍历mFrameScheduled保证每次VSYNC中，只执行一次，可以看到，为了保证16ms只执行一次重绘，加了好多次层保障。doFrame里除了UI重绘，其实还处理了很多其他的事，比如检测VSYNC被延迟多久执行，掉了多少帧，处理Touch事件（一般是MOVE），处理动画，以及UI，当doFrame在处理Choreographer.CALLBACK_TRAVERSAL的回调时（mTraversalRunnable），才是真正的开始处理View重绘
+UI局部重绘：
+某一个View重绘刷新，并不会导致所有View都进行一次measure、layout、draw，只是这个待刷新View链路需要调整，剩余的View可能不需要浪费精力再来一遍，反应再APP侧就是：不需要再次调用所有ViewupdateDisplayListIfDirty构建RenderNode渲染Op树
+https://blog.csdn.net/wjky2014/article/details/128014664
+Choreographer就是负责获取Vsync同步信号并控制App线程(主线程)完成图像绘制的类;
+每个线程中保存一个Choreographer实例对象;
+线程本地存储ThreadLocal变量，Choreographer类型，在主线程中初始化变量时，创建Choreographer对象，绑定主线程Looper;
+同一个App的每个窗体旗下ViewRootImpl使用的同一个Choregrapher对象，他控制者整个App中大部分视图的绘制节奏。
+App进程若要通过gpu实现图像绘制，需要在接收到Vsync信号的条件下进行，因此，App进程访问SurfaceFlinger进程获取这个信号，再进行gpu绘制;
+
+Input子系统.IMS：
+简单介绍下EvenHub，这个类的主要功能就是主动监视Input驱动的变化，一旦有事件产生，就从产生事件相应的驱动中读取出这个事件。实现这个监视驱动功能
+Input系统也是从systemserver中开始说起，首先创建一个InputManagerService对象，为这个对象设置与WindowManagerService相关的回调函数，然后调用InputManagerService的start函数。
+在InputManagerService中start方法会通过JNI调用，启动Native层的InputReaderThread，InputDispatcherThread线程，从而开始Input系统的运行。
+InputReaderThread主要是执行和InputReader相关的内容，主要是从EventHub中读取事件，预处理事件，然会是根据policy来处理此事件，最后发送一个消息到InputDispatcher中通知事件的产生。紧接着InputDispatcher会开始事件的分发，通过InputChannel把事件分发给WindowManager或者应用程序。
+说以一个事件的流程是从 Eventhub  ---> InputReader  ---> InputDispatcher  ---> InputPublisher  ---> InputChannel  ---> InputConsumer  --->  WindowManager or Application.这就是整个事件分发的大致流程。
+进程调度、内存分配、外设硬件管理、显示管理、事件消息的处理.分发
+https://www.cnblogs.com/qiynet/p/4849620.html
+
+

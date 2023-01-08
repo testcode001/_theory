@@ -1,5 +1,89 @@
-开启traced、traced_probes 两个进程:	adb shell setprop persist.traced.enable 1
-校验进程是否开启成功：adb shell ps -A | grep traced 
-adb shell perfetto -h
-https://ui.perfetto.dev/#!/
+内存泄漏.内存占用、速度性能、功耗
+
+内存泄漏专项处理***：
+内存泄漏：非静态内部类/匿名内部类持有外部类的实例对象，非静态内部类的生命周期比外部类的生命周期长。如开子线程执行耗时任务等。如何破解？页面关闭时1.清理资源 2.停止线程 3.把回调设置为null
+leakCanary
+debugApi 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+releaseApi 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+LeakCanary.install(this);
+获取应用资源.获取系统服务、动态注册广播和取消广播用Application避免内存泄漏
+context使用application
+static 匿名内部类inner class+WeakReference<>
+回调置为null
+strings
+readelf
+objdump
 Addr2line+Objdump
+
+ANR无响应.性能优化：内存.leakCanary，cpu:多进程.进程.线程(线程栈帧stack frames).对端进程.线程ID(incoming transaction).系统回调顺序.是否是同一实例对象, asProfile 
+anr：线程栈帧stack frames的查找及状态分析
+https://www.jianshu.com/p/ac545e10e39e
+jps获取当前系统中运行的所有Java虚拟机进程id
+jstack <pid>: 会打印出该进程中所有线程的状态以及调用关系
+https://www.jianshu.com/p/30c1a5ad63a3
+https://www.jianshu.com/p/d19c34e7e9bd
+https://blog.csdn.net/a740169405/article/details/79046211
+ANR无响应log搜索：
+ANR、am_anr->Binder:pid、binder:、incoming transaction
+Cmd line: 
+Cmd line: com
+Cmd line: com.android.camera
+Cmd line: system_server
+dvm_lock_sample
+Timed out waiting
+camera.Camera (server)、system_server:
+内存：
+lowmemorykiller
+onTrimMemory
+https://www.jianshu.com/p/738f4668b2f6
+https://zhuanlan.zhihu.com/p/22272957
+https://zhuanlan.zhihu.com/p/50107397
+
+
+https://ui.perfetto.dev/
+https://perfetto.dev/docs/quickstart/android-tracing#recording-a-trace-through-the-perfetto-ui
+adb shell perfetto -h
+adb shell perfetto -o data/misc/perfetto-traces/trace_file.perfetto-trace -t 15s -b 128mb -a com.android.camera sched freq idle ss rs am wm gfx view binder_driver hal dalvik camera input res memory
+如何带android log抓trace文件？
+https://blog.csdn.net/vicwudi/article/details/100191529
+引入了三个核心元素，即VSYNC、Triple Buffer和Choreographer。
+帧卡顿：
+surfaceFlinger： cpu计算合成-gpu渲染-vsync信号同步--display显示
+surface windowManager skia
+
+https://developer.android.com/topic/performance/tracing#app-trace
+android perfetto：adb shell perfetto -h
+(trace文件名不能包含中文，否则网页打不开)
+adb shell perfetto -o /data/misc/perfetto-traces/trace_file.perfetto-trace -t 20s sched freq idle am wm gfx view binder_driver hal dalvik camera input res memory
+https://zhuanlan.zhihu.com/p/508526020
+https://perfetto.dev/docs/quickstart/android-tracing#recording-a-trace-through-the-perfetto-ui
+android Systrace：./systrace.py -b 132768 -t 15 -o mytrace.html audio video camera gfx freq view input sched ss am wm
+https://developer.android.com/topic/performance/tracing/navigate-report
+android TraceView  DDMS
+
+https://developer.android.com/topic/performance/tracing#app-trace
+https://blog.csdn.net/liu362732346/article/details/83182064
+android systrace
+android TraceView
+
+https://www.cnblogs.com/kekec/p/14659063.html
+Android实时获取进程所有native线程栈
+Android手机中有个debuggerd进程，当发生Native Crash，系统会自动调用debuggerd来dump到tombstone文件（所在目录：/data/tombstones）中。
+另外也可以通过主动执行debuggerd命令来实时获取进程所有线程栈。
+要想成功获取进程的线程栈，必须满足如下条件：
+1. 手机要先被root
+2. adb要以root方式启动（执行adb root）
+3. adb shell之后，执行su，进入root用户，然后执行setenforce 0命令，来临时关闭selinux
+4. 如果有debuggerd进程已经attach到目标进程，要先kill掉，然后立即打印进程所有线程栈   注：debuggerd杀死可能导致进程退出，所有kill掉后立即打印线程栈
+通过ps -elf | grep debuggerd | grep -v grep命令查找，然后执行killall -9 debuggerd && debuggerd -b <pid>
+
+opengl调试：
+https://learnopengl-cn.github.io/06%20In%20Practice/01%20Debugging/
+https://docs.gl/gl3/glBindTexture
+https://github.com/BSVino/docs.gl/
+https://github.com/KhronosGroup/OpenGL-Refpages
+https://www.khronos.org/opengl/wiki/GLSL_Object
+https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/
+https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDetachShader.xhtml
+
+

@@ -1,5 +1,8 @@
 国内一线互联网公司内部面试题库
-codeUtil-JavaTest01-algorithm：单链表翻转，判断链表有环，二叉树的左中右序遍历，层次遍历和深度遍历(递归和非递归实现)、快排实现
+codeUtil-JavaTest01-algorithm：单链表翻转，判断链表有环，二叉树的左.中.右序遍历，层次遍历和深度遍历(递归和非递归实现)、红黑树、快排实现
+C++  JNI
+Kotlin
+学历：统招二本(土木工程)，最后学校发的是的大专毕业证，入校不久转专业了，土木转计算机了。
 
 
 https通信流程及原理：
@@ -25,35 +28,92 @@ RSA1024即非对称加密的私钥key是1024位，即128字节，RSA4096
 
 为了实现可靠性传输，需要考虑很多事情，例如数据的破坏、丢包、重复以及分片顺序混乱等问题。如不能解决这些问题，也就无从谈起可靠传输。
 那么，TCP 是通过序列号、确认应答、重发控制、连接管理以及窗口控制等机制实现可靠性传输的。
-tcp3次握手，建立连接；4次断开的详情
+tcp3次握手，建立连接；4次断开的详情(全双工而不是半双工)
 https://www.jianshu.com/p/5b07a2f05771
 https://www.cnblogs.com/xiaolincoding/p/12732052.html
 消息推送：后台服务+Socket连接，长连接(TCP.发送.响应确认.断线重连)，短连接(timer.http轮询)。
 1.如何保持长连接  (2g.3g.wifi切网、手机没信号、手机没电、手机关机)
 2.心跳时间
 并发，有路由的网络音.视频数据如何保证解码顺序和音视频同步？
-保证处理顺序：header(ip.MAC.端口)+编号+间隔或步长
+TCP保证收发处理顺序：header(ip.MAC.端口)+数据包编号+间隔或步长
+
 usb串口通信：分隔符MO，数据块=header区(数据类型ContentType.数据大小ContentLength)+数据区。 header区版本号，header区和数据区的crc校验
 数据类型ContentType: 音频，视频，下载文件，json应答
 全局唯一、递增的请求.响应msgId + HashMap，以区分不同的回调函数,保证应答不错乱
 usb通信都是串行通信？ 下载的应答的uri为啥要加上偏移-批量发送下载请求
 视频数据区字节转model、时间戳是所在视频文件的时间戳吗？
 
-图(图即不规则网状结构)的深度优先搜索和广度优先遍历：
+
+搜索：LeetCode算法面试题及解析
+leetcode算法题，时间复杂度/空间复杂度(时间复杂度：指数运算及其逆运算.对数运算)
+https://leetcode-cn.com/
+https://paperswithcode.com 
+https://www.nowcoder.com/牛客网
+https://zhuanlan.zhihu.com/p/349940945
+a^b=c，a底数，b指数，c幂。由a,b计算c，称为乘方运算或指数运算。（指数运算一般隐含底数a不变，只关心b的变化引起c的变化）
+b=\log_a c，c真数，a底数，b对数。由a,c计算b，称为对数运算。（对数运算通常同样隐含底数a不变，只关心c的变化引起b的变化）
+如果是由b,c计算a,那是：a={}^b\sqrt{c}=c^{1/b}是开方运算，但也是乘方运算。
+由于乘方运算不满足交换律，于是它有两种逆运算：
+开方——已知指数和幂，求底数的运算；
+对数——已知底数和幂，求指数的运算。
+乘方：已知图形的一维度量与维度，求多维度量。即 73=3437^3=3437^3=343 （cm³）。
+开方：已知图形的多维度量与维度，求一维度量。即 3433=7\sqrt[3]{343}=7\sqrt[3]{343}=7 （cm）。
+对数：已知图形的一维度量与多维度量，求维度。即 log7⁡343=3\log_7{343}=3\log_7{343}=3 （维）。
+https://www.zhihu.com/question/28092068/answer/39352157
+
+算法实现：JavaTest01项目代码
+
+在java编程语言中，最基本的结构就是两种，一个是数组，另外一个是链表.即指针，所有的数据结构都可以用这两个基本结构来构造的，HashMap也不例外。
+HashMap实际上是一个“链表散列”的数据结构：数组和链表的结合体。
+hashmap如何解决冲突？即key的hashcode相等，而key不相等，从而形成一个Entry链。
+https://www.cnblogs.com/peizhe123/p/5790252.html
+HashMap扩容：hash数组的默认大小是16，而且一定是2的指数。负载因子0.75，扩容方式resize：length*2
+jdk1.8  hashmap 红黑树
+LinkedHashMap  LruCache
+Looper
+ThreadLocal
+ThreadLocalMap(与当前Thread相关)：key=threadID+threadLocalObjHashCode  value=Entry(threadLocalObj+valueObj)
+
+最值算法：一层循环遍历出最大或者最小值
+查找: 哈希查找、二分法查找、顺序查找
+二叉树查找算法：深度优先遍历.广度优先遍历、左中右序、反序列化
+排序：时间.空间.稳定性：选择排序.for循环二次嵌套+数据交换、快排   
+外排序.内排序：外部归并排序
+冒泡排序是遍历时总比较相邻两个数的大小，选择排序是选一个基准数与后边所有的数比较大小
+排序算法是否稳定:相同元素的相对在排序前后是否会发生改变，如果会，就是不稳定的，否则就是稳定的。
+排序稳定性：相等的n个数在排序前的前后位置顺序和排序后的前后位置是否相同
+统计：查找字符串中各个字母出现的次数,并按出现次数由大到小排序。map用来遍历统计字符次数，其value为封装了字符和字符次数的Object，统计完成后，把EntrySet按照次数属性排序。
+递归：函数内部调用函数自身，必须在函数结束前判断结束条件。递归可实现栈的效果(先递归调用后处理逻辑)，也可实现队列的效果(先处理逻辑后递归调用)
+单链表反转、判断链表是否有环
+排列组合算法
+Dijkstra最短路径算法
+傅立叶变换与快速傅立叶变换
+图的遍历？叶贝斯网络、分类、随机抽样算法
+
+图(图即不规则网状结构)：
 图的深度优先遍历类似于树的先序遍历，是树的先序遍历的推广。深度优先遍历就是一种不撞南墙不会头的算法，他会把一条路走完之后再回溯到有分叉的节点继续遍历
 图的广度优先遍历与树的层序遍历类似
 https://www.jianshu.com/p/5c676d76f3a3
 https://www.cnblogs.com/luoxiaoyi/p/10073154.html
 图又分为有向图和无向图
 
-二叉树深度优先遍历(Depth First Search)分为：左序(根左右)、中序(左根右)、右序(左右根)。遍历顺序是根据根节点的顺序命名的，三种遍历方式都是先左后右，其中中序遍历最为重要。
-因此我们可以利用堆栈的先进后出的特点(非递归方式实现深度优先遍历，中序.右序都是双重while循环)，先将右子树压栈，再将左子树压栈，这样左子树就位于栈顶，可以保证结点的左子树先与右子树被遍历。
-二叉树广度优先搜索(Breadth First Search).即层次遍历，是从根结点开始沿着树的宽度一层一层层搜索遍历，可以利用队列实现广度优先搜索。
+二叉树深度优先遍历(Depth First Search 利用栈的先进后出的特点实现.非递归)分为：左序(根左右)、中序(左根右)、右序(左右根)。遍历顺序是根据根节点的顺序命名的，三种遍历方式都是先左后右，其中中序遍历最为重要。
+因此我们可以利用栈的先进后出的特点(非递归方式实现深度优先遍历，中序.右序都是双重while循环)，先将右子树压栈，再将左子树压栈，这样左子树就位于栈顶，可以保证结点的左子树先与右子树被遍历。
+二叉树广度优先搜索(Breadth First Search 利用队列实现.非递归).即层次遍历，是从根结点开始沿着树的宽度一层一层层搜索遍历，可以利用队列实现广度优先搜索。
 二叉树，红黑树(红黑树是一种含有红黑结点，能自平衡的二叉查找树)、平衡二叉树
+左序遍历和层次遍历都是单层while循环遍历栈/队列的大小，在循环中放入打印节点和和放入节点。每一个节点按顺序把左右节点压栈，并出栈访问。
+中序遍历和后序遍历都是双层while循环，且while循环判断条件和内部if判断条件一样，且内层循环只push节点压栈，外层循环出栈打印节点并更新节点。
 
 二叉查找树有如下几条特性：
 （1）.左子树上所有结点的值均小于或等于它的根结点的值。
 （2）.右子树上所有结点的值均大于或等于它的根结点的值。
+红黑树属于非严格平衡二叉搜索树，而AVL属于严格平衡二叉搜索树，红黑树具有自动排序的功能，内部的所有元素都是有序的。
+二叉搜索树(又名二叉查找树、二叉排序树)，特点就是左子树上所有节点的键值都小于根节点的键值，右子树所有节点的键值都大于根节点的键值存储的，使用中序遍历可将键值按照从小到大遍历出来。
+https://blog.csdn.net/qq_21997625/article/details/84672775
+严格平衡二叉搜索树：每个结点的*左右子树高度之差(简称平衡因子)的绝对值不超过1
+https://blog.csdn.net/langk_/article/details/126645225
+https://zhuanlan.zhihu.com/p/300669765
+https://www.cnblogs.com/lijiajia/p/10567241.html
 红黑树是一种含有红黑结点，能自平衡的二叉查找树。红黑树既要满足二叉查找树的特性，同时又必须满足下面性质：
 性质1：每个节点要么是黑色，要么是红色。
 性质2：根节点是黑色。
@@ -70,9 +130,20 @@ https://www.cnblogs.com/luoxiaoyi/p/10073154.html
 右旋转只影响旋转结点和其左子树的结构，把左子树的结点往右子树挪了。
 https://www.jianshu.com/p/e136ec79235c
 
-判断单链表有环
+判断单链表有环：
 https://www.cnblogs.com/yorkyang/p/10876604.html
-单链表反转：JavaTest01项目代码
+关于单链表中的环，一般涉及到一下问题：
+1.给一个单链表，判断其中是否有环的存在；
+采用“快慢指针”的方法。就是有两个指针fast和slow，开始的时候两个指针都指向链表头head，然后在每一步操作中slow向前走一步即：slow = slow->next，而fast每一步向前两步即：fast = fast->next->next。
+由于fast要比slow移动的快，如果有环，fast一定会先进入环，而slow后进入环。当两个指针都进入环之后，经过一定步的操作之后二者一定能够在环上相遇，并且此时slow还没有绕环一圈，也就是说一定是在slow走完第一圈之前相遇。
+当slow刚进入环时每个指针可能处于上面的情况，接下来slow和fast分别向前走即：也就是说，slow每次向前走一步，fast向前追了两步，因此每一步操作后fast到slow的距离缩短了1步，这样继续下去就会使得
+两者之间的距离逐渐缩小：...、5、4、3、2、1、0 -> 相遇。又因为在同一个环中fast和slow之间的距离不会大于换的长度，因此到二者相遇的时候slow一定还没有走完一周（或者正好走完以后，这种情况出现在开始的时候fast和slow都在环的入口处）。
+2.如果存在环，找出环的入口点；
+3.如果存在环，求出环上节点的个数；
+4.如果存在环，求出链表的长度；
+5.如果存在环，求出环上距离任意一个节点最远的点（对面节点）；
+6.（扩展）如何判断两个无环链表是否相交；
+7.（扩展）如果相交，求出第一个相交的节点；
 
 从一系列的名为“GC Root”的对象作为起点，从这些节点向下遍历，当一个对象到GC Root没有任何引用链相连时，则该对象不可达，垃圾收集器将回收其所占的内存。
 可以作为GC root的对象有： static、final。
@@ -96,17 +167,6 @@ JAVA虚拟机结构之栈帧
 https://www.cnblogs.com/qlsem/p/12040260.html
 https://blog.csdn.net/u014296316/article/details/82668670
 
-在java编程语言中，最基本的结构就是两种，一个是数组，另外一个是模拟指针（引用），所有的数据结构都可以用这两个基本结构来构造的，HashMap也不例外。
-HashMap实际上是一个“链表散列”的数据结构：数组和链表的结合体。
-hashmap如何解决冲突？即key的hashcode相等，而key不相等，从而形成一个Entry链。
-https://www.cnblogs.com/peizhe123/p/5790252.html
-HashMap扩容：hash数组的默认大小是16，而且一定是2的指数。负载因子0.75，扩容方式resize：length*2
-jdk1.8  hashmap 红黑树
-LinkedHashMap  LruCache
-Looper
-ThreadLocal
-hreadLocalMap(与当前Thread相关)：key=threadID+threadLocalObjHashCode  value=Entry(threadLocalObj+valueObj)
-
 并发编程中的三大特性：原子性、可见性、有序性。
 原子性：即一个操作或者多个操作 要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。如i++;  包含了三个操作：读取i值、i+1 、将+1结果写回去；
 可见性：是指当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。
@@ -115,8 +175,7 @@ https://www.cnblogs.com/chenssy/p/6379280.html
 volatile三大特性
 1) 可见性
 2) 不保证原子性 (在JVM底层volatile是采用“内存屏障”来实现的.即MESI缓存一致性协议)  (volatile变量的写操作happen-before后续的读操作。（volatile 规则）)
-3) 有序性.禁止重排序  
-指令重排序：
+3) 有序性.禁止指令重排序  
 在JMM(Java Memory ModelJava内存模型)中，执行程序时为了提高性能，编译器和处理器通常会对指令做重排序：
 编译器重排序。编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序；
 处理器重排序。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序；
@@ -124,8 +183,7 @@ volatile三大特性
 Java锁
 ReentrantLock可重入锁（递归锁）、公平锁与非公平锁
 ReadWriteLock读写锁、共享锁和独占锁、写锁为独占模式且支持Condition 读锁为共享模式
-ReentrantLock锁在同一个时间点只能被一个线程锁持有；
-而可重入的意思是，ReentrantLock锁，可以被单个线程多次获取。如递归调用
+ReentrantLock锁在同一个时间点只能被一个线程锁持有；而可重入的意思是，ReentrantLock锁，可以被单个线程多次获取。如递归调用
 ReentrantLock分为“公平锁”和“非公平锁”。它们的区别体现在获取锁的机制上是否公平。“锁”是为了保护竞争资源，防止多个线程同时操作线程而出错，ReentrantLock在同一个时间点只能被一个线程获取(当某线程获取到“锁”时，其它线程就必须等待)；ReentraantLock是通过一个FIFO的等待队列来管理获取该锁所有线程的。
 在“公平锁”的机制下，线程依次排队获取锁；而“非公平锁”在锁是可获取状态时，不管自己是不是在队列的开头都会获取锁。
 ReentrantLock 与 synchronized 的比较：
@@ -189,8 +247,8 @@ JNIEnv线程相关，不同线程的JNIEnv相互独立。JNIEnv只在当前线�
 相同的 Java 线程中对本地方法多次调用时，传递给该本地方法的JNIEnv是相同的。但是，一个本地方法可被不同的 Java 线程所调用，因此可以接受不同的 JNIEnv。
 JavaVM则可以在进程中的各线程间共享。
 
-如何减小so库体积：
-1.隐藏符号表strip(-fvisibility=hidden)，可以给破解带来很大的麻烦，另外还可以有效减小so文件的大小，还有一个好处是可以加快程序的运行速度。由于strip后，elf文件的其他section段的内容没有变化，只是删除了symbol和debug的section
+如何减小so库体积：参考g++命令行编译选项
+1.去除符号表信息-s (strip)(-fvisibility=hidden)，可以给破解带来很大的麻烦，另外还可以有效减小so文件的大小，还有一个好处是可以加快程序的运行速度。由于strip后，elf文件的其他section段的内容没有变化，只是删除了symbol和debug的section
 /$ readelf -S ./system/lib/libext2_e2p.so
 There are 21 section headers, starting at offset 0x5464:
 在android下，可执行文件或者动态链接库用的是elf格式，和win32的pe格式有所不同。
@@ -227,7 +285,7 @@ https://www.cnblogs.com/baiqiantao/p/5487889.html
 Canvas操作：
 https://www.cnblogs.com/plokmju/p/android_Canvas.html
 1.移动相关：平移，旋转，缩放，明暗
-2.图层的保存与恢复.刷新：save() restore() invalidate();postInvalidate();
+2.图层的保存与恢复.刷新：save() restore() invalidate();postInvalidate(); requestLayout()
 3.绘制相关：点.线.圆弧.面即draw形状(圆.矩形.椭圆.圆角矩形) drawPath Bitmap Text Color 剪裁Clip：ClipPath, ClipRect, ClipRegion
 4.形状或.与.非计算相关 
 Canvas的绘制图形只能绘制一些常规的，比如点、线、圆、椭圆、矩形等的。如果想要绘制更复杂的图形，那么就得靠Path了
@@ -240,7 +298,8 @@ https://www.cnblogs.com/plokmju/p/android_ColorMatrix.html
 Bitmap.Matrix：
 Bitmap.createBitmap(...)
 BitmapFactory.decode()
-BitmapFactory.Options.inJustDecodeBound inSampleSize
+BitmapFactory.Options.inJustDecodeBound=true 
+BitmapFactory.Options.inSampleSize
 ValueAnimitor.ObjectAnimitor
 输入源：Camera Video
 输出显示：TextureView
@@ -266,8 +325,11 @@ Package->Framework->JNI->Camera(cpp)--(binder)-->CameraService->Camera HAL->Came
 从HAL层向下就不是Android的标准代码了，各个厂商有自己不同的实现。但思路应该都是相同的：Camera遵循V4L2架构，利用ioctl发送VIDIOC_DQBUF命令得到有效的图像数据，接着回调HAL层的data callback接口以通知CameraService，CameraService会通过binder通知Camera.cpp
 PAL，NTSC，还有SECAM，这是全球现行的三种模拟技术彩色电视的制式
 
-android事件传递及分发：是ActionDown的事件传递(ActionUp是选最短路径传递)
+android事件(Down.Move.Up)传递及分发：是ActionDown的事件传递(ActionUp是选最短路径传递)
+只有Activity或者ViewGroup有onInterceptTouchEvent()拦截方法，dispatchTouchEvent()和onTouchEvent()则是Activity、ViewGroup、View都共有的。onInterceptTouchEvent函数只拦截Move事件，不拦截Down事件。
+事件处理return true/false/super()的结果3种：消费掉、传递给下个流程方法、传递给下一层级view
 https://www.jianshu.com/p/7673bc4b5575
+默认整个事件的流向是U型路径：Activity->ViewGroup->View从上往下调用dispatchTouchEvent方法，再由叶子节点的View->ViewGroup->Activity从下往上调用onTouchEvent。、
 在没有OninterceptTouchEvent()情况下，哪个view消耗了Down事件，其余事件(Up.Move)、(Cancel也交给其处理。
 默认所有的onInterceptTouchEvent都不拦截事件的情况下，down事件在最上层的ViewGroup的onTouchEvent函数中进行消费。
 https://blog.csdn.net/hymking/article/details/84729128
@@ -818,11 +880,9 @@ http://blog.csdn.net/mars2639/article/details/6650876
 Animation框架定义了透明度，旋转，缩放和位移几种常见的动画，而且控制的是整个View，实现原理是每次绘制视图时View所在的ViewGroup中的drawChild函数获取该View的Animation的Transformation值，然后调用canvas.concat(transformToApply.getMatrix())，通过矩阵运算完成动画帧，如果动画没有完成，继续调用invalidate()函数，启动下次绘制来驱动动画，动画过程中的帧之间间隙时间是绘制函数所消耗的时间，可能会导致动画消耗比较多的CPU资源，最重要的是，动画改变的只是显示，并不能相应事件。
 
 24.Android为每个应用程序分配的内存大小是多少？（美团）
-
 android程序内存一般限制在16M，也有的是24M
 
 25.Android View刷新机制（百度、美团）
-
 由ViewRoot对象的performTraversals()方法调用draw()方法发起绘制该View树，值得注意的是每次发起绘图时，并不会重新绘制每个View树的视图，而只会重新绘制那些“需要重绘”的视图，View类内部变量包含了一个标志位DRAWN，当该视图需要重绘时，就会为该View添加该标志位。
 
 调用流程 ：
@@ -841,59 +901,80 @@ RelativeLayout的子View如果高度和RelativeLayout不同，则会引发效率
 最后再思考一下文章开头那个矛盾的问题，为什么Google给开发者默认新建了个RelativeLayout，而自己却在DecorView中用了个LinearLayout。因为DecorView的层级深度是已知而且固定的，上面一个标题栏，下面一个内容栏。采用RelativeLayout并不会降低层级深度，所以此时在根节点上用LinearLayout是效率最高的。而之所以给开发者默认新建了个RelativeLayout是希望开发者能采用尽量少的View层级来表达布局以实现性能最优，因为复杂的View嵌套对性能的影响会更大一些。
 
 27.优化自定义view（百度、乐视、小米）
-
 为了加速你的view，对于频繁调用的方法，需要尽量减少不必要的代码。先从onDraw开始，需要特别注意不应该在这里做内存分配的事情，因为它会导致GC，从而导致卡顿。在初始化或者动画间隙期间做分配内存的动作。不要在动画正在执行的时候做内存分配的事情。
-
 你还需要尽可能的减少onDraw被调用的次数，大多数时候导致onDraw都是因为调用了invalidate().因此请尽量减少调用invaildate()的次数。如果可能的话，尽量调用含有4个参数的invalidate()方法而不是没有参数的invalidate()。没有参数的invalidate会强制重绘整个view。
-
 另外一个非常耗时的操作是请求layout。任何时候执行requestLayout()，会使得Android UI系统去遍历整个View的层级来计算出每一个view的大小。如果找到有冲突的值，它会需要重新计算好几次。另外需要尽量保持View的层级是扁平化的，这样对提高效率很有帮助。
-
 如果你有一个复杂的UI，你应该考虑写一个自定义的ViewGroup来执行他的layout操作。与内置的view不同，自定义的view可以使得程序仅仅测量这一部分，这避免了遍历整个view的层级结构来计算大小。这个PieChart 例子展示了如何继承ViewGroup作为自定义view的一部分。PieChart 有子views，但是它从来不测量它们。而是根据他自身的layout法则，直接设置它们的大小。
 
 28.ContentProvider（乐视）
-
 http://blog.csdn.net/coder_pig/article/details/47858489
-
 29.fragment生命周期
 
 
 
 30.volley解析（美团、乐视）
-
 http://a.codekk.com/detail/Android/grumoon/Volley%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90
 
 31.Android Glide源码解析
-
 http://www.lightskystreet.com/2015/10/12/glide_source_analysis/ http://frodoking.github.io/2015/10/10/android-glide/
 
 32.Android 设计模式
-
 http://blog.csdn.net/bboyfeiyu/article/details/44563871
 
 33.架构设计（搜狐）
-
-
-
 http://www.tianmaying.com/tutorial/AndroidMVC
 
-34.Android属性动画特性（乐视、小米）
-
-如果你的需求中只需要对View进行移动、缩放、旋转和淡入淡出操作，那么补间动画确实已经足够健全了。但是很显然，这些功能是不足以覆盖所有的场景的，一旦我们的需求超出了移动、缩放、旋转和淡入淡出这四种对View的操作，那么补间动画就不能再帮我们忙了，也就是说它在功能和可扩展方面都有相当大的局限性，那么下面我们就来看看补间动画所不能胜任的场景。
-
+34.Android属性动画特性（乐视、小米）ValueAnimitor.ObjectAnimitor
+如果你的需求中只需要对View进行平移、缩放、旋转和淡入淡出操作，那么补间动画确实已经足够健全了。但是很显然，这些功能是不足以覆盖所有的场景的，一旦我们的需求超出了移动、缩放、旋转和淡入淡出这四种对View的操作，那么补间动画就不能再帮我们忙了，也就是说它在功能和可扩展方面都有相当大的局限性，那么下面我们就来看看补间动画所不能胜任的场景。
 注意上面我在介绍补间动画的时候都有使用“对View进行操作”这样的描述，没错，补间动画是只能够作用在View上的。也就是说，我们可以对一个Button、TextView、甚至是LinearLayout、或者其它任何继承自View的组件进行动画操作，但是如果我们想要对一个非View的对象进行动画操作，抱歉，补间动画就帮不上忙了。可能有的朋友会感到不能理解，我怎么会需要对一个非View的对象进行动画操作呢？这里我举一个简单的例子，比如说我们有一个自定义的View，在这个View当中有一个Point对象用于管理坐标，然后在onDraw()方法当中就是根据这个Point对象的坐标值来进行绘制的。也就是说，如果我们可以对Point对象进行动画操作，那么整个自定义View的动画效果就有了。显然，补间动画是不具备这个功能的，这是它的第一个缺陷。
-
 然后补间动画还有一个缺陷，就是它只能够实现移动、缩放、旋转和淡入淡出这四种动画操作，那如果我们希望可以对View的背景色进行动态地改变呢？很遗憾，我们只能靠自己去实现了。说白了，之前的补间动画机制就是使用硬编码的方式来完成的，功能限定死就是这些，基本上没有任何扩展性可言。
-
 最后，补间动画还有一个致命的缺陷，就是它只是改变了View的显示效果而已，而不会真正去改变View的属性。什么意思呢？比如说，现在屏幕的左上角有一个按钮，然后我们通过补间动画将它移动到了屏幕的右下角，现在你可以去尝试点击一下这个按钮，点击事件是绝对不会触发的，因为实际上这个按钮还是停留在屏幕的左上角，只不过补间动画将这个按钮绘制到了屏幕的右下角而已。
 
+java NIO支持面向缓冲区的、基于通道的IO操作，NIO主要有三大核心部分：Channel(通道)，Buffer(缓冲区), Selector。
+NIO中的Channel主要实现有：FileChannel、DatagramChannel、SocketChannel、ServerSocketChannel，分别可以对应文件IO、UDP和TCP(Server和Client)。InputStream, OutputStream是单向的，而Channel是双向的，既可以用来进行读操作，又可以用来进行写操作。
+FileChannel.open(Paths.get(fileName), StandardOpenOption.READ);
+NIO中的Buffer实现有：ByteBuffer, CharBuffer, DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer, ShortBuffer，分别对应基本数据类型: byte, char, double, float, int, long, short。当然NIO中还有MappedByteBuffer, HeapByteBuffer, DirectByteBuffer等这里先不进行陈述。
+ByteBuffer buffer = ByteBuffer.allocate(4096);  buffer.flip();// 缓存区切换到读模式
+线程通常将非阻塞IO的空闲时间用于在其它通道上执行IO操作，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
+关系图的说明:
+1.每个 Channel 对应一个 Buffer。
+2.Selector 对应一个线程，一个线程对应多个 Channel。
+3.该图反应了有三个 Channel 注册到该 Selector。
+4.程序切换到那个 Channel 是由事件决定的（Event）。
+5.Selector 会根据不同的事件，在各个通道上切换。
+6.Buffer 就是一个内存块，底层是有一个数组。
+7.数据的读取和写入是通过 Buffer，但是需要flip()切换读写模式，而 BIO 是单向的，要么输入流要么输出流。
+https://www.cnblogs.com/mikechenshare/p/16587635.html
+Selector selector = Selector.open(); // 获取一个选择器实例
+socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); // 将套接字通过到注册到选择器，关注 read 和 write 事件
+while (selector.select() > 0){ // 轮询，且返回时有就绪事件
+Set<SelectionKey> keys = selector.selectedKeys(); // 获取就绪事件集合
+.......
+}
+Selector有3种方式可以 select 就绪事件：
+1）select() 阻塞方法，有一个就绪事件，或者其它线程调用了 wakeup() 或者当前线程被中断时返回。
+2）select(long timeout) 阻塞方法，有一个就绪事件，或者其它线程调用了 wakeup()，或者当前线程被中断，或者阻塞时长达到了 timeout 时返回。不抛出超时异常。
+3）selectNode() 不阻塞，如果无就绪事件，则返回 0；如果有就绪事件，则将就绪事件放到一个集合，返回就绪事件的数量。
+
+
+
+
+
+简历中用到的技术点及实际应用案例
 
 自己擅长的：
-通讯协议http tcp.udp
-加密解密相关技术，ssl、TLS
-音视频相关技术h264.h265组成结构
-OpenGLES的3D渲染
-opencv图像处理与图像识别
+1.通讯协议http tcp.udp
+2.加密解密相关技术，ssl、TLS
+3.音视频相关技术h264.h265组成结构
+音视频录制Camera2 MediaCodec.MediaMuxer.AudioRecoder.MediaRecoder OpenGLES.Vulcan ，音视频编辑ffmpeg.VLC.vitamo.OpenGLES，音视频播放ijkplayer.MediaPlayer.AudioTrack.ffmpeg、视频渲染(OpenGL ES)、图像识别(opencv)、图像编辑
+RTP实时音视频
+4.OpenGLES的3D渲染
+5.opencv图像处理与图像识别
+6.android BSP、驱动相关
 
+还有什么问题吗：
+公积金是全额缴的吗? 
+加班能调休吗？
 
 
 
